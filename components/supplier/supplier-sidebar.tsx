@@ -13,56 +13,50 @@ import {
   ChevronRight,
   Package2,
   Briefcase,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 
-type NavItem = {
-  href: string;
-  label: string;
-  icon: React.ElementType;
-  badge?: number;
-  badgeColor?: string;
-};
-
-const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
-  {
-    label: "Operations",
-    items: [
-      { href: "/supplier",              label: "Overview",          icon: LayoutDashboard },
-      { href: "/supplier/requests",     label: "Sourcing Requests", icon: MessageSquarePlus, badge: 3, badgeColor: "bg-brand-500" },
-      { href: "/supplier/quotes",       label: "Quotes Sent",       icon: FileText,          badge: 2, badgeColor: "bg-amber-500" },
-    ],
-  },
-  {
-    label: "Procurement",
-    items: [
-      { href: "/supplier/procurement",  label: "Active Deals",      icon: ShoppingCart },
-    ],
-  },
-  {
-    label: "Account",
-    items: [
-      { href: "/supplier/settings",     label: "Settings",          icon: Settings },
-    ],
-  },
-];
-
 interface SupplierSidebarProps {
   userEmail?: string;
+  pendingRequests?: number;
+  pendingQuotes?: number;
 }
 
-export function SupplierSidebar({ userEmail }: SupplierSidebarProps) {
+export function SupplierSidebar({ userEmail, pendingRequests = 0, pendingQuotes = 0 }: SupplierSidebarProps) {
   const pathname = usePathname();
   const router   = useRouter();
   const supabase = createClient();
 
   async function handleSignOut() {
-    const isDemo = document.cookie.includes("ff_demo_session=supplier");
-    if (isDemo) { router.push("/auth/demo-logout"); return; }
     await supabase.auth.signOut();
-    router.push("/");
+    router.push("/auth/login");
   }
+
+  const NAV_SECTIONS = [
+    {
+      label: "Operations",
+      items: [
+        { href: "/supplier",              label: "Overview",          icon: LayoutDashboard, badge: 0 },
+        { href: "/supplier/requests",     label: "Sourcing Requests", icon: MessageSquarePlus, badge: pendingRequests, badgeColor: "bg-brand-500" },
+        { href: "/supplier/quotes",       label: "Quotes Sent",       icon: FileText,          badge: pendingQuotes,   badgeColor: "bg-amber-500" },
+      ],
+    },
+    {
+      label: "Procurement",
+      items: [
+        { href: "/supplier/procurement",  label: "Active Deals",      icon: ShoppingCart, badge: 0 },
+        { href: "/supplier/contacts",     label: "Supplier Contacts", icon: Users, badge: 0 },
+      ],
+    },
+    {
+      label: "Account",
+      items: [
+        { href: "/supplier/settings",     label: "Settings",          icon: Settings, badge: 0 },
+      ],
+    },
+  ];
 
   return (
     <aside className="w-64 shrink-0 bg-gray-900 flex flex-col h-screen sticky top-0">
@@ -108,7 +102,7 @@ export function SupplierSidebar({ userEmail }: SupplierSidebarProps) {
                   >
                     <Icon size={16} />
                     <span className="flex-1">{label}</span>
-                    {badge && !isActive && (
+                    {badge > 0 && !isActive && (
                       <span className={cn("text-xs text-white rounded-full px-1.5 py-0.5 font-semibold leading-none", badgeColor ?? "bg-gray-600")}>
                         {badge}
                       </span>

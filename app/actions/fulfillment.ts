@@ -64,6 +64,12 @@ export async function packOrder(id: string) {
 
 export async function shipOrder(id: string, trackingNumber: string) {
   const supabase = await createClient();
+  const { data: fq } = await supabase
+    .from("fulfillment_queue")
+    .select("customer_email, product_name, order_id")
+    .eq("id", id)
+    .single();
+
   const { error } = await supabase
     .from("fulfillment_queue")
     .update({
@@ -72,6 +78,23 @@ export async function shipOrder(id: string, trackingNumber: string) {
       shipped_at: new Date().toISOString(),
     })
     .eq("id", id);
+
+  if (!error && fq?.order_id) {
+    // Also update the parent order tracking number + status
+    await supabase
+      .from("orders")
+      .update({ tracking_number: trackingNumber, status: "shipped" })
+      .eq("id", fq.order_id);
+
+    // Send email (fire-and-forget)
+    try {
+      if (fq.customer_email) {
+        const { sendShipmentEmail } = await import("./email");
+        await sendShipmentEmail(fq.customer_email, fq.product_name, trackingNumber);
+      }
+    } catch { /* non-critical */ }
+  }
+
   return { error: error?.message ?? null };
 }
 
@@ -82,6 +105,18 @@ export async function markDelivered(id: string) {
     .update({ status: "delivered" })
     .eq("id", id);
   return { error: error?.message ?? null };
+}
+
+export async function loadFulfillmentSidebarBadges() {
+  const supabase = await createClient();
+  const [{ count: pendingInbound }, { count: pendingOrders }] = await Promise.all([
+    supabase.from("inbound_shipments").select("*", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("fulfillment_queue").select("*", { count: "exact", head: true }).eq("status", "pending"),
+  ]);
+  return {
+    pendingInbound: pendingInbound ?? 0,
+    pendingOrders:  pendingOrders  ?? 0,
+  };
 }
 
 export async function bulkImportTracking(

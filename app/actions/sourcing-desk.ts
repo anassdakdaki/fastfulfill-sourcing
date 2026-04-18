@@ -96,7 +96,35 @@ export async function sendQuoteToSeller(
     .update({ status: "quoted" })
     .eq("id", requestId);
 
+  // Send email notification (fire-and-forget)
+  try {
+    const { data: sr } = await supabase
+      .from("sourcing_requests")
+      .select("user_id")
+      .eq("id", requestId)
+      .single();
+    if (sr) {
+      const { data: { user } } = await supabase.auth.admin.getUserById(sr.user_id);
+      if (user?.email) {
+        const { sendQuoteEmail } = await import("./email");
+        await sendQuoteEmail(user.email, req.product_name, ref);
+      }
+    }
+  } catch { /* email is non-critical */ }
+
   return { error: null };
+}
+
+export async function loadSupplierSidebarBadges() {
+  const supabase = await createClient();
+  const [{ count: pendingRequests }, { count: pendingQuotes }] = await Promise.all([
+    supabase.from("sourcing_requests").select("*", { count: "exact", head: true }).eq("status", "new"),
+    supabase.from("sent_quotes").select("*", { count: "exact", head: true }).eq("status", "awaiting"),
+  ]);
+  return {
+    pendingRequests: pendingRequests ?? 0,
+    pendingQuotes:   pendingQuotes   ?? 0,
+  };
 }
 
 export async function loadSentQuotes() {

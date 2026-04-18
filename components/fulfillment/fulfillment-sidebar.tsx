@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Warehouse,
   LayoutDashboard,
@@ -15,52 +15,50 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 
-type NavItem = {
-  href: string;
-  label: string;
-  icon: React.ElementType;
-  badge?: number;
-  badgeColor?: string;
-};
+interface FulfillmentSidebarProps {
+  userEmail?: string;
+  pendingInbound?: number;
+  pendingOrders?: number;
+}
 
-const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
-  {
-    label: "Operations",
-    items: [
-      { href: "/fulfillment", label: "Overview", icon: LayoutDashboard },
-      {
-        href: "/fulfillment/inbound",
-        label: "Inbound Stock",
-        icon: PackageCheck,
-        badge: 2,
-        badgeColor: "bg-amber-500",
-      },
-      {
-        href: "/fulfillment/orders",
-        label: "Orders Queue",
-        icon: ClipboardList,
-        badge: 5,
-        badgeColor: "bg-red-500",
-      },
-    ],
-  },
-  {
-    label: "Warehouse",
-    items: [
-      { href: "/fulfillment/inventory", label: "Inventory", icon: Archive },
-    ],
-  },
-  {
-    label: "Account",
-    items: [
-      { href: "/fulfillment/settings", label: "Settings", icon: Settings },
-    ],
-  },
-];
-
-export default function FulfillmentSidebar() {
+export default function FulfillmentSidebar({
+  userEmail,
+  pendingInbound = 0,
+  pendingOrders = 0,
+}: FulfillmentSidebarProps) {
   const pathname = usePathname();
+  const router   = useRouter();
+  const supabase = createClient();
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    router.push("/auth/login");
+  }
+
+  const NAV_SECTIONS = [
+    {
+      label: "Operations",
+      items: [
+        { href: "/fulfillment",          label: "Overview",      icon: LayoutDashboard, badge: 0 },
+        { href: "/fulfillment/inbound",  label: "Inbound Stock", icon: PackageCheck,    badge: pendingInbound, badgeColor: "bg-amber-500" },
+        { href: "/fulfillment/orders",   label: "Orders Queue",  icon: ClipboardList,   badge: pendingOrders,  badgeColor: "bg-red-500" },
+      ],
+    },
+    {
+      label: "Warehouse",
+      items: [
+        { href: "/fulfillment/inventory", label: "Inventory", icon: Archive, badge: 0 },
+      ],
+    },
+    {
+      label: "Account",
+      items: [
+        { href: "/fulfillment/settings", label: "Settings", icon: Settings, badge: 0 },
+      ],
+    },
+  ];
 
   return (
     <aside className="w-64 shrink-0 bg-slate-900 flex flex-col h-screen sticky top-0">
@@ -107,7 +105,7 @@ export default function FulfillmentSidebar() {
                   >
                     <Icon size={17} />
                     <span className="flex-1">{label}</span>
-                    {badge && !isActive && (
+                    {badge > 0 && !isActive && (
                       <span
                         className={cn(
                           "text-xs text-white rounded-full px-1.5 py-0.5 font-semibold leading-none",
@@ -134,17 +132,18 @@ export default function FulfillmentSidebar() {
           <div className="w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center shrink-0">
             <Truck size={14} className="text-slate-300" />
           </div>
-          <p className="text-xs font-medium text-slate-300 truncate flex-1">
-            Fulfillment Partner
-          </p>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium text-slate-300 truncate">Fulfillment Partner</p>
+            {userEmail && <p className="text-[10px] text-slate-500 truncate mt-0.5">{userEmail}</p>}
+          </div>
         </div>
-        <Link
-          href="/auth/demo-logout"
+        <button
+          onClick={handleSignOut}
           className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:bg-red-950/60 hover:text-red-400 transition-colors w-full"
         >
           <LogOut size={17} />
           <span>Sign out</span>
-        </Link>
+        </button>
       </div>
     </aside>
   );
