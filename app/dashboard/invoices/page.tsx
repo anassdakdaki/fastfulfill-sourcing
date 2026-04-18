@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Download, FileText, Search, AlertTriangle, Loader2, CheckCircle2 } from "lucide-react";
+import { useState, useEffect, useMemo, Suspense } from "react";
+import { Download, FileText, Search, AlertTriangle, Loader2, CheckCircle2, CreditCard, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { loadMyInvoices, expireOldQuotes } from "@/app/actions/invoices";
 import { INVOICE_STATUS_COLORS, formatDate, formatCurrency } from "@/lib/utils";
 import type { Invoice } from "@/types/database";
+import { useSearchParams } from "next/navigation";
 
 const STATUS_FILTERS = [
   { value: "all",     label: "All"     },
@@ -23,21 +24,26 @@ function escapeCSV(val: string | number | null): string {
   return s;
 }
 
-export default function InvoicesPage() {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading,  setLoading]  = useState(true);
-  const [filter,   setFilter]   = useState("all");
-  const [search,   setSearch]   = useState("");
+function InvoicesContent() {
+  const searchParams = useSearchParams();
+  const justPaid     = searchParams.get("paid");
+
+  const [invoices,    setInvoices]    = useState<Invoice[]>([]);
+  const [loading,     setLoading]     = useState(true);
+  const [filter,      setFilter]      = useState("all");
+  const [search,      setSearch]      = useState("");
+  const [paying,      setPaying]      = useState<string | null>(null);
+  const [paidBanner,  setPaidBanner]  = useState(!!justPaid);
 
   useEffect(() => {
-    // Expire stale quotes first, then load invoices
     expireOldQuotes().then(() =>
       loadMyInvoices().then(({ data }) => {
         setInvoices(data as Invoice[]);
         setLoading(false);
       })
     );
-  }, []);
+    if (justPaid) setTimeout(() => setPaidBanner(false), 6000);
+  }, [justPaid]);
 
   const filtered = useMemo(() =>
     invoices.filter((inv) => {
@@ -53,6 +59,23 @@ export default function InvoicesPage() {
   const totalPaid        = invoices.filter((i) => i.status === "paid").reduce((s, i) => s + Number(i.total), 0);
   const totalOutstanding = invoices.filter((i) => i.status === "issued" || i.status === "overdue").reduce((s, i) => s + Number(i.total), 0);
   const overdue          = invoices.filter((i) => i.status === "overdue").length;
+
+  async function handlePayNow(invoiceId: string) {
+    setPaying(invoiceId);
+    try {
+      const res = await fetch("/api/stripe/create-checkout", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ invoiceId }),
+      });
+      const { url, error } = await res.json();
+      if (url) window.location.href = url;
+      else console.error("Checkout error:", error);
+    } catch (err) {
+      console.error(err);
+    }
+    setPaying(null);
+  }
 
   function handleExport() {
     const header = ["Invoice #", "Description", "Subtotal", "Shipping", "Total", "Status", "Issued", "Due"];
@@ -85,6 +108,17 @@ export default function InvoicesPage() {
         </Button>
       </div>
 
+      {/* Payment success banner */}
+      {paidBanner && (
+        <div className="bg-green-50 border border-green-200 rounded-2xl px-5 py-3.5 flex items-center gap-3 text-green-800">
+          <CheckCircle2 size={18} className="text-green-600 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold">Payment successful!</p>
+            <p className="text-xs text-green-700 mt-0.5">Your invoice has been marked as paid. We&apos;ll begin processing your order.</p>
+          </div>
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
@@ -109,7 +143,7 @@ export default function InvoicesPage() {
         </div>
       </div>
 
-      {/* How invoices work banner — shown when empty */}
+      {/* How invoices work banner */}
       {!loading && invoices.length === 0 && (
         <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-2xl px-5 py-4 text-sm text-blue-900">
           <FileText size={16} className="shrink-0 mt-0.5 text-blue-500" />
@@ -194,10 +228,23 @@ export default function InvoicesPage() {
                     <td className={`px-6 py-4 whitespace-nowrap font-medium ${inv.status === "overdue" ? "text-red-600" : "text-gray-500"}`}>
                       {inv.due_at ? formatDate(inv.due_at) : "—"}
                     </td>
-                    <td className="px-6 py-4">
-                      <Button size="sm" variant="ghost" className="text-gray-400 hover:text-gray-700">
-                        <Download size={14} />
-                      </Button>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {inv.status !== "paid" ? (
+                        <Button
+                          size="sm"
+                          loading={paying === inv.id}
+                          onClick={() => handlePayNow(inv.id)}
+                          className={inv.status === "overdue" ? "bg-red-600 hover:bg-red-700 text-white" : ""}
+                        >
+                          <CreditCard size={13} />
+                          {inv.status === "overdue" ? "Pay Now" : "Pay"}
+                          <ExternalLink size={11} className="opacity-60" />
+                        </Button>
+                      ) : (
+                        <Button size="sm" variant="ghost" className="text-gray-400 hover:text-gray-700">
+                          <Download size={14} />
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -207,5 +254,13 @@ export default function InvoicesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function InvoicesPage() {
+  return (
+    <Suspense>
+      <InvoicesContent />
+    </Suspense>
   );
 }

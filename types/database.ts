@@ -201,7 +201,8 @@ export interface Supplier {
 export interface Invoice {
   id: string;
   user_id: string;
-  order_id: string | null;
+  order_id?: string | null;
+  quote_id?: string | null;
   invoice_number: string;
   description: string;
   subtotal: number;
@@ -211,7 +212,9 @@ export interface Invoice {
   status: "draft" | "issued" | "paid" | "overdue";
   issued_at: string;
   due_at: string;
-  paid_at: string | null;
+  paid_at?: string | null;
+  stripe_session_id?: string | null;
+  stripe_payment_intent?: string | null;
 }
 
 // ─── Profiles ─────────────────────────────────────────────────────────────────
@@ -321,10 +324,14 @@ export type FulfillmentQueueStatus = "pending" | "packed" | "shipped" | "deliver
 export interface FulfillmentQueueOrder {
   id: string;
   ref: string;               // FF-ORD-00001
+  order_id?: string | null;
   product_name: string;
   sku: string;
   quantity: number;
-  ship_to_country: string;   // country only — no buyer address
+  ship_to_country: string;
+  customer_name?: string | null;
+  customer_email?: string | null;
+  shipping_address?: Json | null;
   status: FulfillmentQueueStatus;
   tracking_number: string | null;
   received_at: string;

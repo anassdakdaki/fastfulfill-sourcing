@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useMemo, useEffect } from "react";
-import { Download, Upload, ClipboardList, CheckCircle2, X, Info, Loader2 } from "lucide-react";
+import { Download, Upload, ClipboardList, CheckCircle2, X, Info, Loader2, Printer, MapPin, User } from "lucide-react";
 import type { FulfillmentQueueOrder, FulfillmentQueueStatus } from "@/types/database";
 import {
   loadFulfillmentQueue,
@@ -240,6 +240,7 @@ export default function OrdersQueuePage() {
                 <tr className="border-b border-gray-100 text-xs text-gray-500 uppercase tracking-wider">
                   <th className="px-5 py-3 text-left font-medium">Order Ref</th>
                   <th className="px-5 py-3 text-left font-medium">Product</th>
+                  <th className="px-5 py-3 text-left font-medium">Customer</th>
                   <th className="px-5 py-3 text-left font-medium">SKU</th>
                   <th className="px-5 py-3 text-left font-medium">Qty</th>
                   <th className="px-5 py-3 text-left font-medium">Ship To</th>
@@ -254,9 +255,41 @@ export default function OrdersQueuePage() {
                   return (
                     <tr key={order.id} className="hover:bg-gray-50 transition-colors align-middle">
                       <td className="px-5 py-3.5">
-                        <span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md">{order.ref}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md">{order.ref}</span>
+                          <a
+                            href={`/fulfillment/orders/${order.id}/print`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Print packing slip"
+                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                          >
+                            <Printer size={13} />
+                          </a>
+                        </div>
                       </td>
                       <td className="px-5 py-3.5 font-medium text-gray-900 max-w-[140px] truncate">{order.product_name}</td>
+                      <td className="px-5 py-3.5">
+                        {order.customer_name ? (
+                          <div>
+                            <p className="text-xs font-medium text-gray-800 flex items-center gap-1">
+                              <User size={10} className="text-gray-400" />
+                              {order.customer_name}
+                            </p>
+                            {order.shipping_address && (
+                              <p className="text-[10px] text-gray-400 flex items-center gap-1 mt-0.5">
+                                <MapPin size={9} />
+                                {(() => {
+                                  const addr = order.shipping_address as Record<string, string>;
+                                  return [addr.city, addr.state, addr.country].filter(Boolean).join(", ");
+                                })()}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-300 text-xs">—</span>
+                        )}
+                      </td>
                       <td className="px-5 py-3.5 font-mono text-xs text-gray-500">{order.sku}</td>
                       <td className="px-5 py-3.5 text-gray-700">{order.quantity}</td>
                       <td className="px-5 py-3.5 text-gray-600 whitespace-nowrap">{order.ship_to_country}</td>

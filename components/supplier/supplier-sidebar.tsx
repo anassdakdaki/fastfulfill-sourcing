@@ -14,6 +14,7 @@ import {
   Package2,
   Briefcase,
   Users,
+  BarChart2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -47,7 +48,8 @@ export function SupplierSidebar({ userEmail, pendingRequests = 0, pendingQuotes 
       label: "Procurement",
       items: [
         { href: "/supplier/procurement",  label: "Active Deals",      icon: ShoppingCart, badge: 0 },
-        { href: "/supplier/contacts",     label: "Supplier Contacts", icon: Users, badge: 0 },
+        { href: "/supplier/contacts",     label: "Supplier Contacts", icon: Users,    badge: 0 },
+      { href: "/supplier/analytics",    label: "Analytics",         icon: BarChart2, badge: 0 },
       ],
     },
     {
