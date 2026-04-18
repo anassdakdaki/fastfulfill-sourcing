@@ -21,64 +21,72 @@ import {
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 
-type NavItem = {
-  href: string;
-  label: string;
-  icon: React.ElementType;
-  badge?: number;
-  badgeColor?: string;
-};
-
-const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
-  {
-    label: "Operations",
-    items: [
-      { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-      { href: "/dashboard/orders", label: "Orders", icon: ShoppingCart },
-      { href: "/dashboard/fulfillment", label: "Fulfillment", icon: Package },
-      { href: "/dashboard/tracking", label: "Tracking", icon: MapPin },
-      { href: "/dashboard/inventory", label: "Inventory", icon: Archive },
-    ],
-  },
-  {
-    label: "Sourcing",
-    items: [
-      { href: "/dashboard/source", label: "Source Request", icon: Search },
-      { href: "/dashboard/quotes", label: "Quotes", icon: Tag, badge: 2 },
-    ],
-  },
-  {
-    label: "Finance",
-    items: [
-      { href: "/dashboard/invoices", label: "Invoices", icon: FileText, badge: 1, badgeColor: "bg-red-500" },
-    ],
-  },
-  {
-    label: "Developer",
-    items: [
-      { href: "/dashboard/integrations", label: "Integrations", icon: Plug },
-    ],
-  },
-];
-
 interface SidebarProps {
   userEmail?: string;
+  pendingQuotes?: number;
+  hasConnectedStore?: boolean;
 }
 
-export function Sidebar({ userEmail }: SidebarProps) {
+export function Sidebar({ userEmail, pendingQuotes = 0, hasConnectedStore = true }: SidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
+  const router   = useRouter();
   const supabase = createClient();
 
   async function handleSignOut() {
-    const isDemo = document.cookie.includes("ff_demo_session=buyer") || document.cookie.includes("ff_demo_session=1");
-    if (isDemo) {
-      router.push("/auth/demo-logout");
-      return;
-    }
     await supabase.auth.signOut();
     router.push("/");
   }
+
+  type NavItem = {
+    href: string;
+    label: string;
+    icon: React.ElementType;
+    badge?: number;
+    badgeColor?: string;
+  };
+
+  const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
+    {
+      label: "Operations",
+      items: [
+        { href: "/dashboard",             label: "Overview",     icon: LayoutDashboard },
+        { href: "/dashboard/orders",      label: "Orders",       icon: ShoppingCart },
+        { href: "/dashboard/fulfillment", label: "Fulfillment",  icon: Package },
+        { href: "/dashboard/tracking",    label: "Tracking",     icon: MapPin },
+        { href: "/dashboard/inventory",   label: "Inventory",    icon: Archive },
+      ],
+    },
+    {
+      label: "Sourcing",
+      items: [
+        { href: "/dashboard/source", label: "Source Request", icon: Search },
+        {
+          href:       "/dashboard/quotes",
+          label:      "Quotes",
+          icon:       Tag,
+          badge:      pendingQuotes > 0 ? pendingQuotes : undefined,
+        },
+      ],
+    },
+    {
+      label: "Finance",
+      items: [
+        { href: "/dashboard/invoices", label: "Invoices", icon: FileText },
+      ],
+    },
+    {
+      label: "Developer",
+      items: [
+        {
+          href:       "/dashboard/integrations",
+          label:      "Integrations",
+          icon:       Plug,
+          badge:      !hasConnectedStore ? 1 : undefined,
+          badgeColor: !hasConnectedStore ? "bg-amber-500" : undefined,
+        },
+      ],
+    },
+  ];
 
   return (
     <aside className="w-64 shrink-0 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0">
@@ -116,7 +124,7 @@ export function Sidebar({ userEmail }: SidebarProps) {
                   >
                     <Icon size={17} />
                     <span className="flex-1">{label}</span>
-                    {badge && !isActive && (
+                    {badge !== undefined && !isActive && (
                       <span className={cn("text-xs text-white rounded-full px-1.5 py-0.5 font-semibold", badgeColor ?? "bg-brand-600")}>
                         {badge}
                       </span>
@@ -153,7 +161,7 @@ export function Sidebar({ userEmail }: SidebarProps) {
         {userEmail && (
           <div className="mt-3 px-3 py-2.5 rounded-xl bg-gray-50">
             <p className="text-xs font-medium text-gray-700 truncate">{userEmail}</p>
-            <p className="text-xs text-gray-400 mt-0.5">Free plan</p>
+            <p className="text-xs text-gray-400 mt-0.5">Buyer account</p>
           </div>
         )}
       </div>

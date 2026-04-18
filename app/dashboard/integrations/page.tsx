@@ -1,139 +1,104 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
 import {
   CheckCircle2, AlertCircle, RefreshCw, Plug, Key,
-  Zap, ArrowRight, ToggleLeft, ToggleRight, Warehouse,
-  Truck, Package, Info,
+  Zap, ToggleLeft, ToggleRight, Warehouse,
+  Truck, Package, Info, Loader2, X,
 } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { DUMMY_INTEGRATIONS } from "@/lib/dummy-data";
+import {
+  loadMyIntegrations,
+  connectStore,
+  disconnectStore,
+  syncStore,
+  toggleAutoFulfill,
+} from "@/app/actions/dashboard";
 import { formatDate } from "@/lib/utils";
 import type { StoreIntegration, IntegrationPlatform } from "@/types/database";
 
-/* ─── Store integration meta ─── */
+/* ─── Platform meta ─── */
 const PLATFORM_META: Record<IntegrationPlatform, {
   name: string; description: string; logo: string;
-  color: string; setupPath: string; features: string[];
+  color: string; features: string[];
+  urlPlaceholder: string;
 }> = {
   shopify: {
     name: "Shopify", logo: "🛍️",
     description: "Sync orders, auto-fulfill Shopify sales, update inventory in real-time.",
     color: "bg-green-50 border-green-200",
-    setupPath: "/dashboard/integrations/shopify",
+    urlPlaceholder: "mystore.myshopify.com",
     features: ["Auto-import orders", "Real-time inventory sync", "Auto-fulfill on sale", "Tracking push-back"],
   },
   woocommerce: {
     name: "WooCommerce", logo: "🛒",
     description: "Connect your WordPress store and automate order fulfillment.",
     color: "bg-purple-50 border-purple-200",
-    setupPath: "/dashboard/integrations/woocommerce",
+    urlPlaceholder: "mystore.com",
     features: ["Order import via REST API", "Product sync", "Fulfillment automation", "Status webhooks"],
   },
   amazon: {
     name: "Amazon Seller", logo: "📦",
     description: "Link your Amazon Seller account for FBA prep and direct fulfillment.",
     color: "bg-yellow-50 border-yellow-200",
-    setupPath: "/dashboard/integrations/amazon",
+    urlPlaceholder: "amazon.com/seller/XXXXX",
     features: ["FBA shipment creation", "Multi-marketplace", "Inventory alerts", "Order routing"],
   },
   tiktok: {
     name: "TikTok Shop", logo: "🎵",
     description: "Fulfill TikTok Shop orders directly through FastFulfill.",
     color: "bg-pink-50 border-pink-200",
-    setupPath: "/dashboard/integrations/tiktok",
+    urlPlaceholder: "shop.tiktok.com/@mystore",
     features: ["Order auto-import", "Fast fulfillment SLA", "Returns management", "Tracking sync"],
   },
   etsy: {
     name: "Etsy", logo: "🎨",
     description: "Source and fulfill your Etsy listings with custom packaging.",
     color: "bg-orange-50 border-orange-200",
-    setupPath: "/dashboard/integrations/etsy",
+    urlPlaceholder: "etsy.com/shop/mystore",
     features: ["Listing sync", "Custom packaging", "Order import", "Tracking updates"],
   },
 };
 
-/* ─── 3PL / Fulfillment partner meta ─── */
+/* ─── 3PL meta (display only — no DB needed) ─── */
 type ThreePLId = "shipbob" | "shipstation" | "easyship" | "dhl";
-
 const THREE_PL_META: Record<ThreePLId, {
   name: string; logo: string; tagline: string;
-  color: string; accentColor: string; setupPath: string;
-  bestFor: string; apiAvailable: boolean;
-  features: string[];
+  color: string; bestFor: string; features: string[];
 }> = {
   shipbob: {
     name: "ShipBob", logo: "📬",
     tagline: "US, EU, Canada, Australia warehouses",
-    color: "bg-blue-50 border-blue-200", accentColor: "#2563eb",
-    setupPath: "/dashboard/integrations/shipbob",
+    color: "bg-blue-50 border-blue-200",
     bestFor: "Ideal for US/EU sellers — largest 3PL network with full REST API",
-    apiAvailable: true,
-    features: [
-      "Auto-forward orders on receipt",
-      "Real-time inventory at warehouse",
-      "Tracking auto-synced back",
-      "Multi-warehouse routing",
-      "Returns management",
-    ],
+    features: ["Auto-forward orders on receipt", "Real-time inventory at warehouse", "Tracking auto-synced back", "Multi-warehouse routing", "Returns management"],
   },
   shipstation: {
     name: "ShipStation", logo: "🚢",
     tagline: "Connects 70+ carriers — USPS, FedEx, UPS, DHL",
-    color: "bg-indigo-50 border-indigo-200", accentColor: "#4338ca",
-    setupPath: "/dashboard/integrations/shipstation",
+    color: "bg-indigo-50 border-indigo-200",
     bestFor: "Best if you use multiple carriers or your own warehouse staff",
-    apiAvailable: true,
-    features: [
-      "Generate labels for 70+ carriers",
-      "Batch fulfill multiple orders",
-      "Branded packing slips",
-      "Automatic tracking updates",
-      "Rate shopping across carriers",
-    ],
+    features: ["Generate labels for 70+ carriers", "Batch fulfill multiple orders", "Branded packing slips", "Automatic tracking updates", "Rate shopping across carriers"],
   },
   easyship: {
     name: "Easyship", logo: "✈️",
     tagline: "International shipping — strong for Asia → World",
-    color: "bg-cyan-50 border-cyan-200", accentColor: "#0891b2",
-    setupPath: "/dashboard/integrations/easyship",
+    color: "bg-cyan-50 border-cyan-200",
     bestFor: "Best for cross-border — especially sourcing from China/Asia",
-    apiAvailable: true,
-    features: [
-      "DDP (Duties Delivered Paid) pricing",
-      "250+ courier options",
-      "Asia-origin optimised routing",
-      "Live rate comparison",
-      "Automated customs docs",
-    ],
+    features: ["DDP (Duties Delivered Paid) pricing", "250+ courier options", "Asia-origin optimised routing", "Live rate comparison", "Automated customs docs"],
   },
   dhl: {
     name: "DHL eCommerce", logo: "🟡",
     tagline: "Global network — 220+ countries",
-    color: "bg-yellow-50 border-yellow-200", accentColor: "#d97706",
-    setupPath: "/dashboard/integrations/dhl",
+    color: "bg-yellow-50 border-yellow-200",
     bestFor: "Best for high-volume international, especially EU and Asia",
-    apiAvailable: true,
-    features: [
-      "Global last-mile delivery",
-      "China Preferred Partner",
-      "Landed cost calculator",
-      "Parcel tracking API",
-      "Pickup scheduling",
-    ],
+    features: ["Global last-mile delivery", "China Preferred Partner", "Landed cost calculator", "Parcel tracking API", "Pickup scheduling"],
   },
 };
 
-const PLATFORMS = Object.keys(PLATFORM_META) as IntegrationPlatform[];
+const PLATFORMS  = Object.keys(PLATFORM_META) as IntegrationPlatform[];
 const THREE_PLS  = Object.keys(THREE_PL_META) as ThreePLId[];
-
-/* ─── Dummy connected 3PLs (demo) ─── */
-type Connected3PL = { id: ThreePLId; warehouseRegion: string; autoRoute: boolean; ordersRouted: number; connectedAt: string };
-const DEMO_3PL: Connected3PL = {
-  id: "shipbob", warehouseRegion: "US East", autoRoute: true,
-  ordersRouted: 87, connectedAt: "2025-11-01T00:00:00Z",
-};
 
 function StatusBadge({ status }: { status: StoreIntegration["status"] }) {
   if (status === "connected") return (
@@ -155,35 +120,86 @@ function StatusBadge({ status }: { status: StoreIntegration["status"] }) {
 }
 
 export default function IntegrationsPage() {
-  const [integrations, setIntegrations] = useState<StoreIntegration[]>(DUMMY_INTEGRATIONS);
+  const [integrations, setIntegrations] = useState<StoreIntegration[]>([]);
+  const [loading, setLoading]           = useState(true);
   const [syncing, setSyncing]           = useState<string | null>(null);
-  const [connected3pl, setConnected3pl] = useState<Connected3PL | null>(DEMO_3PL);
+  const [toggling, setToggling]         = useState<string | null>(null);
+  const [disconnecting, setDisconnecting] = useState<string | null>(null);
+
+  // Connect form state
+  const [connectingPlatform, setConnectingPlatform] = useState<IntegrationPlatform | null>(null);
+  const [connectForm, setConnectForm] = useState({ store_name: "", store_url: "" });
+  const [connectSaving, setConnectSaving] = useState(false);
+  const [connectError, setConnectError]   = useState("");
+
+  useEffect(() => {
+    loadMyIntegrations().then(({ data }) => {
+      setIntegrations(data as StoreIntegration[]);
+      setLoading(false);
+    });
+  }, []);
 
   function getConnected(p: IntegrationPlatform) {
-    return integrations.find((i) => i.platform === p);
+    return integrations.find((i) => i.platform === p && i.status !== "disconnected");
   }
 
   async function handleSync(id: string) {
     setSyncing(id);
-    await new Promise((r) => setTimeout(r, 1800));
-    setIntegrations(integrations.map((i) =>
-      i.id === id ? { ...i, last_sync: new Date().toISOString(), orders_synced: i.orders_synced + 2 } : i
-    ));
+    await syncStore(id);
+    setIntegrations((prev) =>
+      prev.map((i) => i.id === id ? { ...i, last_sync: new Date().toISOString(), status: "connected" } : i)
+    );
     setSyncing(null);
   }
 
-  function handleDisconnect(id: string) {
-    setIntegrations(integrations.filter((i) => i.id !== id));
+  async function handleDisconnect(id: string) {
+    setDisconnecting(id);
+    await disconnectStore(id);
+    setIntegrations((prev) => prev.filter((i) => i.id !== id));
+    setDisconnecting(null);
   }
 
-  function toggleAutoFulfill(id: string) {
-    setIntegrations(integrations.map((i) =>
-      i.id === id ? { ...i, auto_fulfill: !i.auto_fulfill } : i
-    ));
+  async function handleToggleAutoFulfill(id: string, current: boolean) {
+    setToggling(id);
+    await toggleAutoFulfill(id, !current);
+    setIntegrations((prev) =>
+      prev.map((i) => i.id === id ? { ...i, auto_fulfill: !current } : i)
+    );
+    setToggling(null);
+  }
+
+  function openConnectForm(platform: IntegrationPlatform) {
+    setConnectingPlatform(platform);
+    setConnectForm({ store_name: "", store_url: "" });
+    setConnectError("");
+  }
+
+  async function handleConnect(e: React.FormEvent) {
+    e.preventDefault();
+    if (!connectingPlatform) return;
+    setConnectSaving(true);
+    setConnectError("");
+
+    const { error } = await connectStore({
+      platform:   connectingPlatform,
+      store_name: connectForm.store_name,
+      store_url:  connectForm.store_url,
+    });
+
+    if (error) {
+      setConnectError(error);
+      setConnectSaving(false);
+      return;
+    }
+
+    // Reload from DB
+    const { data } = await loadMyIntegrations();
+    setIntegrations(data as StoreIntegration[]);
+    setConnectingPlatform(null);
+    setConnectSaving(false);
   }
 
   const connectedCount = integrations.length;
-  const meta3pl = connected3pl ? THREE_PL_META[connected3pl.id] : null;
 
   return (
     <div className="space-y-10">
@@ -203,174 +219,7 @@ export default function IntegrationsPage() {
       </div>
 
       {/* ══════════════════════════════════
-          SECTION 1 — FULFILLMENT PARTNERS
-         ══════════════════════════════════ */}
-      <section className="space-y-5">
-        <div className="flex items-center gap-2">
-          <Warehouse size={18} className="text-gray-600" />
-          <h2 className="text-base font-semibold text-gray-900">Fulfillment Partners (3PL)</h2>
-          {connected3pl && (
-            <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full flex items-center gap-1">
-              <CheckCircle2 size={11} /> 1 connected
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-2xl px-5 py-4 text-sm text-blue-900">
-          <Info size={16} className="shrink-0 mt-0.5 text-blue-500" />
-          <div>
-            <p className="font-semibold">How 3PL fulfillment works with FastFulfill</p>
-            <p className="text-xs text-blue-800 mt-1">
-              After your client confirms a quote, you bulk-order the stock and send it to your 3PL
-              partner&apos;s warehouse. When your client gets an order on their store, FastFulfill
-              automatically forwards it to the 3PL via API — they pick, pack and ship it. Tracking
-              comes back to you and your client automatically. Your client never knows the 3PL exists.
-            </p>
-          </div>
-        </div>
-
-        {/* Connected 3PL */}
-        {connected3pl && meta3pl && (
-          <div className={`rounded-2xl border p-5 ${meta3pl.color}`}>
-            <div className="flex items-start justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{meta3pl.logo}</span>
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base font-bold text-gray-900">{meta3pl.name}</h3>
-                    <span className="flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-100 px-2.5 py-1 rounded-full">
-                      <CheckCircle2 size={11} /> Connected
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-0.5">{connected3pl.warehouseRegion} Warehouse</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Link href={meta3pl.setupPath}>
-                  <Button size="sm" variant="outline">Settings</Button>
-                </Link>
-                <Button
-                  size="sm" variant="ghost"
-                  onClick={() => setConnected3pl(null)}
-                  className="text-red-500 hover:bg-red-50 hover:text-red-600"
-                >
-                  Disconnect
-                </Button>
-              </div>
-            </div>
-
-            <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="bg-white/70 rounded-xl px-4 py-3">
-                <p className="text-xs text-gray-500">Orders Routed</p>
-                <p className="text-lg font-bold text-gray-900">{connected3pl.ordersRouted}</p>
-              </div>
-              <div className="bg-white/70 rounded-xl px-4 py-3">
-                <p className="text-xs text-gray-500">Warehouse</p>
-                <p className="text-sm font-semibold text-gray-900">{connected3pl.warehouseRegion}</p>
-              </div>
-              <div className="bg-white/70 rounded-xl px-4 py-3">
-                <p className="text-xs text-gray-500">Connected</p>
-                <p className="text-sm font-semibold text-gray-900">{formatDate(connected3pl.connectedAt)}</p>
-              </div>
-              <div className="bg-white/70 rounded-xl px-4 py-3">
-                <p className="text-xs text-gray-500 mb-1">Auto-Route Orders</p>
-                <button
-                  onClick={() => setConnected3pl(prev => prev ? { ...prev, autoRoute: !prev.autoRoute } : null)}
-                  className="flex items-center gap-1.5 text-sm font-semibold"
-                >
-                  {connected3pl.autoRoute ? (
-                    <><ToggleRight size={20} className="text-brand-600" /><span className="text-brand-600">On</span></>
-                  ) : (
-                    <><ToggleLeft size={20} className="text-gray-400" /><span className="text-gray-500">Off</span></>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {connected3pl.autoRoute && (
-              <div className="mt-3 flex items-center gap-2 text-xs text-green-800 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5">
-                <Zap size={13} className="text-green-600 shrink-0" />
-                <span>
-                  <strong>Auto-route active</strong> — new fulfillment orders are automatically sent
-                  to {meta3pl.name} without any manual action required.
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Available 3PLs */}
-        <div>
-          <p className="text-xs font-medium text-gray-500 mb-3">
-            {connected3pl ? "Other fulfillment partners" : "Choose a fulfillment partner"}
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {THREE_PLS.filter(id => !connected3pl || connected3pl.id !== id).map((id) => {
-              const p = THREE_PL_META[id];
-              return (
-                <div key={id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-shadow">
-                  <div className="flex items-start gap-3 mb-3">
-                    <span className="text-2xl">{p.logo}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-sm font-bold text-gray-900">{p.name}</h3>
-                        {p.apiAvailable && (
-                          <span className="text-[10px] font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">
-                            Full API
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-500 mt-0.5">{p.tagline}</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-600 mb-3 bg-gray-50 rounded-xl px-3 py-2 italic">
-                    {p.bestFor}
-                  </p>
-                  <ul className="space-y-1 mb-4">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
-                        <CheckCircle2 size={11} className="text-green-500 shrink-0" /> {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href={p.setupPath}>
-                    <Button size="sm" className="w-full">
-                      <Truck size={13} /> Connect {p.name}
-                    </Button>
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Manual workflow fallback */}
-        {!connected3pl && (
-          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5">
-            <div className="flex items-start gap-3">
-              <Package size={18} className="text-gray-500 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-semibold text-gray-800">Not ready to connect a 3PL yet?</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  You can still manage fulfillment manually. Go to <strong>Fulfillment Orders</strong> in
-                  the Fulfillment Portal to view orders, update status, and add tracking numbers. Connect
-                  a 3PL partner when you&apos;re ready to automate.
-                </p>
-                <div className="flex gap-3 mt-3">
-                  <Link href="/supplier/orders">
-                    <Button size="sm" variant="outline">
-                      Open Fulfillment Orders <ArrowRight size={13} />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </section>
-
-      {/* ══════════════════════════════════
-          SECTION 2 — STORE INTEGRATIONS
+          SECTION 1 — STORE INTEGRATIONS
          ══════════════════════════════════ */}
       <section className="space-y-5">
         <div className="flex items-center gap-2">
@@ -383,8 +232,20 @@ export default function IntegrationsPage() {
           )}
         </div>
 
-        {/* Stats banner */}
-        {connectedCount > 0 && (
+        {!loading && connectedCount === 0 && (
+          <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
+            <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-amber-900">No store connected yet</p>
+              <p className="text-xs text-amber-700 mt-1">
+                Connect your store below to enable order auto-import, automatic fulfillment, and sourcing requests.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Stats banner — only when connected */}
+        {!loading && connectedCount > 0 && (
           <div className="bg-brand-50 border border-brand-200 rounded-2xl p-5 flex flex-wrap gap-6">
             <div>
               <p className="text-xs font-medium text-brand-600 uppercase tracking-wider">Connected Stores</p>
@@ -406,11 +267,17 @@ export default function IntegrationsPage() {
         )}
 
         {/* Connected stores */}
-        {connectedCount > 0 && (
+        {loading ? (
+          <div className="flex items-center justify-center py-10 gap-2 text-gray-400">
+            <Loader2 size={18} className="animate-spin" /> Loading integrations…
+          </div>
+        ) : (
           <div className="space-y-3">
             {integrations.map((integration) => {
-              const meta = PLATFORM_META[integration.platform];
-              const isSyncing = syncing === integration.id;
+              const meta       = PLATFORM_META[integration.platform];
+              const isSyncing  = syncing === integration.id;
+              const isTogg     = toggling === integration.id;
+              const isDisconn  = disconnecting === integration.id;
               return (
                 <div key={integration.id} className={`rounded-2xl border p-5 ${meta.color}`}>
                   <div className="flex items-start justify-between flex-wrap gap-4">
@@ -421,7 +288,9 @@ export default function IntegrationsPage() {
                           <h3 className="text-base font-bold text-gray-900">{meta.name}</h3>
                           <StatusBadge status={isSyncing ? "syncing" : integration.status} />
                         </div>
-                        <p className="text-sm text-gray-600 mt-0.5">{integration.store_url}</p>
+                        <p className="text-sm text-gray-600 mt-0.5">
+                          {integration.store_name} · {integration.store_url}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -429,8 +298,13 @@ export default function IntegrationsPage() {
                         <RefreshCw size={13} className={isSyncing ? "animate-spin" : ""} />
                         {isSyncing ? "Syncing..." : "Sync Now"}
                       </Button>
-                      <Link href={meta.setupPath}><Button size="sm" variant="outline">Settings</Button></Link>
-                      <Button size="sm" variant="ghost" onClick={() => handleDisconnect(integration.id)} className="text-red-500 hover:bg-red-50 hover:text-red-600">
+                      <Button
+                        size="sm" variant="ghost"
+                        onClick={() => handleDisconnect(integration.id)}
+                        disabled={isDisconn}
+                        className="text-red-500 hover:bg-red-50 hover:text-red-600"
+                      >
+                        {isDisconn ? <Loader2 size={13} className="animate-spin" /> : null}
                         Disconnect
                       </Button>
                     </div>
@@ -452,7 +326,11 @@ export default function IntegrationsPage() {
                     </div>
                     <div className="bg-white/70 rounded-xl px-4 py-3">
                       <p className="text-xs text-gray-500 mb-1">Auto-Fulfill</p>
-                      <button onClick={() => toggleAutoFulfill(integration.id)} className="flex items-center gap-1.5 text-sm font-semibold">
+                      <button
+                        onClick={() => handleToggleAutoFulfill(integration.id, integration.auto_fulfill)}
+                        disabled={isTogg}
+                        className="flex items-center gap-1.5 text-sm font-semibold"
+                      >
                         {integration.auto_fulfill ? (
                           <><ToggleRight size={20} className="text-brand-600" /><span className="text-brand-600">On</span></>
                         ) : (
@@ -467,34 +345,139 @@ export default function IntegrationsPage() {
           </div>
         )}
 
-        {/* Available stores */}
-        <div>
-          {connectedCount > 0 && (
-            <p className="text-xs font-medium text-gray-500 mb-3">Add more stores</p>
-          )}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {PLATFORMS.filter((p) => !getConnected(p)).map((platform) => {
-              const meta = PLATFORM_META[platform];
-              return (
-                <div key={platform} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-shadow">
-                  <div className="flex items-start gap-3 mb-3">
-                    <span className="text-3xl">{meta.logo}</span>
-                    <h3 className="text-base font-bold text-gray-900">{meta.name}</h3>
+        {/* Available platforms */}
+        {!loading && (
+          <div>
+            {connectedCount > 0 && (
+              <p className="text-xs font-medium text-gray-500 mb-3">Add more stores</p>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {PLATFORMS.filter((p) => !getConnected(p)).map((platform) => {
+                const meta      = PLATFORM_META[platform];
+                const isOpening = connectingPlatform === platform;
+                return (
+                  <div key={platform} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-shadow">
+                    <div className="flex items-start gap-3 mb-3">
+                      <span className="text-3xl">{meta.logo}</span>
+                      <h3 className="text-base font-bold text-gray-900 mt-1">{meta.name}</h3>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-4">{meta.description}</p>
+                    <ul className="space-y-1.5 mb-5">
+                      {meta.features.map((f) => (
+                        <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
+                          <CheckCircle2 size={12} className="text-green-500 shrink-0" /> {f}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* Inline connect form */}
+                    {isOpening ? (
+                      <form onSubmit={handleConnect} className="space-y-3 border-t border-gray-100 pt-4">
+                        <div>
+                          <label className="text-xs font-medium text-gray-700">Store Name</label>
+                          <input
+                            required
+                            placeholder="e.g. My Main Store"
+                            value={connectForm.store_name}
+                            onChange={(e) => setConnectForm({ ...connectForm, store_name: e.target.value })}
+                            className="mt-1 w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-gray-700">Store URL</label>
+                          <input
+                            required
+                            placeholder={meta.urlPlaceholder}
+                            value={connectForm.store_url}
+                            onChange={(e) => setConnectForm({ ...connectForm, store_url: e.target.value })}
+                            className="mt-1 w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                          />
+                        </div>
+                        {connectError && (
+                          <p className="text-xs text-red-600">{connectError}</p>
+                        )}
+                        <div className="flex gap-2">
+                          <Button type="submit" size="sm" disabled={connectSaving} className="flex-1">
+                            {connectSaving ? <Loader2 size={13} className="animate-spin" /> : <Plug size={13} />}
+                            {connectSaving ? "Connecting…" : "Connect"}
+                          </Button>
+                          <Button type="button" size="sm" variant="ghost" onClick={() => setConnectingPlatform(null)}>
+                            <X size={13} />
+                          </Button>
+                        </div>
+                      </form>
+                    ) : (
+                      <Button size="sm" className="w-full" onClick={() => openConnectForm(platform)}>
+                        <Plug size={13} /> Connect {meta.name}
+                      </Button>
+                    )}
                   </div>
-                  <p className="text-sm text-gray-500 mb-4">{meta.description}</p>
-                  <ul className="space-y-1.5 mb-5">
-                    {meta.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
-                        <CheckCircle2 size={12} className="text-green-500 shrink-0" /> {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href={meta.setupPath}>
-                    <Button size="sm" className="w-full"><Plug size={13} /> Connect {meta.name}</Button>
-                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* ══════════════════════════════════
+          SECTION 2 — FULFILLMENT PARTNERS
+         ══════════════════════════════════ */}
+      <section className="space-y-5">
+        <div className="flex items-center gap-2">
+          <Warehouse size={18} className="text-gray-600" />
+          <h2 className="text-base font-semibold text-gray-900">Fulfillment Partners (3PL)</h2>
+        </div>
+
+        <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-2xl px-5 py-4 text-sm text-blue-900">
+          <Info size={16} className="shrink-0 mt-0.5 text-blue-500" />
+          <div>
+            <p className="font-semibold">How 3PL fulfillment works with FastFulfill</p>
+            <p className="text-xs text-blue-800 mt-1">
+              FastFulfill stores your stock in our warehouse and fulfills orders manually or routes them to a
+              3PL partner via API. Your customers never know who fulfilled the order.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {THREE_PLS.map((id) => {
+            const p = THREE_PL_META[id];
+            return (
+              <div key={id} className={`rounded-2xl border p-5 ${p.color}`}>
+                <div className="flex items-start gap-3 mb-3">
+                  <span className="text-2xl">{p.logo}</span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-bold text-gray-900">{p.name}</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">{p.tagline}</p>
+                  </div>
+                  <span className="text-[10px] font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">Full API</span>
                 </div>
-              );
-            })}
+                <p className="text-xs text-gray-600 mb-3 bg-white/60 rounded-xl px-3 py-2 italic">{p.bestFor}</p>
+                <ul className="space-y-1 mb-4">
+                  {p.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
+                      <CheckCircle2 size={11} className="text-green-500 shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
+                <Button size="sm" variant="outline" className="w-full">
+                  <Truck size={13} /> Coming soon
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5">
+          <div className="flex items-start gap-3">
+            <Package size={18} className="text-gray-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-gray-800">No 3PL needed to get started</p>
+              <p className="text-xs text-gray-500 mt-1">
+                FastFulfill&apos;s warehouse team handles picking, packing and shipping manually for every order in your
+                fulfillment queue. Connect a 3PL later to automate at scale.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -512,11 +495,9 @@ export default function IntegrationsPage() {
             { n: "→" },
             { n: "2", title: "FastFulfill receives it",    sub: "Auto-imported via store integration" },
             { n: "→" },
-            { n: "3", title: "Routed to 3PL",              sub: "ShipBob / ShipStation / Easyship" },
+            { n: "3", title: "Warehouse team fulfills",    sub: "From your stored warehouse stock" },
             { n: "→" },
-            { n: "4", title: "3PL picks & ships",          sub: "From your stored warehouse stock" },
-            { n: "→" },
-            { n: "5", title: "Tracking synced back",       sub: "To FastFulfill and your store" },
+            { n: "4", title: "Tracking synced back",       sub: "To FastFulfill and your store" },
           ].map((s, i) =>
             s.title ? (
               <div key={i} className="text-center">

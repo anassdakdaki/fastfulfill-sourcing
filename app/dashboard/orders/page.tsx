@@ -1,152 +1,72 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Upload, Plus, Search, Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect, useMemo } from "react";
+import { Search, Filter, ShoppingCart, Plug, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { EmptyState } from "@/components/ui/empty-state";
-import { DUMMY_ORDERS } from "@/lib/dummy-data";
+import { Button } from "@/components/ui/button";
+import { loadMyOrders } from "@/app/actions/dashboard";
 import {
   ORDER_STATUS_LABELS,
   ORDER_STATUS_COLORS,
   formatDate,
   formatCurrency,
 } from "@/lib/utils";
-import type { Order, OrderStatus } from "@/types/database";
+import type { Order } from "@/types/database";
 
 const STATUSES: { value: string; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "pending", label: "Pending" },
+  { value: "all",        label: "All"        },
+  { value: "pending",    label: "Pending"    },
   { value: "processing", label: "Processing" },
-  { value: "fulfilled", label: "Fulfilled" },
-  { value: "shipped", label: "Shipped" },
-  { value: "delivered", label: "Delivered" },
+  { value: "fulfilled",  label: "Fulfilled"  },
+  { value: "shipped",    label: "Shipped"    },
+  { value: "delivered",  label: "Delivered"  },
 ];
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>(DUMMY_ORDERS);
-  const [search, setSearch] = useState("");
+  const [orders, setOrders]           = useState<Order[]>([]);
+  const [loading, setLoading]         = useState(true);
+  const [search, setSearch]           = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [showForm, setShowForm] = useState(false);
-  const [newOrder, setNewOrder] = useState({ product_name: "", quantity: "", destination_country: "" });
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const filtered = orders.filter((o) => {
-    const matchSearch = o.product_name.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "all" || o.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  useEffect(() => {
+    loadMyOrders().then(({ data }) => {
+      setOrders(data as Order[]);
+      setLoading(false);
+    });
+  }, []);
 
-  function handleAddOrder(e: React.FormEvent) {
-    e.preventDefault();
-    const order: Order = {
-      id: `ord_${Date.now()}`,
-      user_id: "user_demo",
-      product_name: newOrder.product_name,
-      quantity: parseInt(newOrder.quantity),
-      destination_country: newOrder.destination_country,
-      status: "pending",
-      tracking_number: null,
-      unit_price: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    setOrders([order, ...orders]);
-    setNewOrder({ product_name: "", quantity: "", destination_country: "" });
-    setShowForm(false);
-  }
-
-  function handleCSVUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const text = ev.target?.result as string;
-      const lines = text.split("\n").slice(1);
-      const newOrders: Order[] = lines
-        .filter((l) => l.trim())
-        .map((line, i) => {
-          const [product_name, quantity, country] = line.split(",");
-          return {
-            id: `ord_csv_${i}`,
-            user_id: "user_demo",
-            product_name: product_name?.trim() || "Unknown",
-            quantity: parseInt(quantity) || 1,
-            destination_country: country?.trim() || "US",
-            status: "pending" as OrderStatus,
-            tracking_number: null,
-            unit_price: null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
-        });
-      setOrders([...newOrders, ...orders]);
-    };
-    reader.readAsText(file);
-  }
+  const filtered = useMemo(() =>
+    orders.filter((o) => {
+      const matchSearch = o.product_name.toLowerCase().includes(search.toLowerCase());
+      const matchStatus = statusFilter === "all" || o.status === statusFilter;
+      return matchSearch && matchStatus;
+    }),
+    [orders, search, statusFilter]
+  );
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{orders.length} total orders</p>
-        </div>
-        <div className="flex gap-2">
-          <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleCSVUpload} />
-          <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-            <Upload size={15} /> Import CSV
-          </Button>
-          <Button size="sm" onClick={() => setShowForm(!showForm)}>
-            <Plus size={15} /> Add Order
-          </Button>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {loading ? "Loading…" : `${orders.length} total order${orders.length !== 1 ? "s" : ""}`}
+          </p>
         </div>
       </div>
 
-      {/* Add order form */}
-      {showForm && (
-        <form
-          onSubmit={handleAddOrder}
-          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6"
-        >
-          <h2 className="text-sm font-semibold text-gray-900 mb-4">New Order</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Input
-              label="Product Name"
-              placeholder="e.g. Wireless Earbuds"
-              value={newOrder.product_name}
-              onChange={(e) => setNewOrder({ ...newOrder, product_name: e.target.value })}
-              required
-            />
-            <Input
-              label="Quantity"
-              type="number"
-              placeholder="50"
-              value={newOrder.quantity}
-              onChange={(e) => setNewOrder({ ...newOrder, quantity: e.target.value })}
-              required
-              min="1"
-            />
-            <Input
-              label="Destination Country"
-              placeholder="United States"
-              value={newOrder.destination_country}
-              onChange={(e) => setNewOrder({ ...newOrder, destination_country: e.target.value })}
-              required
-            />
-          </div>
-          <div className="flex gap-3 mt-4">
-            <Button type="submit" size="sm">Create Order</Button>
-            <Button type="button" variant="ghost" size="sm" onClick={() => setShowForm(false)}>Cancel</Button>
-          </div>
-        </form>
-      )}
-
-      {/* CSV hint */}
-      <p className="text-xs text-gray-400">
-        CSV format: <code className="font-mono bg-gray-100 px-1 rounded">product_name,quantity,country</code> (one per line, with header row)
-      </p>
+      {/* Info banner */}
+      <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-2xl px-5 py-4 text-sm text-blue-900">
+        <ShoppingCart size={16} className="shrink-0 mt-0.5 text-blue-500" />
+        <div>
+          <p className="font-semibold">Orders are imported automatically from your connected stores.</p>
+          <p className="text-xs text-blue-800 mt-1">
+            When a customer places an order in your Shopify / WooCommerce / Amazon store, FastFulfill
+            automatically receives it and starts the fulfillment process.
+          </p>
+        </div>
+      </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center">
@@ -179,12 +99,29 @@ export default function OrdersPage() {
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        {filtered.length === 0 ? (
-          <EmptyState
-            icon={<Search size={28} />}
-            title="No orders found"
-            description="Try adjusting your search or filters."
-          />
+        {loading ? (
+          <div className="py-16 flex flex-col items-center gap-3">
+            <Loader2 size={24} className="animate-spin text-gray-400" />
+            <p className="text-sm text-gray-400">Loading your orders…</p>
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="py-16 flex flex-col items-center gap-3 text-center px-4">
+            <ShoppingCart size={32} className="text-gray-300" />
+            <p className="text-sm font-semibold text-gray-700">No orders yet</p>
+            <p className="text-sm text-gray-400 max-w-xs">
+              Orders will appear here automatically once you connect your store and customers start buying.
+            </p>
+            <Link href="/dashboard/integrations">
+              <Button size="sm" className="mt-2">
+                <Plug size={13} /> Connect a Store
+              </Button>
+            </Link>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="py-12 flex flex-col items-center gap-2">
+            <Search size={28} className="text-gray-300" />
+            <p className="text-sm text-gray-400">No orders match your filters.</p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -202,18 +139,18 @@ export default function OrdersPage() {
                   <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{order.product_name}</td>
                     <td className="px-6 py-4 text-gray-600">{order.quantity}</td>
-                    <td className="px-6 py-4 text-gray-500">{order.destination_country ?? "-"}</td>
+                    <td className="px-6 py-4 text-gray-500">{order.destination_country ?? "—"}</td>
                     <td className="px-6 py-4 text-gray-500">
-                      {order.unit_price ? formatCurrency(order.unit_price) : "-"}
+                      {order.unit_price ? formatCurrency(order.unit_price) : "—"}
                     </td>
                     <td className="px-6 py-4">
-                      <Badge className={ORDER_STATUS_COLORS[order.status]}>
-                        {ORDER_STATUS_LABELS[order.status]}
+                      <Badge className={ORDER_STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"}>
+                        {ORDER_STATUS_LABELS[order.status] ?? order.status}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-gray-500 whitespace-nowrap">{formatDate(order.created_at)}</td>
                     <td className="px-6 py-4 text-gray-500 font-mono text-xs whitespace-nowrap">
-                      {order.tracking_number ?? "-"}
+                      {order.tracking_number ?? "—"}
                     </td>
                   </tr>
                 ))}

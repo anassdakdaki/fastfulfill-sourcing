@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, ExternalLink, Warehouse, Package, Truck, ShieldCheck, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Plus, Search, ExternalLink, Warehouse, Package, Truck, ShieldCheck, AlertCircle, CheckCircle, Loader2, Plug } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +10,7 @@ import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { SOURCE_STATUS_COLORS, formatDate } from "@/lib/utils";
 import { loadMySourceRequests, submitSourceRequest } from "@/app/actions/source-requests";
+import { checkStoreConnected } from "@/app/actions/dashboard";
 import type { SourceRequest } from "@/types/database";
 
 const MIN_MOQ = 50;
@@ -37,6 +39,7 @@ const HOW_IT_WORKS = [
 export default function SourceRequestPage() {
   const [requests, setRequests]       = useState<SourceRequest[]>([]);
   const [loading, setLoading]         = useState(true);
+  const [storeConnected, setStoreConnected] = useState<boolean | null>(null);
   const [showForm, setShowForm]       = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [submitting, setSubmitting]   = useState(false);
@@ -48,8 +51,12 @@ export default function SourceRequestPage() {
   });
 
   useEffect(() => {
-    loadMySourceRequests().then(({ data }) => {
+    Promise.all([
+      loadMySourceRequests(),
+      checkStoreConnected(),
+    ]).then(([{ data }, { connected }]) => {
       setRequests(data as SourceRequest[]);
+      setStoreConnected(connected);
       setLoading(false);
     });
   }, []);
@@ -108,7 +115,12 @@ export default function SourceRequestPage() {
           <button onClick={() => setShowHowItWorks(v => !v)} className="text-sm text-brand-600 hover:text-brand-700 font-medium">
             How it works
           </button>
-          <Button size="sm" onClick={() => setShowForm(!showForm)}>
+          <Button
+            size="sm"
+            onClick={() => setShowForm(!showForm)}
+            disabled={storeConnected === false}
+            title={storeConnected === false ? "Connect a store first" : undefined}
+          >
             <Plus size={15} /> New Request
           </Button>
         </div>
@@ -129,6 +141,27 @@ export default function SourceRequestPage() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Store gate — must connect a store before sourcing */}
+      {storeConnected === false && (
+        <div className="flex items-start gap-4 bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
+          <div className="w-9 h-9 bg-red-100 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+            <Plug size={18} className="text-red-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-red-900">Connect your store first</p>
+            <p className="text-xs text-red-700 mt-1">
+              You need to connect your Shopify, WooCommerce, Amazon, or TikTok Shop before submitting a
+              sourcing request. This lets FastFulfill know where to fulfill orders once your stock arrives.
+            </p>
+          </div>
+          <Link href="/dashboard/integrations" className="shrink-0">
+            <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white whitespace-nowrap">
+              <Plug size={13} /> Connect Store
+            </Button>
+          </Link>
         </div>
       )}
 
@@ -254,7 +287,14 @@ export default function SourceRequestPage() {
             </div>
             <p className="text-sm font-semibold text-gray-900">No sourcing requests yet</p>
             <p className="text-sm text-gray-500 mt-1 max-w-xs">Submit your first request and we'll get back to you with a quote within 24 hours.</p>
-            <Button className="mt-5" size="sm" onClick={() => setShowForm(true)}><Plus size={15} /> New Request</Button>
+            <Button className="mt-5" size="sm" onClick={() => setShowForm(true)} disabled={storeConnected === false}>
+              <Plus size={15} /> New Request
+            </Button>
+            {storeConnected === false && (
+              <p className="text-xs text-gray-400 mt-2">
+                <Link href="/dashboard/integrations" className="text-brand-600 hover:underline">Connect your store</Link> to unlock sourcing.
+              </p>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
