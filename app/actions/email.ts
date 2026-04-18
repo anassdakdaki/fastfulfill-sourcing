@@ -2,11 +2,17 @@
 
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM   = "FastFulfill <noreply@fastfulfill.com>";
+const FROM = "FastFulfill <noreply@fastfulfill.com>";
+
+function getResend(): Resend | null {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return null;
+  return new Resend(key);
+}
 
 export async function sendQuoteEmail(to: string, productName: string, quoteRef: string) {
-  if (!process.env.RESEND_API_KEY) return; // silently skip if not configured
+  const resend = getResend();
+  if (!resend) return; // silently skip if not configured
   await resend.emails.send({
     from: FROM,
     to,
@@ -34,7 +40,8 @@ export async function sendQuoteEmail(to: string, productName: string, quoteRef: 
 }
 
 export async function sendShipmentEmail(to: string, productName: string, trackingNumber: string) {
-  if (!process.env.RESEND_API_KEY) return;
+  const resend = getResend();
+  if (!resend) return;
   await resend.emails.send({
     from: FROM,
     to,
@@ -62,7 +69,8 @@ export async function sendShipmentEmail(to: string, productName: string, trackin
 }
 
 export async function sendInvoiceEmail(to: string, invoiceNumber: string, total: number, dueDate: string) {
-  if (!process.env.RESEND_API_KEY) return;
+  const resend = getResend();
+  if (!resend) return;
   await resend.emails.send({
     from: FROM,
     to,

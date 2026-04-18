@@ -100,14 +100,18 @@ export async function sendQuoteToSeller(
   try {
     const { data: sr } = await supabase
       .from("sourcing_requests")
-      .select("user_id")
+      .select("buyer_user_id")
       .eq("id", requestId)
       .single();
-    if (sr) {
-      const { data: { user } } = await supabase.auth.admin.getUserById(sr.user_id);
-      if (user?.email) {
+    if (sr?.buyer_user_id) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", sr.buyer_user_id)
+        .single();
+      if (profile?.email) {
         const { sendQuoteEmail } = await import("./email");
-        await sendQuoteEmail(user.email, req.product_name, ref);
+        await sendQuoteEmail(profile.email, req.product_name, ref);
       }
     }
   } catch { /* email is non-critical */ }
