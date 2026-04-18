@@ -62,7 +62,7 @@ export default function OrdersPage() {
         <div>
           <p className="font-semibold">Orders are imported automatically from your connected stores.</p>
           <p className="text-xs text-blue-800 mt-1">
-            When a customer places an order in your Shopify / WooCommerce / Amazon store, FastFulfill
+            When a customer places an order in your Shopify store, FastFulfill
             automatically receives it and starts the fulfillment process.
           </p>
         </div>

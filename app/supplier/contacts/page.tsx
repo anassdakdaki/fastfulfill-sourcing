@@ -82,9 +82,9 @@ export default function ContactsPage() {
       categories:    form.categories.split(",").map((c) => c.trim()).filter(Boolean),
       contact_name:  form.contact_name.trim(),
       contact_email: form.contact_email.trim(),
-      wechat:        form.wechat.trim() || undefined,
-      whatsapp:      form.whatsapp.trim() || undefined,
-      notes:         form.notes.trim() || undefined,
+      wechat:        form.wechat.trim() || null,
+      whatsapp:      form.whatsapp.trim() || null,
+      notes:         form.notes.trim() || null,
     };
     if (editing) {
       const { error } = await updateSupplierContact(editing.id, payload);

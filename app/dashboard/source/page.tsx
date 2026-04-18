@@ -153,7 +153,7 @@ export default function SourceRequestPage() {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-red-900">Connect your store first</p>
             <p className="text-xs text-red-700 mt-1">
-              You need to connect your Shopify, WooCommerce, Amazon, or TikTok Shop before submitting a
+              You need to connect your Shopify store before submitting a
               sourcing request. This lets FastFulfill know where to fulfill orders once your stock arrives.
             </p>
           </div>

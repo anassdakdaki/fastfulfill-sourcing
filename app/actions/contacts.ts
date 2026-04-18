@@ -17,9 +17,9 @@ export async function createSupplierContact(input: {
   categories: string[];
   contact_name: string;
   contact_email: string;
-  wechat?: string;
-  whatsapp?: string;
-  notes?: string;
+  wechat?: string | null;
+  whatsapp?: string | null;
+  notes?: string | null;
 }) {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -38,9 +38,9 @@ export async function updateSupplierContact(
     categories: string[];
     contact_name: string;
     contact_email: string;
-    wechat: string;
-    whatsapp: string;
-    notes: string;
+    wechat: string | null;
+    whatsapp: string | null;
+    notes: string | null;
     verified: boolean;
     rating: number;
   }>

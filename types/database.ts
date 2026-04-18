@@ -44,6 +44,14 @@ export interface OrderRow {
   tracking_number: string | null;
   destination_country: string | null;
   unit_price: number | null;
+  source_platform?: string | null;
+  source_store_domain?: string | null;
+  external_order_id?: string | null;
+  external_order_name?: string | null;
+  customer_name?: string | null;
+  customer_email?: string | null;
+  shipping_address?: Json | null;
+  line_items?: Json[];
   created_at: string;
   updated_at: string;
 }
@@ -56,6 +64,14 @@ export interface OrderInsert {
   tracking_number?: string | null;
   destination_country?: string | null;
   unit_price?: number | null;
+  source_platform?: string | null;
+  source_store_domain?: string | null;
+  external_order_id?: string | null;
+  external_order_name?: string | null;
+  customer_name?: string | null;
+  customer_email?: string | null;
+  shipping_address?: Json | null;
+  line_items?: Json[];
 }
 
 // ─── Tracking ─────────────────────────────────────────────────────────────────
@@ -202,7 +218,7 @@ export interface Invoice {
 
 export interface Profile {
   id: string;
-  role: "buyer" | "supplier";
+  role: "buyer" | "supplier" | "fulfillment";
   full_name: string | null;
   company_name: string | null;
   country: string | null;
@@ -241,6 +257,7 @@ export interface StoreIntegration {
   platform: IntegrationPlatform;
   store_name: string;
   store_url: string;
+  store_domain?: string | null;
   status: IntegrationStatus;
   auto_fulfill: boolean;
   auto_import_orders: boolean;

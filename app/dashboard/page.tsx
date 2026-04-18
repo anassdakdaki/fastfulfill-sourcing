@@ -42,7 +42,7 @@ export default async function DashboardPage() {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-amber-900">Connect your store to get started</p>
             <p className="text-xs text-amber-700 mt-1">
-              Before you can submit sourcing requests, connect your Shopify, WooCommerce, Amazon, or TikTok Shop.
+              Before you can submit sourcing requests, connect your Shopify store.
               This lets FastFulfill automatically import your orders and fulfill them as stock arrives in our warehouse.
             </p>
           </div>

@@ -1,6 +1,11 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  markShopifyIntegrationError,
+  normalizeShopDomain,
+  syncShopifyOrders,
+} from "@/lib/shopify";
 import type { IntegrationPlatform } from "@/types/database";
 
 // ── Dashboard overview ────────────────────────────────────────────────────────
@@ -68,7 +73,7 @@ export async function loadMyIntegrations() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("store_integrations")
-    .select("*")
+    .select("id, user_id, platform, store_name, store_url, store_domain, status, auto_fulfill, auto_import_orders, orders_synced, products_mapped, last_sync, connected_at, error_message")
     .order("connected_at", { ascending: false });
   return { data: data ?? [], error: error?.message ?? null };
 }
@@ -92,21 +97,22 @@ export async function connectStore(input: {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
-  const { error } = await supabase.from("store_integrations").insert({
-    user_id:           user.id,
-    platform:          input.platform,
-    store_name:        input.store_name,
-    store_url:         input.store_url,
-    status:            "connected",
-    auto_fulfill:      true,
-    auto_import_orders: true,
-    orders_synced:     0,
-    products_mapped:   0,
-    last_sync:         null,
-    error_message:     null,
+  if (input.platform !== "shopify") {
+    return { error: "Only Shopify is wired live right now. Use the Shopify connector for real order sync." };
+  }
+
+  const shopDomain = normalizeShopDomain(input.store_url);
+  if (!shopDomain) {
+    return { error: "Enter a valid Shopify domain like mystore.myshopify.com" };
+  }
+
+  const storeName = input.store_name.trim() || shopDomain;
+  const params = new URLSearchParams({
+    shop: shopDomain,
+    store_name: storeName,
   });
 
-  return { error: error?.message ?? null };
+  return { error: null, redirectTo: `/api/integrations/shopify/install?${params.toString()}` };
 }
 
 export async function disconnectStore(id: string) {
@@ -120,11 +126,44 @@ export async function disconnectStore(id: string) {
 
 export async function syncStore(id: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: integration, error: lookupError } = await supabase
+    .from("store_integrations")
+    .select("id, platform")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .single();
+
+  if (lookupError || !integration) {
+    return { error: "Store integration not found" };
+  }
+
+  if (integration.platform !== "shopify") {
+    return { error: "Manual sync is only available on the live Shopify integration right now" };
+  }
+
   const { error } = await supabase
     .from("store_integrations")
-    .update({ last_sync: new Date().toISOString(), status: "connected" })
+    .update({
+      status: "syncing",
+      error_message: null,
+    })
     .eq("id", id);
-  return { error: error?.message ?? null };
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  try {
+    const result = await syncShopifyOrders(id);
+    return { error: null, importedOrders: result.importedOrders };
+  } catch (syncError) {
+    const message = syncError instanceof Error ? syncError.message : "Shopify sync failed";
+    await markShopifyIntegrationError(id, message);
+    return { error: message };
+  }
 }
 
 export async function toggleAutoFulfill(id: string, value: boolean) {

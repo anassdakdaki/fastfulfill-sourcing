@@ -2,11 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2025-03-31.basil" });
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+function getStripeClient() {
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeSecretKey) {
+    throw new Error("Missing STRIPE_SECRET_KEY");
+  }
+
+  return new Stripe(stripeSecretKey, { apiVersion: "2026-03-25.dahlia" });
+}
 
 export async function POST(req: NextRequest) {
-  const body      = await req.text();
+  const stripe = getStripeClient();
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    return NextResponse.json({ error: "Missing STRIPE_WEBHOOK_SECRET" }, { status: 500 });
+  }
+
+  const body = await req.text();
   const signature = req.headers.get("stripe-signature")!;
 
   let event: Stripe.Event;
@@ -18,7 +30,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (event.type === "checkout.session.completed") {
-    const session  = event.data.object as Stripe.Checkout.Session;
+    const session = event.data.object as Stripe.Checkout.Session;
     const invoiceId = session.metadata?.invoice_id;
     const paymentIntent = typeof session.payment_intent === "string"
       ? session.payment_intent
@@ -29,9 +41,9 @@ export async function POST(req: NextRequest) {
       await supabase
         .from("invoices")
         .update({
-          status:                 "paid",
-          stripe_payment_intent:  paymentIntent ?? null,
-          paid_at:                new Date().toISOString(),
+          status: "paid",
+          stripe_payment_intent: paymentIntent ?? null,
+          paid_at: new Date().toISOString(),
         })
         .eq("id", invoiceId);
     }
@@ -39,6 +51,3 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ received: true });
 }
-
-// Stripe needs raw body — disable default body parsing
-export const config = { api: { bodyParser: false } };

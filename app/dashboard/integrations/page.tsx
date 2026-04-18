@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   CheckCircle2, AlertCircle, RefreshCw, Plug, Key,
   Zap, ToggleLeft, ToggleRight, Warehouse,
@@ -99,6 +100,7 @@ const THREE_PL_META: Record<ThreePLId, {
 
 const PLATFORMS  = Object.keys(PLATFORM_META) as IntegrationPlatform[];
 const THREE_PLS  = Object.keys(THREE_PL_META) as ThreePLId[];
+const LIVE_PLATFORM: IntegrationPlatform = "shopify";
 
 function StatusBadge({ status }: { status: StoreIntegration["status"] }) {
   if (status === "connected") return (
@@ -120,11 +122,13 @@ function StatusBadge({ status }: { status: StoreIntegration["status"] }) {
 }
 
 export default function IntegrationsPage() {
+  const searchParams = useSearchParams();
   const [integrations, setIntegrations] = useState<StoreIntegration[]>([]);
   const [loading, setLoading]           = useState(true);
   const [syncing, setSyncing]           = useState<string | null>(null);
   const [toggling, setToggling]         = useState<string | null>(null);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
+  const [actionError, setActionError]   = useState("");
 
   // Connect form state
   const [connectingPlatform, setConnectingPlatform] = useState<IntegrationPlatform | null>(null);
@@ -132,11 +136,14 @@ export default function IntegrationsPage() {
   const [connectSaving, setConnectSaving] = useState(false);
   const [connectError, setConnectError]   = useState("");
 
+  async function refreshIntegrations() {
+    const { data } = await loadMyIntegrations();
+    setIntegrations(data as StoreIntegration[]);
+    setLoading(false);
+  }
+
   useEffect(() => {
-    loadMyIntegrations().then(({ data }) => {
-      setIntegrations(data as StoreIntegration[]);
-      setLoading(false);
-    });
+    refreshIntegrations();
   }, []);
 
   function getConnected(p: IntegrationPlatform) {
@@ -145,10 +152,10 @@ export default function IntegrationsPage() {
 
   async function handleSync(id: string) {
     setSyncing(id);
-    await syncStore(id);
-    setIntegrations((prev) =>
-      prev.map((i) => i.id === id ? { ...i, last_sync: new Date().toISOString(), status: "connected" } : i)
-    );
+    setActionError("");
+    const { error } = await syncStore(id);
+    await refreshIntegrations();
+    if (error) setActionError(error);
     setSyncing(null);
   }
 
@@ -169,6 +176,7 @@ export default function IntegrationsPage() {
   }
 
   function openConnectForm(platform: IntegrationPlatform) {
+    if (platform !== LIVE_PLATFORM) return;
     setConnectingPlatform(platform);
     setConnectForm({ store_name: "", store_url: "" });
     setConnectError("");
@@ -180,7 +188,7 @@ export default function IntegrationsPage() {
     setConnectSaving(true);
     setConnectError("");
 
-    const { error } = await connectStore({
+    const { error, redirectTo } = await connectStore({
       platform:   connectingPlatform,
       store_name: connectForm.store_name,
       store_url:  connectForm.store_url,
@@ -192,14 +200,17 @@ export default function IntegrationsPage() {
       return;
     }
 
-    // Reload from DB
-    const { data } = await loadMyIntegrations();
-    setIntegrations(data as StoreIntegration[]);
-    setConnectingPlatform(null);
+    if (redirectTo) {
+      window.location.assign(redirectTo);
+      return;
+    }
+
     setConnectSaving(false);
   }
 
   const connectedCount = integrations.length;
+  const oauthStatus = searchParams.get("shopify");
+  const hasOauthError = oauthStatus === "error" || Boolean(searchParams.get("integration_error"));
 
   return (
     <div className="space-y-10">
@@ -208,7 +219,7 @@ export default function IntegrationsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Integrations</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            Connect your stores and fulfillment partners to automate your entire operation.
+            Connect Shopify and your fulfillment partners to automate your operation.
           </p>
         </div>
         <Link href="/dashboard/integrations/api">
@@ -217,6 +228,40 @@ export default function IntegrationsPage() {
           </Button>
         </Link>
       </div>
+
+      {oauthStatus === "connected" && (
+        <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-2xl px-5 py-4">
+          <CheckCircle2 size={16} className="text-green-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-green-900">Shopify store connected</p>
+            <p className="text-xs text-green-700 mt-1">
+              OAuth completed, webhooks were registered, and your recent Shopify orders were imported into FastFulfill.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {hasOauthError && (
+        <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
+          <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-red-900">Shopify connection failed</p>
+            <p className="text-xs text-red-700 mt-1">
+              FastFulfill could not finish the Shopify install flow. Check your Shopify app credentials, webhook secret, and allowed callback URL, then try again.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {actionError && (
+        <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
+          <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-red-900">Sync failed</p>
+            <p className="text-xs text-red-700 mt-1">{actionError}</p>
+          </div>
+        </div>
+      )}
 
       {/* ══════════════════════════════════
           SECTION 1 — STORE INTEGRATIONS
@@ -238,7 +283,7 @@ export default function IntegrationsPage() {
             <div>
               <p className="text-sm font-semibold text-amber-900">No store connected yet</p>
               <p className="text-xs text-amber-700 mt-1">
-                Connect your store below to enable order auto-import, automatic fulfillment, and sourcing requests.
+                Connect Shopify below to enable live order sync, automatic fulfillment, and sourcing requests.
               </p>
             </div>
           </div>
@@ -291,6 +336,9 @@ export default function IntegrationsPage() {
                         <p className="text-sm text-gray-600 mt-0.5">
                           {integration.store_name} · {integration.store_url}
                         </p>
+                        {integration.error_message && (
+                          <p className="text-xs text-red-600 mt-1">{integration.error_message}</p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -355,6 +403,7 @@ export default function IntegrationsPage() {
               {PLATFORMS.filter((p) => !getConnected(p)).map((platform) => {
                 const meta      = PLATFORM_META[platform];
                 const isOpening = connectingPlatform === platform;
+                const isLive    = platform === LIVE_PLATFORM;
                 return (
                   <div key={platform} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-shadow">
                     <div className="flex items-start gap-3 mb-3">
@@ -406,6 +455,10 @@ export default function IntegrationsPage() {
                           </Button>
                         </div>
                       </form>
+                    ) : !isLive ? (
+                      <Button size="sm" variant="outline" className="w-full" disabled>
+                        Coming soon
+                      </Button>
                     ) : (
                       <Button size="sm" className="w-full" onClick={() => openConnectForm(platform)}>
                         <Plug size={13} /> Connect {meta.name}
@@ -491,7 +544,7 @@ export default function IntegrationsPage() {
         </h2>
         <div className="flex flex-wrap items-start gap-2">
           {[
-            { n: "1", title: "Store order comes in",       sub: "Shopify / WooCommerce / Amazon / TikTok" },
+            { n: "1", title: "Store order comes in",       sub: "Shopify" },
             { n: "→" },
             { n: "2", title: "FastFulfill receives it",    sub: "Auto-imported via store integration" },
             { n: "→" },
