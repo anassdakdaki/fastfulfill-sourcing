@@ -1,31 +1,39 @@
 "use client";
 
-import { useState } from "react";
-import { PackageCheck, CheckCircle2, Clock, Truck, Archive } from "lucide-react";
-import { DUMMY_INBOUND_SHIPMENTS } from "@/lib/dummy-data";
+import { useState, useEffect } from "react";
+import { PackageCheck, CheckCircle2, Clock, Truck, Archive, Loader2 } from "lucide-react";
 import type { InboundShipment, InboundStatus } from "@/types/database";
+import { loadInboundShipments, confirmReceipt } from "@/app/actions/fulfillment";
 
 type FilterTab = "all" | InboundStatus;
 
 const TABS: { key: FilterTab; label: string }[] = [
-  { key: "all",        label: "All" },
-  { key: "pending",    label: "Pending" },
+  { key: "all",        label: "All"        },
+  { key: "pending",    label: "Pending"    },
   { key: "in_transit", label: "In Transit" },
-  { key: "arrived",    label: "Arrived" },
-  { key: "logged",     label: "Logged" },
+  { key: "arrived",    label: "Arrived"    },
+  { key: "logged",     label: "Logged"     },
 ];
 
 const STATUS_STYLES: Record<InboundStatus, { badge: string; icon: React.ElementType; label: string }> = {
-  pending:    { badge: "bg-gray-100 text-gray-600",   icon: Clock,         label: "Pending"    },
-  in_transit: { badge: "bg-blue-100 text-blue-700",   icon: Truck,         label: "In Transit" },
-  arrived:    { badge: "bg-amber-100 text-amber-700", icon: PackageCheck,  label: "Arrived"    },
-  logged:     { badge: "bg-green-100 text-green-700", icon: CheckCircle2,  label: "Logged"     },
+  pending:    { badge: "bg-gray-100 text-gray-600",   icon: Clock,        label: "Pending"    },
+  in_transit: { badge: "bg-blue-100 text-blue-700",   icon: Truck,        label: "In Transit" },
+  arrived:    { badge: "bg-amber-100 text-amber-700", icon: PackageCheck, label: "Arrived"    },
+  logged:     { badge: "bg-green-100 text-green-700", icon: CheckCircle2, label: "Logged"     },
 };
 
 export default function InboundStockPage() {
-  const [shipments, setShipments] = useState<InboundShipment[]>(DUMMY_INBOUND_SHIPMENTS);
-  const [filter, setFilter] = useState<FilterTab>("all");
+  const [shipments, setShipments] = useState<InboundShipment[]>([]);
+  const [loading, setLoading]     = useState(true);
+  const [filter, setFilter]       = useState<FilterTab>("all");
   const [confirming, setConfirming] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadInboundShipments().then(({ data }) => {
+      setShipments(data as InboundShipment[]);
+      setLoading(false);
+    });
+  }, []);
 
   const counts = {
     pending:    shipments.filter((s) => s.status === "pending").length,
@@ -36,23 +44,21 @@ export default function InboundStockPage() {
 
   const filtered = filter === "all" ? shipments : shipments.filter((s) => s.status === filter);
 
-  function confirmReceipt(id: string) {
+  async function handleConfirmReceipt(id: string, expectedQty: number) {
     setConfirming(id);
-    setTimeout(() => {
+    const { error } = await confirmReceipt(id, expectedQty);
+    if (!error) {
       setShipments((prev) =>
         prev.map((s) =>
-          s.id === id
-            ? { ...s, status: "logged", quantity_received: s.quantity_expected }
-            : s
+          s.id === id ? { ...s, status: "logged", quantity_received: expectedQty } : s
         )
       );
-      setConfirming(null);
-    }, 800);
+    }
+    setConfirming(null);
   }
 
   return (
     <div className="py-8 px-6 max-w-6xl mx-auto space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Inbound Stock</h1>
         <p className="mt-1 text-sm text-gray-500">
@@ -83,9 +89,7 @@ export default function InboundStockPage() {
             key={tab.key}
             onClick={() => setFilter(tab.key)}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              filter === tab.key
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+              filter === tab.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
             }`}
           >
             {tab.label}
@@ -100,7 +104,12 @@ export default function InboundStockPage() {
 
       {/* Table */}
       <div className="card overflow-hidden">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="py-16 flex flex-col items-center gap-3">
+            <Loader2 size={24} className="animate-spin text-gray-400" />
+            <p className="text-sm text-gray-400">Loading inbound shipments…</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="py-16 flex flex-col items-center gap-3">
             <Archive size={32} className="text-gray-300" />
             <p className="text-sm text-gray-400">No shipments match this filter.</p>
@@ -127,15 +136,11 @@ export default function InboundStockPage() {
                   return (
                     <tr key={s.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-5 py-4">
-                        <span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md">
-                          {s.ref}
-                        </span>
+                        <span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md">{s.ref}</span>
                       </td>
                       <td className="px-5 py-4">
                         <p className="font-medium text-gray-900">{s.product_name}</p>
-                        {s.notes && (
-                          <p className="text-xs text-amber-600 mt-0.5">⚠ {s.notes}</p>
-                        )}
+                        {s.notes && <p className="text-xs text-amber-600 mt-0.5">⚠ {s.notes}</p>}
                       </td>
                       <td className="px-5 py-4 font-mono text-xs text-gray-500">{s.sku}</td>
                       <td className="px-5 py-4 text-gray-700">{s.quantity_expected}</td>
@@ -144,9 +149,7 @@ export default function InboundStockPage() {
                           <span className={s.quantity_received < s.quantity_expected ? "text-amber-600 font-medium" : "text-gray-700"}>
                             {s.quantity_received}
                             {s.quantity_received < s.quantity_expected && (
-                              <span className="ml-1 text-xs text-amber-500">
-                                ({s.quantity_expected - s.quantity_received} short)
-                              </span>
+                              <span className="ml-1 text-xs text-amber-500">({s.quantity_expected - s.quantity_received} short)</span>
                             )}
                           </span>
                         ) : (
@@ -154,32 +157,27 @@ export default function InboundStockPage() {
                         )}
                       </td>
                       <td className="px-5 py-4 text-gray-600">
-                        {new Date(s.expected_date).toLocaleDateString("en-GB", {
-                          day: "numeric", month: "short", year: "numeric",
-                        })}
+                        {new Date(s.expected_date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                       </td>
                       <td className="px-5 py-4">
-                        <span className={`badge ${meta.badge}`}>
-                          {meta.label}
-                        </span>
+                        <span className={`badge ${meta.badge}`}>{meta.label}</span>
                       </td>
                       <td className="px-5 py-4">
                         {(s.status === "in_transit" || s.status === "arrived") && (
                           <button
-                            onClick={() => confirmReceipt(s.id)}
+                            onClick={() => handleConfirmReceipt(s.id, s.quantity_expected)}
                             disabled={isConfirming}
-                            className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${
+                            className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
                               isConfirming
                                 ? "bg-green-100 text-green-600 cursor-wait"
                                 : "bg-green-600 hover:bg-green-700 text-white"
                             }`}
                           >
+                            {isConfirming && <Loader2 size={11} className="animate-spin" />}
                             {isConfirming ? "Confirming…" : "Confirm Receipt"}
                           </button>
                         )}
-                        {s.status === "logged" && (
-                          <CheckCircle2 size={18} className="text-green-500" />
-                        )}
+                        {s.status === "logged" && <CheckCircle2 size={18} className="text-green-500" />}
                       </td>
                     </tr>
                   );

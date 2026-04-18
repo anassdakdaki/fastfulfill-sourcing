@@ -29,17 +29,6 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    // Demo bypass
-    const demo = DEMO_ACCOUNTS.find((d) => d.email === email && d.password === password);
-    if (demo) {
-      document.cookie = `ff_demo_session=${demo.role}; path=/; max-age=86400`;
-      const dest = demo.role === "supplier" ? "/supplier" : demo.role === "fulfillment" ? "/fulfillment" : "/dashboard";
-      router.push(dest);
-      router.refresh();
-      return;
-    }
-
-    // Real Supabase login
     const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (authError) {
@@ -48,7 +37,6 @@ export default function LoginPage() {
       return;
     }
 
-    // Fetch role and redirect accordingly
     if (data.user) {
       const { data: profile } = await supabase
         .from("profiles")
@@ -57,7 +45,11 @@ export default function LoginPage() {
         .single();
 
       const role = profile?.role ?? "buyer";
-      router.push(role === "supplier" ? "/supplier" : "/dashboard");
+      const dest =
+        role === "supplier"    ? "/supplier" :
+        role === "fulfillment" ? "/fulfillment" :
+        "/dashboard";
+      router.push(dest);
       router.refresh();
     }
   }

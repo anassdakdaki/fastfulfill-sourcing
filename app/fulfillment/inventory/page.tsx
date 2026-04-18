@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Search, Archive, TrendingDown, AlertCircle } from "lucide-react";
-import { DUMMY_WAREHOUSE_STOCK } from "@/lib/dummy-data";
+import { useState, useMemo, useEffect } from "react";
+import { Search, Archive, TrendingDown, AlertCircle, Loader2 } from "lucide-react";
 import type { WarehouseStock } from "@/types/database";
+import { loadWarehouseStock } from "@/app/actions/fulfillment";
 
 type StockStatus = "healthy" | "low" | "out";
 
@@ -18,13 +18,11 @@ const STATUS_BADGE: Record<StockStatus, string> = {
   low:     "bg-amber-100 text-amber-700",
   out:     "bg-red-100 text-red-700",
 };
-
 const STATUS_LABEL: Record<StockStatus, string> = {
   healthy: "Healthy",
   low:     "Low Stock",
   out:     "Out of Stock",
 };
-
 const AVAIL_COLOR: Record<StockStatus, string> = {
   healthy: "text-green-700 font-semibold",
   low:     "text-amber-600 font-semibold",
@@ -32,26 +30,31 @@ const AVAIL_COLOR: Record<StockStatus, string> = {
 };
 
 function StockBar({ inStock, reserved }: { inStock: number; reserved: number }) {
-  if (inStock === 0) {
-    return (
-      <div className="w-20 h-2.5 bg-red-200 rounded-full" title="Out of stock" />
-    );
-  }
-  const availPct = ((inStock - reserved) / inStock) * 100;
+  if (inStock === 0) return <div className="w-20 h-2.5 bg-red-200 rounded-full" />;
+  const availPct   = ((inStock - reserved) / inStock) * 100;
   const reservedPct = (reserved / inStock) * 100;
   return (
-    <div className="w-20 h-2.5 bg-gray-100 rounded-full overflow-hidden flex" title={`${inStock - reserved} available / ${reserved} reserved`}>
-      <div className="h-full bg-blue-400" style={{ width: `${reservedPct}%` }} />
+    <div className="w-20 h-2.5 bg-gray-100 rounded-full overflow-hidden flex">
+      <div className="h-full bg-blue-400"  style={{ width: `${reservedPct}%` }} />
       <div className="h-full bg-green-400" style={{ width: `${availPct}%` }} />
     </div>
   );
 }
 
 export default function InventoryPage() {
+  const [stock, setStock]   = useState<WarehouseStock[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  const rows = useMemo<(WarehouseStock & { available: number; stockStatus: StockStatus })[]>(() => {
-    return DUMMY_WAREHOUSE_STOCK
+  useEffect(() => {
+    loadWarehouseStock().then(({ data }) => {
+      setStock(data as WarehouseStock[]);
+      setLoading(false);
+    });
+  }, []);
+
+  const rows = useMemo(() =>
+    stock
       .filter(
         (s) =>
           s.product_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -59,18 +62,18 @@ export default function InventoryPage() {
       )
       .map((s) => ({
         ...s,
-        available: s.in_stock - s.reserved,
+        available:   s.in_stock - s.reserved,
         stockStatus: getStatus(s.in_stock - s.reserved),
-      }));
-  }, [search]);
+      })),
+    [stock, search]
+  );
 
-  const totalSKUs  = DUMMY_WAREHOUSE_STOCK.length;
-  const totalUnits = DUMMY_WAREHOUSE_STOCK.reduce((sum, s) => sum + s.in_stock, 0);
-  const lowStock   = DUMMY_WAREHOUSE_STOCK.filter((s) => getStatus(s.in_stock - s.reserved) === "low" || getStatus(s.in_stock - s.reserved) === "out").length;
+  const totalSKUs  = stock.length;
+  const totalUnits = stock.reduce((sum, s) => sum + s.in_stock, 0);
+  const lowStock   = stock.filter((s) => getStatus(s.in_stock - s.reserved) !== "healthy").length;
 
   return (
     <div className="py-8 px-6 max-w-6xl mx-auto space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Warehouse Inventory</h1>
         <p className="mt-1 text-sm text-gray-500">Live stock levels across all SKUs stored at FastFulfill Warehouse.</p>
@@ -115,26 +118,26 @@ export default function InventoryPage() {
           placeholder="Search by product name or SKU…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 focus:border-transparent"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
         />
       </div>
 
-      {/* Legend */}
       <div className="flex items-center gap-4 text-xs text-gray-500">
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 bg-blue-400 rounded-sm" /> Reserved
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 bg-green-400 rounded-sm" /> Available
-        </span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 bg-blue-400 rounded-sm" /> Reserved</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 bg-green-400 rounded-sm" /> Available</span>
       </div>
 
       {/* Table */}
       <div className="card overflow-hidden">
-        {rows.length === 0 ? (
+        {loading ? (
+          <div className="py-16 flex flex-col items-center gap-3">
+            <Loader2 size={24} className="animate-spin text-gray-400" />
+            <p className="text-sm text-gray-400">Loading inventory…</p>
+          </div>
+        ) : rows.length === 0 ? (
           <div className="py-16 flex flex-col items-center gap-3">
             <Archive size={32} className="text-gray-300" />
-            <p className="text-sm text-gray-400">No SKUs match &quot;{search}&quot;</p>
+            <p className="text-sm text-gray-400">{search ? `No SKUs match "${search}"` : "No inventory yet."}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -154,27 +157,15 @@ export default function InventoryPage() {
               <tbody className="divide-y divide-gray-50">
                 {rows.map((row) => (
                   <tr key={row.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-4">
-                      <span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md">
-                        {row.sku}
-                      </span>
-                    </td>
+                    <td className="px-5 py-4"><span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md">{row.sku}</span></td>
                     <td className="px-5 py-4 font-medium text-gray-900">{row.product_name}</td>
                     <td className="px-5 py-4 text-gray-700">{row.in_stock}</td>
                     <td className="px-5 py-4 text-blue-600">{row.reserved}</td>
                     <td className={`px-5 py-4 ${AVAIL_COLOR[row.stockStatus]}`}>{row.available}</td>
-                    <td className="px-5 py-4">
-                      <StockBar inStock={row.in_stock} reserved={row.reserved} />
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className={`badge ${STATUS_BADGE[row.stockStatus]}`}>
-                        {STATUS_LABEL[row.stockStatus]}
-                      </span>
-                    </td>
+                    <td className="px-5 py-4"><StockBar inStock={row.in_stock} reserved={row.reserved} /></td>
+                    <td className="px-5 py-4"><span className={`badge ${STATUS_BADGE[row.stockStatus]}`}>{STATUS_LABEL[row.stockStatus]}</span></td>
                     <td className="px-5 py-4 text-gray-400 text-xs">
-                      {new Date(row.last_movement).toLocaleDateString("en-GB", {
-                        day: "numeric", month: "short", year: "numeric",
-                      })}
+                      {new Date(row.last_movement).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                     </td>
                   </tr>
                 ))}

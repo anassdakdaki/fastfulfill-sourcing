@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
-import { Download, Upload, ClipboardList, CheckCircle2, X, Info } from "lucide-react";
-import { DUMMY_FULFILLMENT_QUEUE } from "@/lib/dummy-data";
+import { useState, useRef, useMemo, useEffect } from "react";
+import { Download, Upload, ClipboardList, CheckCircle2, X, Info, Loader2 } from "lucide-react";
 import type { FulfillmentQueueOrder, FulfillmentQueueStatus } from "@/types/database";
+import {
+  loadFulfillmentQueue,
+  packOrder,
+  shipOrder,
+  markDelivered,
+  bulkImportTracking,
+} from "@/app/actions/fulfillment";
 
 type FilterTab = "all" | FulfillmentQueueStatus;
 
@@ -25,18 +31,25 @@ const STATUS_BADGE: Record<FulfillmentQueueStatus, string> = {
 function escapeCSV(val: string | number | null): string {
   if (val === null || val === undefined) return "";
   const s = String(val);
-  if (s.includes(",") || s.includes('"') || s.includes("\n")) {
-    return `"${s.replace(/"/g, '""')}"`;
-  }
+  if (s.includes(",") || s.includes('"') || s.includes("\n")) return `"${s.replace(/"/g, '""')}"`;
   return s;
 }
 
 export default function OrdersQueuePage() {
-  const [orders, setOrders] = useState<FulfillmentQueueOrder[]>(DUMMY_FULFILLMENT_QUEUE);
-  const [filter, setFilter] = useState<FilterTab>("all");
+  const [orders, setOrders]           = useState<FulfillmentQueueOrder[]>([]);
+  const [loading, setLoading]         = useState(true);
+  const [filter, setFilter]           = useState<FilterTab>("all");
   const [trackingInputs, setTrackingInputs] = useState<Record<string, string>>({});
-  const [importSuccess, setImportSuccess] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess]   = useState<string | null>(null);
+  const [acting, setActing]           = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    loadFulfillmentQueue().then(({ data }) => {
+      setOrders(data as FulfillmentQueueOrder[]);
+      setLoading(false);
+    });
+  }, []);
 
   const counts = useMemo(() => ({
     all:       orders.length,
@@ -46,52 +59,50 @@ export default function OrdersQueuePage() {
     delivered: orders.filter((o) => o.status === "delivered").length,
   }), [orders]);
 
-  const filtered = useMemo(() =>
-    filter === "all" ? orders : orders.filter((o) => o.status === filter),
+  const filtered = useMemo(
+    () => filter === "all" ? orders : orders.filter((o) => o.status === filter),
     [orders, filter]
   );
 
   // ── Actions ───────────────────────────────────────────────────────────────
-  function handlePack(id: string) {
-    setOrders((prev) => prev.map((o) => o.id === id ? { ...o, status: "packed" } : o));
+  async function handlePack(id: string) {
+    setActing(id);
+    const { error } = await packOrder(id);
+    if (!error) setOrders((prev) => prev.map((o) => o.id === id ? { ...o, status: "packed" } : o));
+    setActing(null);
   }
 
-  function handleShipped(id: string) {
+  async function handleShipped(id: string) {
     const tracking = trackingInputs[id]?.trim();
     if (!tracking) return;
-    setOrders((prev) =>
-      prev.map((o) =>
-        o.id === id
-          ? { ...o, status: "shipped", tracking_number: tracking, shipped_at: new Date().toISOString() }
-          : o
-      )
-    );
-    setTrackingInputs((prev) => { const n = { ...prev }; delete n[id]; return n; });
+    setActing(id);
+    const { error } = await shipOrder(id, tracking);
+    if (!error) {
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === id ? { ...o, status: "shipped", tracking_number: tracking, shipped_at: new Date().toISOString() } : o
+        )
+      );
+      setTrackingInputs((prev) => { const n = { ...prev }; delete n[id]; return n; });
+    }
+    setActing(null);
   }
 
-  function handleDelivered(id: string) {
-    setOrders((prev) => prev.map((o) => o.id === id ? { ...o, status: "delivered" } : o));
+  async function handleDelivered(id: string) {
+    setActing(id);
+    const { error } = await markDelivered(id);
+    if (!error) setOrders((prev) => prev.map((o) => o.id === id ? { ...o, status: "delivered" } : o));
+    setActing(null);
   }
 
   // ── CSV Export ─────────────────────────────────────────────────────────────
   function handleExport() {
-    const rows = filtered;
     const header = ["Order Ref", "Product", "SKU", "Qty", "Ship To Country", "Status", "Tracking Number", "Received At"];
     const lines = [
       header.join(","),
-      ...rows.map((o) =>
-        [
-          o.ref,
-          o.product_name,
-          o.sku,
-          o.quantity,
-          o.ship_to_country,
-          o.status,
-          o.tracking_number ?? "",
-          new Date(o.received_at).toISOString().split("T")[0],
-        ]
-          .map(escapeCSV)
-          .join(",")
+      ...filtered.map((o) =>
+        [o.ref, o.product_name, o.sku, o.quantity, o.ship_to_country, o.status, o.tracking_number ?? "", new Date(o.received_at).toISOString().split("T")[0]]
+          .map(escapeCSV).join(",")
       ),
     ];
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
@@ -106,45 +117,36 @@ export default function OrdersQueuePage() {
   }
 
   // ── CSV Import ─────────────────────────────────────────────────────────────
-  function handleCSVImport(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleCSVImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      const text = ev.target?.result as string;
-      const lines = text.split("\n").slice(1); // skip header
-      let updated = 0;
-      setOrders((prev) => {
-        const next = [...prev];
-        lines.forEach((line) => {
-          if (!line.trim()) return;
-          const cols = line.split(",");
-          const ref      = cols[0]?.trim().replace(/"/g, "");
-          const tracking = cols[6]?.trim().replace(/"/g, "");
-          if (!ref || !tracking) return;
-          const idx = next.findIndex((o) => o.ref === ref);
-          if (idx !== -1) {
-            next[idx] = {
-              ...next[idx],
-              tracking_number: tracking,
-              status: "shipped",
-              shipped_at: new Date().toISOString(),
-            };
-            updated++;
-          }
-        });
-        return next;
+    reader.onload = async (ev) => {
+      const text  = ev.target?.result as string;
+      const lines = text.split("\n").slice(1);
+      const updates: { ref: string; tracking_number: string }[] = [];
+
+      lines.forEach((line) => {
+        if (!line.trim()) return;
+        const cols     = line.split(",");
+        const ref      = cols[0]?.trim().replace(/"/g, "");
+        const tracking = cols[6]?.trim().replace(/"/g, "");
+        if (ref && tracking) updates.push({ ref, tracking_number: tracking });
       });
+
+      const { updated } = await bulkImportTracking(updates);
+
+      // Refresh orders from DB
+      const { data } = await loadFulfillmentQueue();
+      setOrders(data as FulfillmentQueueOrder[]);
       setImportSuccess(`${updated} order(s) updated with tracking numbers.`);
     };
     reader.readAsText(file);
-    // Reset file input so same file can be re-imported
     e.target.value = "";
   }
 
   return (
     <div className="py-8 px-6 max-w-6xl mx-auto space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Fulfillment Queue</h1>
         <p className="mt-1 text-sm text-gray-500">
@@ -157,9 +159,7 @@ export default function OrdersQueuePage() {
         {(["pending", "packed", "shipped", "delivered"] as FulfillmentQueueStatus[]).map((s) => (
           <div key={s} className="card p-5">
             <p className={`text-2xl font-bold ${
-              s === "pending"   ? "text-yellow-700" :
-              s === "packed"    ? "text-blue-700"   :
-              s === "shipped"   ? "text-green-700"  : "text-gray-600"
+              s === "pending" ? "text-yellow-700" : s === "packed" ? "text-blue-700" : s === "shipped" ? "text-green-700" : "text-gray-600"
             }`}>
               {counts[s]}
             </p>
@@ -168,18 +168,14 @@ export default function OrdersQueuePage() {
         ))}
       </div>
 
-      {/* Import success banner */}
       {importSuccess && (
         <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-800">
           <CheckCircle2 size={16} className="text-green-600 shrink-0" />
           <span>{importSuccess}</span>
-          <button onClick={() => setImportSuccess(null)} className="ml-auto text-green-600 hover:text-green-800">
-            <X size={15} />
-          </button>
+          <button onClick={() => setImportSuccess(null)} className="ml-auto text-green-600 hover:text-green-800"><X size={15} /></button>
         </div>
       )}
 
-      {/* CSV Info box */}
       <div className="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700">
         <Info size={15} className="text-slate-400 shrink-0 mt-0.5" />
         <span>
@@ -196,16 +192,12 @@ export default function OrdersQueuePage() {
               key={tab.key}
               onClick={() => setFilter(tab.key)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                filter === tab.key
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
+                filter === tab.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
               }`}
             >
               {tab.label}
               {counts[tab.key] > 0 && (
-                <span className="ml-1.5 text-xs bg-gray-200 text-gray-600 rounded-full px-1.5 py-0.5">
-                  {counts[tab.key]}
-                </span>
+                <span className="ml-1.5 text-xs bg-gray-200 text-gray-600 rounded-full px-1.5 py-0.5">{counts[tab.key]}</span>
               )}
             </button>
           ))}
@@ -214,31 +206,29 @@ export default function OrdersQueuePage() {
         <div className="flex gap-2">
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            disabled={filtered.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition-colors"
           >
-            <Download size={15} />
-            Export CSV
+            <Download size={15} /> Export CSV
           </button>
           <button
             onClick={() => fileInputRef.current?.click()}
             className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-sm font-medium transition-colors"
           >
-            <Upload size={15} />
-            Import Tracking
+            <Upload size={15} /> Import Tracking
           </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".csv"
-            className="hidden"
-            onChange={handleCSVImport}
-          />
+          <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleCSVImport} />
         </div>
       </div>
 
       {/* Table */}
       <div className="card overflow-hidden">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="py-16 flex flex-col items-center gap-3">
+            <Loader2 size={24} className="animate-spin text-gray-400" />
+            <p className="text-sm text-gray-400">Loading orders…</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="py-16 flex flex-col items-center gap-3">
             <ClipboardList size={32} className="text-gray-300" />
             <p className="text-sm text-gray-400">No orders in this status.</p>
@@ -259,76 +249,71 @@ export default function OrdersQueuePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {filtered.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50 transition-colors align-middle">
-                    <td className="px-5 py-3.5">
-                      <span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md">
-                        {order.ref}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 font-medium text-gray-900 max-w-[140px] truncate">
-                      {order.product_name}
-                    </td>
-                    <td className="px-5 py-3.5 font-mono text-xs text-gray-500">{order.sku}</td>
-                    <td className="px-5 py-3.5 text-gray-700">{order.quantity}</td>
-                    <td className="px-5 py-3.5 text-gray-600 whitespace-nowrap">{order.ship_to_country}</td>
-                    <td className="px-5 py-3.5">
-                      <span className={`badge ${STATUS_BADGE[order.status]}`}>
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      {order.tracking_number ? (
-                        <span className="font-mono text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md">
-                          {order.tracking_number}
-                        </span>
-                      ) : (
-                        <span className="text-gray-300 text-xs">—</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-3.5">
-                      {order.status === "pending" && (
-                        <button
-                          onClick={() => handlePack(order.id)}
-                          className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-colors"
-                        >
-                          Pack
-                        </button>
-                      )}
-                      {order.status === "packed" && (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            placeholder="Tracking #"
-                            value={trackingInputs[order.id] ?? ""}
-                            onChange={(e) =>
-                              setTrackingInputs((prev) => ({ ...prev, [order.id]: e.target.value }))
-                            }
-                            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 w-28 focus:outline-none focus:ring-1 focus:ring-green-400"
-                          />
+                {filtered.map((order) => {
+                  const isActing = acting === order.id;
+                  return (
+                    <tr key={order.id} className="hover:bg-gray-50 transition-colors align-middle">
+                      <td className="px-5 py-3.5">
+                        <span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md">{order.ref}</span>
+                      </td>
+                      <td className="px-5 py-3.5 font-medium text-gray-900 max-w-[140px] truncate">{order.product_name}</td>
+                      <td className="px-5 py-3.5 font-mono text-xs text-gray-500">{order.sku}</td>
+                      <td className="px-5 py-3.5 text-gray-700">{order.quantity}</td>
+                      <td className="px-5 py-3.5 text-gray-600 whitespace-nowrap">{order.ship_to_country}</td>
+                      <td className="px-5 py-3.5">
+                        <span className={`badge ${STATUS_BADGE[order.status]}`}>{order.status}</span>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        {order.tracking_number ? (
+                          <span className="font-mono text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md">{order.tracking_number}</span>
+                        ) : (
+                          <span className="text-gray-300 text-xs">—</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        {order.status === "pending" && (
                           <button
-                            onClick={() => handleShipped(order.id)}
-                            disabled={!trackingInputs[order.id]?.trim()}
-                            className="text-xs bg-green-600 hover:bg-green-700 disabled:opacity-40 text-white px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-colors"
+                            onClick={() => handlePack(order.id)}
+                            disabled={isActing}
+                            className="text-xs bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-colors flex items-center gap-1.5"
                           >
-                            Confirm
+                            {isActing && <Loader2 size={11} className="animate-spin" />}
+                            Pack
                           </button>
-                        </div>
-                      )}
-                      {order.status === "shipped" && (
-                        <button
-                          onClick={() => handleDelivered(order.id)}
-                          className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-colors"
-                        >
-                          Delivered
-                        </button>
-                      )}
-                      {order.status === "delivered" && (
-                        <CheckCircle2 size={17} className="text-green-500" />
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                        )}
+                        {order.status === "packed" && (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              placeholder="Tracking #"
+                              value={trackingInputs[order.id] ?? ""}
+                              onChange={(e) => setTrackingInputs((prev) => ({ ...prev, [order.id]: e.target.value }))}
+                              className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 w-28 focus:outline-none focus:ring-1 focus:ring-green-400"
+                            />
+                            <button
+                              onClick={() => handleShipped(order.id)}
+                              disabled={!trackingInputs[order.id]?.trim() || isActing}
+                              className="text-xs bg-green-600 hover:bg-green-700 disabled:opacity-40 text-white px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-colors flex items-center gap-1.5"
+                            >
+                              {isActing && <Loader2 size={11} className="animate-spin" />}
+                              Confirm
+                            </button>
+                          </div>
+                        )}
+                        {order.status === "shipped" && (
+                          <button
+                            onClick={() => handleDelivered(order.id)}
+                            disabled={isActing}
+                            className="text-xs bg-gray-100 hover:bg-gray-200 disabled:opacity-40 text-gray-600 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-colors"
+                          >
+                            Mark Delivered
+                          </button>
+                        )}
+                        {order.status === "delivered" && <CheckCircle2 size={17} className="text-green-500" />}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

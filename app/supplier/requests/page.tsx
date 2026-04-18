@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   MessageSquarePlus, ChevronDown, ChevronUp, ExternalLink,
-  Calculator, CheckCircle2, X, Clock,
+  Calculator, CheckCircle2, X, Clock, Loader2,
 } from "lucide-react";
-import { DUMMY_SOURCING_REQUESTS } from "@/lib/dummy-data";
 import type { SourcingRequest, SourcingRequestStatus, SourcingUrgency } from "@/types/database";
+import {
+  loadSourcingRequests,
+  markRequestReviewing,
+  declineRequest,
+  sendQuoteToSeller,
+} from "@/app/actions/sourcing-desk";
 
 type FilterTab = "all" | SourcingRequestStatus;
 
@@ -42,22 +47,25 @@ function hoursAgo(iso: string) {
   return `${Math.floor(h / 24)}d ago`;
 }
 
-interface QuoteForm {
-  ourCost: string;
-  shipping: string;
-  moq: string;
-  leadTime: string;
-  notes: string;
-}
-
+interface QuoteForm { ourCost: string; shipping: string; moq: string; leadTime: string; notes: string; }
 const EMPTY_FORM: QuoteForm = { ourCost: "", shipping: "", moq: "50", leadTime: "14", notes: "" };
 
 export default function SourcingRequestsPage() {
-  const [requests, setRequests] = useState<SourcingRequest[]>(DUMMY_SOURCING_REQUESTS);
+  const [requests, setRequests] = useState<SourcingRequest[]>([]);
+  const [loading, setLoading]   = useState(true);
   const [filter, setFilter]     = useState<FilterTab>("all");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [forms, setForms]       = useState<Record<string, QuoteForm>>({});
   const [sent, setSent]         = useState<Record<string, boolean>>({});
+  const [sending, setSending]   = useState<string | null>(null);
+  const [actionId, setActionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadSourcingRequests().then(({ data }) => {
+      setRequests(data as SourcingRequest[]);
+      setLoading(false);
+    });
+  }, []);
 
   const filtered = useMemo(
     () => filter === "all" ? requests : requests.filter((r) => r.status === filter),
@@ -82,27 +90,40 @@ export default function SourcingRequestsPage() {
     setForms((prev) => ({ ...prev, [id]: { ...(prev[id] ?? EMPTY_FORM), [field]: val } }));
   }
 
-  function markReviewing(id: string) {
-    setRequests((prev) =>
-      prev.map((r) => r.id === id && r.status === "new" ? { ...r, status: "reviewing" } : r)
-    );
+  async function handleMarkReviewing(id: string) {
+    setActionId(id);
+    await markRequestReviewing(id);
+    setRequests((prev) => prev.map((r) => r.id === id ? { ...r, status: "reviewing" } : r));
+    setActionId(null);
   }
 
-  function sendQuote(req: SourcingRequest) {
+  async function handleSendQuote(req: SourcingRequest) {
     const form = forms[req.id] ?? EMPTY_FORM;
     if (!form.ourCost || parseFloat(form.ourCost) <= 0) return;
-    setRequests((prev) =>
-      prev.map((r) => r.id === req.id ? { ...r, status: "quoted" } : r)
-    );
-    setSent((prev) => ({ ...prev, [req.id]: true }));
-    setExpanded(null);
+    setSending(req.id);
+
+    const { error } = await sendQuoteToSeller(req.id, {
+      ourCost:  parseFloat(form.ourCost),
+      shipping: parseFloat(form.shipping) || 0,
+      moq:      parseInt(form.moq) || 50,
+      leadTime: parseInt(form.leadTime) || 14,
+      notes:    form.notes,
+    });
+
+    if (!error) {
+      setRequests((prev) => prev.map((r) => r.id === req.id ? { ...r, status: "quoted" } : r));
+      setSent((prev) => ({ ...prev, [req.id]: true }));
+      setExpanded(null);
+    }
+    setSending(null);
   }
 
-  function declineRequest(id: string) {
-    setRequests((prev) =>
-      prev.map((r) => r.id === id ? { ...r, status: "declined" } : r)
-    );
+  async function handleDecline(id: string) {
+    setActionId(id);
+    await declineRequest(id);
+    setRequests((prev) => prev.map((r) => r.id === id ? { ...r, status: "declined" } : r));
     setExpanded(null);
+    setActionId(null);
   }
 
   function calcMargin(reqId: string, qty: number) {
@@ -117,7 +138,6 @@ export default function SourcingRequestsPage() {
 
   return (
     <div className="py-8 px-6 max-w-6xl mx-auto space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Sourcing Requests</h1>
         <p className="mt-1 text-sm text-gray-500">
@@ -145,16 +165,12 @@ export default function SourcingRequestsPage() {
             key={tab.key}
             onClick={() => setFilter(tab.key)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              filter === tab.key
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+              filter === tab.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
             }`}
           >
             {tab.label}
             {counts[tab.key] > 0 && (
-              <span className="ml-1.5 text-xs bg-gray-200 text-gray-600 rounded-full px-1.5 py-0.5">
-                {counts[tab.key]}
-              </span>
+              <span className="ml-1.5 text-xs bg-gray-200 text-gray-600 rounded-full px-1.5 py-0.5">{counts[tab.key]}</span>
             )}
           </button>
         ))}
@@ -162,43 +178,44 @@ export default function SourcingRequestsPage() {
 
       {/* Request Cards */}
       <div className="space-y-3">
-        {filtered.length === 0 && (
+        {loading ? (
+          <div className="card py-16 flex flex-col items-center gap-3">
+            <Loader2 size={24} className="animate-spin text-gray-400" />
+            <p className="text-sm text-gray-400">Loading requests…</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="card py-16 flex flex-col items-center gap-3">
             <MessageSquarePlus size={32} className="text-gray-300" />
             <p className="text-sm text-gray-400">No requests in this category.</p>
           </div>
-        )}
+        ) : null}
 
-        {filtered.map((req) => {
-          const isOpen       = expanded === req.id;
-          const isSent       = sent[req.id];
-          const urgency      = URGENCY_BADGE[req.urgency];
-          const form         = forms[req.id] ?? EMPTY_FORM;
-          const calc         = calcMargin(req.id, req.qty_requested);
-          const canReply     = req.status === "new" || req.status === "reviewing";
+        {!loading && filtered.map((req) => {
+          const isOpen   = expanded === req.id;
+          const isSent   = sent[req.id];
+          const urgency  = URGENCY_BADGE[req.urgency];
+          const form     = forms[req.id] ?? EMPTY_FORM;
+          const calc     = calcMargin(req.id, req.qty_requested);
+          const canReply = req.status === "new" || req.status === "reviewing";
+          const isSending = sending === req.id;
+          const isActing  = actionId === req.id;
 
           return (
             <div key={req.id} className={`card overflow-hidden transition-all ${req.urgency === "rush" ? "border-red-200" : ""}`}>
-              {/* Rush banner */}
               {req.urgency === "rush" && req.status === "new" && (
                 <div className="bg-red-600 text-white text-xs font-semibold px-5 py-1.5 flex items-center gap-2">
                   ⚡ Rush request — seller expects fast response
                 </div>
               )}
 
-              {/* Summary row */}
               <div
                 className="flex items-center gap-4 px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => toggleExpand(req.id)}
               >
-                <span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md shrink-0">
-                  {req.ref}
-                </span>
+                <span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md shrink-0">{req.ref}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-gray-900 truncate">{req.product_name}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {req.seller_ref} · {req.qty_requested} units · {req.target_country} · {req.category}
-                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">{req.seller_ref} · {req.qty_requested} units · {req.target_country} · {req.category}</p>
                 </div>
                 <span className={`badge shrink-0 ${urgency.badge}`}>{urgency.label}</span>
                 <span className={`badge shrink-0 ${STATUS_BADGE[req.status]}`}>{req.status}</span>
@@ -208,27 +225,23 @@ export default function SourcingRequestsPage() {
                 {isOpen ? <ChevronUp size={16} className="text-gray-400 shrink-0" /> : <ChevronDown size={16} className="text-gray-400 shrink-0" />}
               </div>
 
-              {/* Expanded Detail + Quote Form */}
               {isOpen && (
                 <div className="border-t border-gray-100 bg-gray-50/70 px-5 py-5 space-y-5">
                   {isSent ? (
                     <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
                       <CheckCircle2 size={16} className="text-green-600" />
-                      <span className="text-sm text-green-800 font-medium">
-                        Quote sent to {req.seller_ref} — awaiting their response.
-                      </span>
+                      <span className="text-sm text-green-800 font-medium">Quote sent to {req.seller_ref} — awaiting their response.</span>
                     </div>
                   ) : (
                     <>
-                      {/* Details */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="card p-4 space-y-2.5">
                           <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Request Details</p>
                           {[
-                            ["Seller",    req.seller_ref],
-                            ["Quantity",  `${req.qty_requested} units`],
-                            ["Ship To",   req.target_country],
-                            ["Category",  req.category],
+                            ["Seller",   req.seller_ref],
+                            ["Quantity", `${req.qty_requested} units`],
+                            ["Ship To",  req.target_country],
+                            ["Category", req.category],
                           ].map(([k, v]) => (
                             <div key={k} className="flex justify-between text-sm">
                               <span className="text-gray-500">{k}</span>
@@ -236,13 +249,9 @@ export default function SourcingRequestsPage() {
                             </div>
                           ))}
                           {req.product_url && (
-                            <a
-                              href={req.product_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700 mt-1"
-                              onClick={(e) => e.stopPropagation()}
-                            >
+                            <a href={req.product_url} target="_blank" rel="noopener noreferrer"
+                               className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700 mt-1"
+                               onClick={(e) => e.stopPropagation()}>
                               <ExternalLink size={11} /> View product reference link
                             </a>
                           )}
@@ -257,55 +266,29 @@ export default function SourcingRequestsPage() {
 
                       {canReply && (
                         <>
-                          {/* Quote form */}
                           <div className="card p-5 space-y-4">
                             <p className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                              <Calculator size={15} className="text-brand-600" />
-                              Build Your Quote
+                              <Calculator size={15} className="text-brand-600" /> Build Your Quote
                             </p>
                             <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                                  Your Cost / Unit ($)
-                                  <span className="ml-1 text-gray-400 font-normal">internal only</span>
-                                </label>
-                                <input
-                                  type="number" step="0.01" min="0" placeholder="e.g. 4.50"
-                                  value={form.ourCost}
-                                  onChange={(e) => updateForm(req.id, "ourCost", e.target.value)}
-                                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                                  Shipping Cost ($)
-                                  <span className="ml-1 text-gray-400 font-normal">internal</span>
-                                </label>
-                                <input
-                                  type="number" step="1" min="0" placeholder="e.g. 250"
-                                  value={form.shipping}
-                                  onChange={(e) => updateForm(req.id, "shipping", e.target.value)}
-                                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1.5">MOQ <span className="text-gray-400">(min 50)</span></label>
-                                <input
-                                  type="number" min="50"
-                                  value={form.moq}
-                                  onChange={(e) => updateForm(req.id, "moq", e.target.value)}
-                                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1.5">Lead Time (days)</label>
-                                <input
-                                  type="number" min="1"
-                                  value={form.leadTime}
-                                  onChange={(e) => updateForm(req.id, "leadTime", e.target.value)}
-                                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
-                                />
-                              </div>
+                              {[
+                                { label: "Your Cost / Unit ($)", field: "ourCost" as const, placeholder: "e.g. 4.50", step: "0.01", hint: "internal only" },
+                                { label: "Shipping Cost ($)",    field: "shipping" as const, placeholder: "e.g. 250",  step: "1",    hint: "internal" },
+                                { label: "MOQ",                  field: "moq" as const,      placeholder: "50",        step: "1",    hint: "min 50" },
+                                { label: "Lead Time (days)",     field: "leadTime" as const,  placeholder: "14",        step: "1",    hint: "" },
+                              ].map(({ label, field, placeholder, step, hint }) => (
+                                <div key={field}>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                                    {label} {hint && <span className="text-gray-400 font-normal">{hint}</span>}
+                                  </label>
+                                  <input
+                                    type="number" step={step} min="0" placeholder={placeholder}
+                                    value={form[field]}
+                                    onChange={(e) => updateForm(req.id, field, e.target.value)}
+                                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+                                  />
+                                </div>
+                              ))}
                             </div>
                             <div>
                               <label className="block text-xs font-medium text-gray-700 mb-1.5">Message to Seller</label>
@@ -318,7 +301,6 @@ export default function SourcingRequestsPage() {
                             </div>
                           </div>
 
-                          {/* Live Margin Preview */}
                           {calc.cost > 0 && (
                             <div className="rounded-2xl bg-gradient-to-r from-brand-50 via-white to-green-50 border border-brand-100 px-5 py-4">
                               <p className="text-xs font-semibold uppercase tracking-wider text-brand-700 mb-3 flex items-center gap-1.5">
@@ -342,30 +324,33 @@ export default function SourcingRequestsPage() {
                                 </div>
                               </div>
                               <p className="mt-2.5 text-xs text-gray-400">
-                                Your supplier cost and identity are <strong className="text-gray-600">never shown to the seller</strong>. They only see the quoted price.
+                                Your supplier cost and identity are <strong className="text-gray-600">never shown to the seller</strong>.
                               </p>
                             </div>
                           )}
 
-                          {/* Action buttons */}
                           <div className="flex items-center gap-3 flex-wrap">
                             {req.status === "new" && (
                               <button
-                                onClick={(e) => { e.stopPropagation(); markReviewing(req.id); }}
-                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition-colors"
+                                onClick={(e) => { e.stopPropagation(); handleMarkReviewing(req.id); }}
+                                disabled={isActing}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition-colors disabled:opacity-40 flex items-center gap-2"
                               >
+                                {isActing ? <Loader2 size={13} className="animate-spin" /> : null}
                                 Mark as Reviewing
                               </button>
                             )}
                             <button
-                              onClick={(e) => { e.stopPropagation(); sendQuote(req); }}
-                              disabled={!form.ourCost || parseFloat(form.ourCost) <= 0}
+                              onClick={(e) => { e.stopPropagation(); handleSendQuote(req); }}
+                              disabled={!form.ourCost || parseFloat(form.ourCost) <= 0 || isSending}
                               className="px-5 py-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors flex items-center gap-2"
                             >
-                              <CheckCircle2 size={14} /> Send Quote to {req.seller_ref}
+                              {isSending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                              Send Quote to {req.seller_ref}
                             </button>
                             <button
-                              onClick={(e) => { e.stopPropagation(); declineRequest(req.id); }}
+                              onClick={(e) => { e.stopPropagation(); handleDecline(req.id); }}
+                              disabled={isActing}
                               className="px-4 py-2 text-red-600 hover:bg-red-50 text-sm font-medium rounded-xl transition-colors flex items-center gap-1.5"
                             >
                               <X size={13} /> Decline
@@ -374,12 +359,11 @@ export default function SourcingRequestsPage() {
                         </>
                       )}
 
-                      {/* Locked state */}
                       {!canReply && (
                         <div className={`rounded-xl px-4 py-3 text-sm font-medium flex items-center gap-2 ${
-                          req.status === "accepted" ? "bg-green-50 text-green-800 border border-green-200"
-                          : req.status === "declined" ? "bg-gray-100 text-gray-500"
-                          : "bg-amber-50 text-amber-800 border border-amber-200"
+                          req.status === "accepted" ? "bg-green-50 text-green-800 border border-green-200" :
+                          req.status === "declined" ? "bg-gray-100 text-gray-500" :
+                          "bg-amber-50 text-amber-800 border border-amber-200"
                         }`}>
                           <CheckCircle2 size={14} />
                           {req.status === "accepted" && "Seller accepted this quote — view Procurement for next steps."}
