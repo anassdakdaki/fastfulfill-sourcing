@@ -1,21 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { Save, Building2, MapPin, Truck, Bell, Shield, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Save, Building2, MapPin, Truck, Bell, Shield, User, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { loadMyProfile, saveSettings } from "@/app/actions/settings";
 
 const SHIPPING_PREFS = [
-  { value: "air", label: "Air Freight" },
-  { value: "sea", label: "Sea Freight" },
+  { value: "air",     label: "Air Freight"        },
+  { value: "sea",     label: "Sea Freight"         },
   { value: "express", label: "Express (DHL/FedEx)" },
 ];
 
 const CURRENCY_OPTIONS = [
-  { value: "USD", label: "USD - US Dollar" },
-  { value: "EUR", label: "EUR - Euro" },
-  { value: "GBP", label: "GBP - British Pound" },
+  { value: "USD", label: "USD - US Dollar"       },
+  { value: "EUR", label: "EUR - Euro"            },
+  { value: "GBP", label: "GBP - British Pound"   },
   { value: "CAD", label: "CAD - Canadian Dollar" },
   { value: "AUD", label: "AUD - Australian Dollar" },
 ];
@@ -32,7 +33,9 @@ function Section({ icon, title, children }: { icon: React.ReactNode; title: stri
   );
 }
 
-function Toggle({ label, description, checked, onChange }: { label: string; description: string; checked: boolean; onChange: (v: boolean) => void }) {
+function Toggle({ label, description, checked, onChange }: {
+  label: string; description: string; checked: boolean; onChange: (v: boolean) => void;
+}) {
   return (
     <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
       <div>
@@ -51,44 +54,80 @@ function Toggle({ label, description, checked, onChange }: { label: string; desc
 }
 
 export default function SettingsPage() {
-  const [saved, setSaved] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [saving,  setSaving]  = useState(false);
+  const [saved,   setSaved]   = useState(false);
+  const [saveErr, setSaveErr] = useState("");
 
-  const [profile, setProfile] = useState({
-    full_name: "Demo User",
-    email: "demo@fastfullfill.com",
-  });
-
-  const [company, setCompany] = useState({
-    name: "Demo Company Ltd.",
-    website: "",
-    vat_number: "",
-  });
-
-  const [address, setAddress] = useState({
-    line1: "",
-    city: "",
-    state: "",
-    zip: "",
-    country: "United States",
-  });
-
-  const [prefs, setPrefs] = useState({
-    default_shipping: "air",
-    currency: "USD",
-  });
-
+  const [profile, setProfile] = useState({ full_name: "", email: "" });
+  const [company, setCompany] = useState({ name: "", website: "", vat_number: "" });
+  const [address, setAddress] = useState({ line1: "", city: "", state: "", zip: "", country: "" });
+  const [prefs,   setPrefs]   = useState({ default_shipping: "air", currency: "USD" });
+  const [phone,   setPhone]   = useState("");
   const [notifications, setNotifications] = useState({
-    order_updates: true,
-    quote_received: true,
-    shipment_alerts: true,
-    invoice_due: true,
-    marketing: false,
+    order_updates: true, quote_received: true, shipment_alerts: true, invoice_due: true, marketing: false,
   });
 
-  function handleSave(e: React.FormEvent) {
+  useEffect(() => {
+    loadMyProfile().then(({ data }) => {
+      if (data) {
+        setProfile({ full_name: data.full_name ?? "", email: data.email ?? "" });
+        setCompany({ name: data.company_name ?? "", website: data.website ?? "", vat_number: data.vat_number ?? "" });
+        setAddress({ line1: data.address_line1 ?? "", city: data.address_city ?? "", state: data.address_state ?? "", zip: data.address_zip ?? "", country: data.country ?? "" });
+        setPrefs({ default_shipping: data.default_shipping ?? "air", currency: data.currency ?? "USD" });
+        setPhone(data.phone ?? "");
+        setNotifications({
+          order_updates:   data.notif_order_updates   ?? true,
+          quote_received:  data.notif_quote_received  ?? true,
+          shipment_alerts: data.notif_shipment_alerts ?? true,
+          invoice_due:     data.notif_invoice_due     ?? true,
+          marketing:       data.notif_marketing       ?? false,
+        });
+      }
+      setLoadingProfile(false);
+    });
+  }, []);
+
+  async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setSaving(true);
+    setSaveErr("");
+
+    const { error } = await saveSettings({
+      full_name:             profile.full_name,
+      company_name:          company.name,
+      phone,
+      country:               address.country,
+      website:               company.website,
+      vat_number:            company.vat_number,
+      address_line1:         address.line1,
+      address_city:          address.city,
+      address_state:         address.state,
+      address_zip:           address.zip,
+      default_shipping:      prefs.default_shipping,
+      currency:              prefs.currency,
+      notif_order_updates:   notifications.order_updates,
+      notif_quote_received:  notifications.quote_received,
+      notif_shipment_alerts: notifications.shipment_alerts,
+      notif_invoice_due:     notifications.invoice_due,
+      notif_marketing:       notifications.marketing,
+    });
+
+    if (error) {
+      setSaveErr(error);
+    } else {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 4000);
+    }
+    setSaving(false);
+  }
+
+  if (loadingProfile) {
+    return (
+      <div className="flex items-center justify-center py-24 gap-2 text-gray-400">
+        <Loader2 size={20} className="animate-spin" /> Loading your settings…
+      </div>
+    );
   }
 
   return (
@@ -99,9 +138,13 @@ export default function SettingsPage() {
       </div>
 
       {saved && (
-        <div className="bg-green-50 border border-green-200 rounded-2xl px-5 py-4 text-sm text-green-700 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-green-500" />
-          Settings saved successfully.
+        <div className="bg-green-50 border border-green-200 rounded-2xl px-5 py-3.5 text-sm text-green-700 flex items-center gap-2">
+          <CheckCircle2 size={16} className="text-green-600" /> Settings saved successfully.
+        </div>
+      )}
+      {saveErr && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl px-5 py-3.5 text-sm text-red-700">
+          {saveErr}
         </div>
       )}
 
@@ -117,11 +160,16 @@ export default function SettingsPage() {
             label="Email Address"
             type="email"
             value={profile.email}
-            onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+            disabled
+            hint="Email can't be changed here."
           />
-        </div>
-        <div className="mt-4">
-          <Button type="button" variant="outline" size="sm">Change Password</Button>
+          <Input
+            label="Phone Number"
+            type="tel"
+            placeholder="+1 555 000 0000"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
         </div>
       </Section>
 
@@ -161,10 +209,10 @@ export default function SettingsPage() {
               onChange={(e) => setAddress({ ...address, line1: e.target.value })}
             />
           </div>
-          <Input label="City" placeholder="New York" value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} />
-          <Input label="State / Province" placeholder="NY" value={address.state} onChange={(e) => setAddress({ ...address, state: e.target.value })} />
-          <Input label="ZIP / Postal Code" placeholder="10001" value={address.zip} onChange={(e) => setAddress({ ...address, zip: e.target.value })} />
-          <Input label="Country" placeholder="United States" value={address.country} onChange={(e) => setAddress({ ...address, country: e.target.value })} />
+          <Input label="City"               placeholder="New York"  value={address.city}    onChange={(e) => setAddress({ ...address, city: e.target.value })} />
+          <Input label="State / Province"   placeholder="NY"        value={address.state}   onChange={(e) => setAddress({ ...address, state: e.target.value })} />
+          <Input label="ZIP / Postal Code"  placeholder="10001"     value={address.zip}     onChange={(e) => setAddress({ ...address, zip: e.target.value })} />
+          <Input label="Country"            placeholder="US"        value={address.country} onChange={(e) => setAddress({ ...address, country: e.target.value })} />
         </div>
       </Section>
 
@@ -188,11 +236,11 @@ export default function SettingsPage() {
 
       {/* Notifications */}
       <Section icon={<Bell size={16} />} title="Notifications">
-        <Toggle label="Order Updates" description="Get notified when your order status changes." checked={notifications.order_updates} onChange={(v) => setNotifications({ ...notifications, order_updates: v })} />
-        <Toggle label="Quote Received" description="Alert when a new supplier quote arrives." checked={notifications.quote_received} onChange={(v) => setNotifications({ ...notifications, quote_received: v })} />
-        <Toggle label="Shipment Alerts" description="Track shipment milestones and delays." checked={notifications.shipment_alerts} onChange={(v) => setNotifications({ ...notifications, shipment_alerts: v })} />
-        <Toggle label="Invoice Due" description="Reminder before invoices become overdue." checked={notifications.invoice_due} onChange={(v) => setNotifications({ ...notifications, invoice_due: v })} />
-        <Toggle label="Marketing & Tips" description="Product updates and sourcing tips from FastFulfill." checked={notifications.marketing} onChange={(v) => setNotifications({ ...notifications, marketing: v })} />
+        <Toggle label="Order Updates"    description="Get notified when your order status changes."     checked={notifications.order_updates}   onChange={(v) => setNotifications({ ...notifications, order_updates: v })} />
+        <Toggle label="Quote Received"   description="Alert when a new supplier quote arrives."          checked={notifications.quote_received}  onChange={(v) => setNotifications({ ...notifications, quote_received: v })} />
+        <Toggle label="Shipment Alerts"  description="Track shipment milestones and delays."             checked={notifications.shipment_alerts} onChange={(v) => setNotifications({ ...notifications, shipment_alerts: v })} />
+        <Toggle label="Invoice Due"      description="Reminder before invoices become overdue."          checked={notifications.invoice_due}     onChange={(v) => setNotifications({ ...notifications, invoice_due: v })} />
+        <Toggle label="Marketing & Tips" description="Product updates and sourcing tips from FastFulfill." checked={notifications.marketing}     onChange={(v) => setNotifications({ ...notifications, marketing: v })} />
       </Section>
 
       {/* Security */}
@@ -207,16 +255,16 @@ export default function SettingsPage() {
           </div>
           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
             <div>
-              <p className="text-sm font-medium text-gray-800">Active Sessions</p>
-              <p className="text-xs text-gray-500 mt-0.5">1 active session</p>
+              <p className="text-sm font-medium text-gray-800">Change Password</p>
+              <p className="text-xs text-gray-500 mt-0.5">Update your login password.</p>
             </div>
-            <Button type="button" variant="outline" size="sm">View Sessions</Button>
+            <Button type="button" variant="outline" size="sm">Change Password</Button>
           </div>
         </div>
       </Section>
 
       <div className="flex gap-3 pb-8">
-        <Button type="submit" size="lg">
+        <Button type="submit" size="lg" loading={saving}>
           <Save size={15} /> Save Changes
         </Button>
       </div>

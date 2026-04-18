@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import {
   MessageSquarePlus, ChevronDown, ChevronUp, ExternalLink,
-  Calculator, CheckCircle2, X, Clock, Loader2,
+  Calculator, CheckCircle2, X, Clock, Loader2, Search, AlertTriangle,
 } from "lucide-react";
 import type { SourcingRequest, SourcingRequestStatus, SourcingUrgency } from "@/types/database";
 import {
@@ -39,6 +39,7 @@ const URGENCY_BADGE: Record<SourcingUrgency, { badge: string; label: string }> =
 };
 
 const DEFAULT_MARGIN = 20;
+const MIN_MARGIN     = 15; // enforce minimum 15% margin
 
 function hoursAgo(iso: string) {
   const h = Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000);
@@ -54,6 +55,7 @@ export default function SourcingRequestsPage() {
   const [requests, setRequests] = useState<SourcingRequest[]>([]);
   const [loading, setLoading]   = useState(true);
   const [filter, setFilter]     = useState<FilterTab>("all");
+  const [search, setSearch]     = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [forms, setForms]       = useState<Record<string, QuoteForm>>({});
   const [sent, setSent]         = useState<Record<string, boolean>>({});
@@ -67,10 +69,19 @@ export default function SourcingRequestsPage() {
     });
   }, []);
 
-  const filtered = useMemo(
-    () => filter === "all" ? requests : requests.filter((r) => r.status === filter),
-    [requests, filter]
-  );
+  const filtered = useMemo(() => {
+    let list = filter === "all" ? requests : requests.filter((r) => r.status === filter);
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter((r) =>
+        r.product_name.toLowerCase().includes(q) ||
+        r.seller_ref.toLowerCase().includes(q) ||
+        r.ref.toLowerCase().includes(q) ||
+        r.target_country.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [requests, filter, search]);
 
   const counts = useMemo<Record<FilterTab, number>>(() => ({
     all:       requests.length,
@@ -133,7 +144,9 @@ export default function SourcingRequestsPage() {
     const sellerUnit = cost > 0 ? cost * (1 + DEFAULT_MARGIN / 100) : 0;
     const sellerShip = ship * (1 + DEFAULT_MARGIN / 100);
     const margin     = (sellerUnit - cost) * qty;
-    return { cost, sellerUnit, sellerShip, margin };
+    const marginPct  = cost > 0 ? ((sellerUnit - cost) / cost) * 100 : 0;
+    const belowMin   = cost > 0 && marginPct < MIN_MARGIN;
+    return { cost, sellerUnit, sellerShip, margin, marginPct, belowMin };
   }
 
   return (
@@ -156,6 +169,18 @@ export default function SourcingRequestsPage() {
             {i < arr.length - 1 && <div className="w-4 h-px bg-gray-300 shrink-0 mx-0.5" />}
           </div>
         ))}
+      </div>
+
+      {/* Search */}
+      <div className="relative max-w-sm">
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search by product, seller, country…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-300 bg-white"
+        />
       </div>
 
       {/* Filter Tabs */}
@@ -323,6 +348,12 @@ export default function SourcingRequestsPage() {
                                   <p className="font-bold text-white">${calc.margin.toFixed(0)}</p>
                                 </div>
                               </div>
+                              {calc.belowMin && (
+                                <div className="mt-3 flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2 text-xs text-red-700">
+                                  <AlertTriangle size={12} className="shrink-0" />
+                                  Margin is below the {MIN_MARGIN}% minimum. Increase your seller price or reduce cost.
+                                </div>
+                              )}
                               <p className="mt-2.5 text-xs text-gray-400">
                                 Your supplier cost and identity are <strong className="text-gray-600">never shown to the seller</strong>.
                               </p>
@@ -342,7 +373,8 @@ export default function SourcingRequestsPage() {
                             )}
                             <button
                               onClick={(e) => { e.stopPropagation(); handleSendQuote(req); }}
-                              disabled={!form.ourCost || parseFloat(form.ourCost) <= 0 || isSending}
+                              disabled={!form.ourCost || parseFloat(form.ourCost) <= 0 || isSending || calc.belowMin}
+                              title={calc.belowMin ? `Margin below ${MIN_MARGIN}% minimum` : undefined}
                               className="px-5 py-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors flex items-center gap-2"
                             >
                               {isSending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}

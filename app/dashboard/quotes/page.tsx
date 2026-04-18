@@ -10,16 +10,17 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { QUOTE_STATUS_COLORS, formatDate, formatCurrency } from "@/lib/utils";
 import { loadMyQuotes, respondToQuote } from "@/app/actions/quotes";
+import { expireOldQuotes } from "@/app/actions/invoices";
 import type { Quote } from "@/types/database";
 
 const MIN_MOQ = 50;
 
 const STATUS_FILTERS = [
-  { value: "all",      label: "All" },
-  { value: "pending",  label: "Pending" },
-  { value: "accepted", label: "Accepted" },
-  { value: "declined", label: "Declined" },
-  { value: "expired",  label: "Expired" },
+  { value: "all",      label: "All"               },
+  { value: "pending",  label: "Awaiting Response"  },
+  { value: "accepted", label: "Accepted"           },
+  { value: "declined", label: "Declined"           },
+  { value: "expired",  label: "Expired"            },
 ];
 
 export default function QuotesPage() {
@@ -29,10 +30,12 @@ export default function QuotesPage() {
   const [acting, setActing]   = useState<string | null>(null);
 
   useEffect(() => {
-    loadMyQuotes().then(({ data }) => {
-      setQuotes(data as Quote[]);
-      setLoading(false);
-    });
+    expireOldQuotes().then(() =>
+      loadMyQuotes().then(({ data }) => {
+        setQuotes(data as Quote[]);
+        setLoading(false);
+      })
+    );
   }, []);
 
   async function handleRespond(id: string, status: "accepted" | "declined") {
