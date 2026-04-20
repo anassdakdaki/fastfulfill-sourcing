@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   const updated = "April 20, 2026";
   const email   = "privacy@fastfulfill.com";
-  const appUrl  = "https://fastfullfillsourcing.vercel.app";
+  const appUrl  = process.env.NEXT_PUBLIC_APP_URL ?? "https://fastfullfillsourcing.vercel.app";
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-16 text-slate-700">

@@ -12,10 +12,17 @@ function getStripeClient() {
 }
 
 export async function POST(req: NextRequest) {
-  const stripe = getStripeClient();
+  // Auth first — before any Stripe client initialization
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  let stripe: Stripe;
+  try {
+    stripe = getStripeClient();
+  } catch {
+    return NextResponse.json({ error: "Payment processing is not yet configured" }, { status: 503 });
+  }
 
   const { invoiceId } = await req.json();
   if (!invoiceId) return NextResponse.json({ error: "Missing invoiceId" }, { status: 400 });
@@ -31,9 +38,9 @@ export async function POST(req: NextRequest) {
   if (invoice.status === "paid") return NextResponse.json({ error: "Already paid" }, { status: 400 });
 
   const totalCents = Math.round(Number(invoice.total) * 100);
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://fastfullfillsourcing.vercel.app";
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await stripe!.checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
     line_items: [

@@ -40,7 +40,10 @@ export default function SignupPage() {
     const { data, error: authErr } = await supabase.auth.signUp({
       email:    form.email,
       password: form.password,
-      options:  { data: { full_name: form.full_name } },
+      options:  {
+        data: { full_name: form.full_name },
+        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
+      },
     });
 
     if (authErr) { setError(authErr.message); setLoading(false); return; }
@@ -200,8 +203,8 @@ export default function SignupPage() {
 
               <p className="text-xs text-center text-gray-400">
                 By signing up you agree to our{" "}
-                <a href="#" className="underline hover:text-gray-600">Terms</a> and{" "}
-                <a href="#" className="underline hover:text-gray-600">Privacy Policy</a>.
+                <a href="/terms" className="underline hover:text-gray-600">Terms</a> and{" "}
+                <a href="/privacy" className="underline hover:text-gray-600">Privacy Policy</a>.
               </p>
             </form>
 

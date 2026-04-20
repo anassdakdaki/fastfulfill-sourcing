@@ -73,7 +73,7 @@ export default function SupplierSignupPage() {
           full_name: company.full_name,
           company_name: company.company_name,
         },
-        emailRedirectTo: `${location.origin}/supplier`,
+        emailRedirectTo: `${location.origin}/api/auth/callback?next=/supplier`,
       },
     });
 
