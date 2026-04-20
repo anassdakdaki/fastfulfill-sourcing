@@ -226,7 +226,12 @@ export default function IntegrationsPage() {
     }
 
     if (redirectTo) {
-      window.location.assign(redirectTo);
+      const popup = window.open(redirectTo, "_blank", "noopener,noreferrer");
+      if (!popup) {
+        window.location.assign(redirectTo);
+      }
+      setConnectSaving(false);
+      setConnectingPlatform(null);
       return;
     }
 
@@ -249,7 +254,11 @@ export default function IntegrationsPage() {
     }
 
     if (redirectTo) {
-      window.location.assign(redirectTo);
+      const popup = window.open(redirectTo, "_blank", "noopener,noreferrer");
+      if (!popup) {
+        window.location.assign(redirectTo);
+      }
+      setConnectSaving(false);
       return;
     }
 
