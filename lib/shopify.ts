@@ -82,6 +82,13 @@ type MinimalSetupCheck = {
   error?: string;
 };
 
+type ShopifyOAuthStatePayload = {
+  nonce: string;
+  userId?: string;
+  storeName?: string;
+  createdAt: number;
+};
+
 function normalizeAppUrl(rawValue: string) {
   const value = rawValue.trim();
   if (!value) return null;
@@ -192,8 +199,64 @@ export function buildShopifyInstallUrl(shop: string, redirectUri: string, state:
   return url.toString();
 }
 
-export function createShopifyOAuthState() {
-  return crypto.randomBytes(16).toString("hex");
+function base64UrlEncode(input: string) {
+  return Buffer.from(input, "utf8").toString("base64url");
+}
+
+function base64UrlDecode(input: string) {
+  return Buffer.from(input, "base64url").toString("utf8");
+}
+
+export function createShopifyOAuthState(input?: {
+  userId?: string;
+  storeName?: string;
+}) {
+  const payload: ShopifyOAuthStatePayload = {
+    nonce: crypto.randomBytes(16).toString("hex"),
+    userId: input?.userId,
+    storeName: input?.storeName,
+    createdAt: Date.now(),
+  };
+
+  const encodedPayload = base64UrlEncode(JSON.stringify(payload));
+  const signature = crypto
+    .createHmac("sha256", SHOPIFY_API_SECRET)
+    .update(encodedPayload, "utf8")
+    .digest("base64url");
+
+  return `${encodedPayload}.${signature}`;
+}
+
+export function parseShopifyOAuthState(state: string) {
+  const [encodedPayload, signature] = state.split(".");
+  if (!encodedPayload || !signature) {
+    return null;
+  }
+
+  const expectedSignature = crypto
+    .createHmac("sha256", SHOPIFY_API_SECRET)
+    .update(encodedPayload, "utf8")
+    .digest("base64url");
+
+  if (!timingSafeEqual(expectedSignature, signature)) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(base64UrlDecode(encodedPayload)) as ShopifyOAuthStatePayload;
+    if (!payload?.nonce || !payload?.createdAt) {
+      return null;
+    }
+
+    const ageMs = Date.now() - payload.createdAt;
+    if (ageMs < 0 || ageMs > 15 * 60 * 1000) {
+      return null;
+    }
+
+    return payload;
+  } catch {
+    return null;
+  }
 }
 
 export function verifyShopifyOAuthSignature(requestUrl: string) {

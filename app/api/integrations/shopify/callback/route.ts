@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   classifyShopifyConnectError,
   exchangeShopifyCodeForToken,
   markShopifyIntegrationConnected,
   markShopifyIntegrationError,
   normalizeShopDomain,
+  parseShopifyOAuthState,
   registerShopifyWebhooks,
   resolveShopifyWebhookBaseUrl,
   sanitizeShopifyDiagnosticMessage,
@@ -87,8 +90,12 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const shopDomain = normalizeShopDomain(searchParams.get("shop") ?? "");
   const storedState = request.cookies.get(OAUTH_STATE_COOKIE)?.value ?? "";
+  const signedState = state ? parseShopifyOAuthState(state) : null;
   const storeName =
-    request.cookies.get(STORE_NAME_COOKIE)?.value ?? shopDomain ?? "Shopify";
+    request.cookies.get(STORE_NAME_COOKIE)?.value ??
+    signedState?.storeName ??
+    shopDomain ??
+    "Shopify";
 
   console.log(
     "[shopify-callback] shop=%s code=%s state=%s storedState=%s",
@@ -118,7 +125,7 @@ export async function GET(request: NextRequest) {
   }
 
   const hmacOk = verifyShopifyOAuthSignature(request.url);
-  const stateOk = storedState ? state === storedState : true;
+  const stateOk = storedState ? state === storedState : Boolean(signedState);
 
   console.log(
     "[shopify-callback] hmacOk=%s stateOk=%s cookiePresent=%s",
@@ -149,14 +156,35 @@ export async function GET(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  console.log("[shopify-callback] user=%s", user?.id ?? "null");
+  const effectiveUserId = user?.id ?? signedState?.userId ?? null;
+  let db: SupabaseClient = supabase;
 
-  if (!user) {
+  if (!user && effectiveUserId) {
+    try {
+      db = createAdminClient();
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : "Missing Supabase admin client configuration";
+      return buildErrorRedirect(
+        request,
+        "unauthenticated",
+        "session_lookup",
+        detail
+      );
+    }
+  }
+
+  console.log(
+    "[shopify-callback] user=%s effectiveUserId=%s",
+    user?.id ?? "null",
+    effectiveUserId ?? "null"
+  );
+
+  if (!effectiveUserId) {
     return buildErrorRedirect(
       request,
       "unauthenticated",
       "session_lookup",
-      "No signed-in FastFulfill buyer session was available in the Shopify callback."
+      "No signed-in FastFulfill buyer session or recoverable OAuth user state was available in the Shopify callback."
     );
   }
 
@@ -177,8 +205,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    integrationId = await saveShopifyIntegration(supabase, {
-      userId: user.id,
+    integrationId = await saveShopifyIntegration(db, {
+      userId: effectiveUserId,
       storeName,
       shopDomain,
       tokens,
@@ -200,7 +228,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     const classified = classifyShopifyConnectError(error);
     console.error("[shopify-callback] webhook base URL failed:", classified.message);
-    await markShopifyIntegrationError(supabase, integrationId, classified.message);
+    await markShopifyIntegrationError(db, integrationId, classified.message);
     return buildErrorRedirect(
       request,
       "shopify_setup_invalid",
@@ -221,7 +249,7 @@ export async function GET(request: NextRequest) {
       "[shopify-callback] webhook registration failed:",
       classified.message
     );
-    await markShopifyIntegrationError(supabase, integrationId, classified.message);
+    await markShopifyIntegrationError(db, integrationId, classified.message);
     return buildErrorRedirect(
       request,
       classified.reason,
@@ -231,13 +259,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    await syncShopifyOrders(supabase, integrationId);
+    await syncShopifyOrders(db, integrationId);
   } catch (error) {
     const classified = classifyShopifyConnectError(error);
     console.error("[shopify-callback] initial sync failed:", classified.message);
 
     if (classified.reason === "database_not_ready") {
-      await markShopifyIntegrationError(supabase, integrationId, classified.message);
+      await markShopifyIntegrationError(db, integrationId, classified.message);
       return buildErrorRedirect(
         request,
         classified.reason,
@@ -247,7 +275,7 @@ export async function GET(request: NextRequest) {
     }
 
     await markShopifyIntegrationConnected(
-      supabase,
+      db,
       integrationId,
       `Initial sync failed: ${classified.message}`
     );

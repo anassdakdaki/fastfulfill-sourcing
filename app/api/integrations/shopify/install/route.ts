@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import {
   buildShopifyInstallUrl,
   createShopifyOAuthState,
@@ -30,7 +31,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard/integrations?shopify=error&reason=invalid_install_hmac&step=install_request", request.url));
   }
 
-  const state = createShopifyOAuthState();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const state = createShopifyOAuthState({
+    userId: user?.id,
+    storeName: storeName || shopDomain,
+  });
   const callbackBaseUrl = resolveShopifyWebhookBaseUrl(request.nextUrl.origin);
   const callbackUrl = new URL("/api/integrations/shopify/callback", callbackBaseUrl).toString();
   let installUrl: string;
