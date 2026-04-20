@@ -4,7 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import {
   markShopifyIntegrationError,
   normalizeShopDomain,
+  resolveShopifyInstallUrl,
   syncShopifyOrders,
+  validateShopifyConfiguration,
+  verifyShopifyDbSetup,
 } from "@/lib/shopify";
 import type { IntegrationPlatform } from "@/types/database";
 
@@ -90,8 +93,8 @@ export async function checkStoreConnected() {
 
 export async function connectStore(input: {
   platform: IntegrationPlatform;
-  store_name: string;
-  store_url: string;
+  store_name?: string;
+  store_url?: string;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -101,18 +104,41 @@ export async function connectStore(input: {
     return { error: "Only Shopify is wired live right now. Use the Shopify connector for real order sync." };
   }
 
-  const shopDomain = normalizeShopDomain(input.store_url);
+  const config = validateShopifyConfiguration();
+  if (!config.ok) {
+    return { error: config.error ?? "Shopify app configuration is not ready" };
+  }
+
+  const setup = await verifyShopifyDbSetup(supabase);
+  if (!setup.ok) {
+    return { error: setup.error ?? "Shopify integration schema is not ready" };
+  }
+
+  const installUrl = resolveShopifyInstallUrl();
+  if (installUrl) {
+    return { error: null, redirectTo: installUrl };
+  }
+
+  const shopDomain = normalizeShopDomain(input.store_url ?? "");
   if (!shopDomain) {
     return { error: "Enter a valid Shopify domain like mystore.myshopify.com" };
   }
 
-  const storeName = input.store_name.trim() || shopDomain;
+  const storeName = input.store_name?.trim() || shopDomain;
   const params = new URLSearchParams({
     shop: shopDomain,
     store_name: storeName,
   });
 
   return { error: null, redirectTo: `/api/integrations/shopify/install?${params.toString()}` };
+}
+
+export async function loadShopifyConnectSetup() {
+  const installUrl = resolveShopifyInstallUrl();
+  return {
+    mode: installUrl ? "one_click" : "manual",
+    installUrlConfigured: Boolean(installUrl),
+  } as const;
 }
 
 export async function disconnectStore(id: string) {
@@ -157,11 +183,11 @@ export async function syncStore(id: string) {
   }
 
   try {
-    const result = await syncShopifyOrders(id);
+    const result = await syncShopifyOrders(supabase, id);
     return { error: null, importedOrders: result.importedOrders };
   } catch (syncError) {
     const message = syncError instanceof Error ? syncError.message : "Shopify sync failed";
-    await markShopifyIntegrationError(id, message);
+    await markShopifyIntegrationError(supabase, id, message);
     return { error: message };
   }
 }

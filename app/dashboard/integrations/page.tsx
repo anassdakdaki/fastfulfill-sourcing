@@ -13,6 +13,7 @@ import {
   loadMyIntegrations,
   connectStore,
   disconnectStore,
+  loadShopifyConnectSetup,
   syncStore,
   toggleAutoFulfill,
 } from "@/app/actions/dashboard";
@@ -102,6 +103,25 @@ const PLATFORMS  = Object.keys(PLATFORM_META) as IntegrationPlatform[];
 const THREE_PLS  = Object.keys(THREE_PL_META) as ThreePLId[];
 const LIVE_PLATFORM: IntegrationPlatform = "shopify";
 
+const SHOPIFY_CONNECT_REASON_COPY: Record<string, string> = {
+  invalid_shopify_domain: "The Shopify domain is invalid. Use a domain like mystore.myshopify.com.",
+  invalid_install_hmac: "Shopify reached FastFulfill with an invalid install signature before OAuth started.",
+  missing_params: "Shopify returned without the required OAuth parameters. Start the connection again from FastFulfill.",
+  invalid_hmac: "Shopify returned an invalid OAuth signature. This usually means the Shopify app secret is wrong in your environment.",
+  state_mismatch: "The Shopify OAuth state expired or changed during the redirect. Start the connection again and finish it in the same browser tab.",
+  unauthenticated: "You must be signed in with your real FastFulfill buyer account before connecting Shopify.",
+  shopify_setup_invalid: "The Shopify app environment is incomplete or invalid. Check SHOPIFY_API_KEY, SHOPIFY_API_SECRET, and NEXT_PUBLIC_APP_URL.",
+  token_exchange_failed: "Shopify rejected the token exchange. This usually means the app credentials are wrong or the callback URL in Shopify does not match this app.",
+  integration_save_failed: "Shopify authorized the app, but FastFulfill could not save the store connection in Supabase.",
+  webhook_registration_failed: "Shopify authorized the app, but FastFulfill could not register the live order webhooks for this store.",
+  database_not_ready: "The Shopify database schema is still incomplete. Run the full Supabase migrations before connecting the store.",
+  exception: "FastFulfill could not finish the Shopify install flow. Check the latest server logs for the exact failing step.",
+};
+
+const SHOPIFY_CONNECT_WARNING_COPY: Record<string, string> = {
+  initial_sync_failed: "Shopify connected successfully, but the first historical order import failed. Live webhooks are registered. Use Sync Now after checking the store warning below.",
+};
+
 function StatusBadge({ status }: { status: StoreIntegration["status"] }) {
   if (status === "connected") return (
     <span className="flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-100 px-2.5 py-1 rounded-full">
@@ -125,6 +145,7 @@ export default function IntegrationsPage() {
   const searchParams = useSearchParams();
   const [integrations, setIntegrations] = useState<StoreIntegration[]>([]);
   const [loading, setLoading]           = useState(true);
+  const [shopifyConnectMode, setShopifyConnectMode] = useState<"one_click" | "manual">("manual");
   const [syncing, setSyncing]           = useState<string | null>(null);
   const [toggling, setToggling]         = useState<string | null>(null);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
@@ -137,8 +158,12 @@ export default function IntegrationsPage() {
   const [connectError, setConnectError]   = useState("");
 
   async function refreshIntegrations() {
-    const { data } = await loadMyIntegrations();
+    const [{ data }, connectSetup] = await Promise.all([
+      loadMyIntegrations(),
+      loadShopifyConnectSetup(),
+    ]);
     setIntegrations(data as StoreIntegration[]);
+    setShopifyConnectMode(connectSetup.mode);
     setLoading(false);
   }
 
@@ -208,9 +233,40 @@ export default function IntegrationsPage() {
     setConnectSaving(false);
   }
 
+  async function handleDirectConnect(platform: IntegrationPlatform) {
+    if (platform !== LIVE_PLATFORM) return;
+    setConnectSaving(true);
+    setConnectError("");
+
+    const { error, redirectTo } = await connectStore({
+      platform,
+    });
+
+    if (error) {
+      setConnectError(error);
+      setConnectSaving(false);
+      return;
+    }
+
+    if (redirectTo) {
+      window.location.assign(redirectTo);
+      return;
+    }
+
+    setConnectSaving(false);
+  }
+
   const connectedCount = integrations.length;
   const oauthStatus = searchParams.get("shopify");
+  const oauthReason = searchParams.get("reason") ?? searchParams.get("integration_error") ?? "";
+  const oauthWarning = searchParams.get("warning") ?? "";
+  const oauthStep = searchParams.get("step") ?? "";
+  const oauthDetail = searchParams.get("detail") ?? "";
   const hasOauthError = oauthStatus === "error" || Boolean(searchParams.get("integration_error"));
+  const oauthErrorMessage =
+    SHOPIFY_CONNECT_REASON_COPY[oauthReason] ??
+    "FastFulfill could not finish the Shopify install flow. Check your Shopify app credentials, callback URL, and Supabase setup, then try again.";
+  const oauthWarningMessage = SHOPIFY_CONNECT_WARNING_COPY[oauthWarning] ?? "";
 
   return (
     <div className="space-y-10">
@@ -229,7 +285,7 @@ export default function IntegrationsPage() {
         </Link>
       </div>
 
-      {oauthStatus === "connected" && (
+      {oauthStatus === "connected" && !oauthWarning && (
         <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-2xl px-5 py-4">
           <CheckCircle2 size={16} className="text-green-600 shrink-0 mt-0.5" />
           <div>
@@ -241,22 +297,65 @@ export default function IntegrationsPage() {
         </div>
       )}
 
+      {oauthStatus === "connected" && oauthWarning && (
+        <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
+          <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-amber-900">Shopify connected with a warning</p>
+            <p className="text-xs text-amber-700 mt-1">
+              {oauthWarningMessage}
+              <span className="ml-1 font-mono bg-amber-100 px-1 rounded">({oauthWarning})</span>
+            </p>
+            {(oauthStep || oauthDetail) && (
+              <div className="mt-2 space-y-1">
+                {oauthStep && (
+                  <p className="text-[11px] text-amber-800">
+                    Step:
+                    <span className="ml-1 font-mono bg-amber-100 px-1 rounded">{oauthStep}</span>
+                  </p>
+                )}
+                {oauthDetail && (
+                  <p className="text-[11px] text-amber-800 break-words">
+                    Detail:
+                    <span className="ml-1 font-mono bg-amber-100 px-1 rounded">{oauthDetail}</span>
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {hasOauthError && (
         <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
           <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-red-900">Shopify connection failed</p>
-            {searchParams.get("reason") === "unauthenticated" ? (
-              <p className="text-xs text-red-700 mt-1">
-                You must be signed in with a real account (not the demo) to connect Shopify.
-                Please <a href="/auth/login" className="underline font-semibold">sign in</a> with your account first.
-              </p>
-            ) : (
-              <p className="text-xs text-red-700 mt-1">
-                FastFulfill could not finish the Shopify install flow. Check your Shopify app credentials, webhook secret, and allowed callback URL, then try again.
-                {searchParams.get("reason") && (
-                  <span className="ml-1 font-mono bg-red-100 px-1 rounded">({searchParams.get("reason")})</span>
+            <p className="text-xs text-red-700 mt-1">
+              {oauthErrorMessage}
+              {oauthReason && (
+                <span className="ml-1 font-mono bg-red-100 px-1 rounded">({oauthReason})</span>
+              )}
+            </p>
+            {(oauthStep || oauthDetail) && (
+              <div className="mt-2 space-y-1">
+                {oauthStep && (
+                  <p className="text-[11px] text-red-800">
+                    Step:
+                    <span className="ml-1 font-mono bg-red-100 px-1 rounded">{oauthStep}</span>
+                  </p>
                 )}
+                {oauthDetail && (
+                  <p className="text-[11px] text-red-800 break-words">
+                    Detail:
+                    <span className="ml-1 font-mono bg-red-100 px-1 rounded">{oauthDetail}</span>
+                  </p>
+                )}
+              </div>
+            )}
+            {oauthReason === "unauthenticated" && (
+              <p className="text-xs text-red-700 mt-2">
+                Please <a href="/auth/login" className="underline font-semibold">sign in</a> with your buyer account and then start the Shopify connection again.
               </p>
             )}
           </div>
@@ -414,6 +513,7 @@ export default function IntegrationsPage() {
                 const meta      = PLATFORM_META[platform];
                 const isOpening = connectingPlatform === platform;
                 const isLive    = platform === LIVE_PLATFORM;
+                const isOneClickShopify = platform === LIVE_PLATFORM && shopifyConnectMode === "one_click";
                 return (
                   <div key={platform} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-shadow">
                     <div className="flex items-start gap-3 mb-3">
@@ -465,6 +565,24 @@ export default function IntegrationsPage() {
                           </Button>
                         </div>
                       </form>
+                    ) : isOneClickShopify ? (
+                      <div className="border-t border-gray-100 pt-4 space-y-3">
+                        <p className="text-xs text-gray-500">
+                          One-click install is enabled. Shopify will identify the store from the official install link, so the merchant does not need to type a store domain here.
+                        </p>
+                        {connectError && (
+                          <p className="text-xs text-red-600">{connectError}</p>
+                        )}
+                        <Button
+                          size="sm"
+                          className="w-full"
+                          onClick={() => handleDirectConnect(platform)}
+                          disabled={connectSaving}
+                        >
+                          {connectSaving ? <Loader2 size={13} className="animate-spin" /> : <Plug size={13} />}
+                          {connectSaving ? "Redirecting..." : `Connect ${meta.name}`}
+                        </Button>
+                      </div>
                     ) : !isLive ? (
                       <Button size="sm" variant="outline" className="w-full" disabled>
                         Coming soon

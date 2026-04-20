@@ -2,6 +2,7 @@ import "server-only";
 
 import crypto from "crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const SHOPIFY_API_VERSION = "2026-04";
 export const SHOPIFY_SCOPES = ["read_orders"];
@@ -9,6 +10,8 @@ const ACCESS_TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 
 const SHOPIFY_API_KEY = process.env.SHOPIFY_API_KEY ?? "";
 const SHOPIFY_API_SECRET = process.env.SHOPIFY_API_SECRET ?? "";
+const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET ?? "";
+const SHOPIFY_APP_INSTALL_URL = process.env.SHOPIFY_APP_INSTALL_URL ?? "";
 
 type ShopifyTokenResponse = {
   access_token: string;
@@ -74,6 +77,44 @@ type IntegrationSecretRecord = {
   last_sync: string | null;
 };
 
+type MinimalSetupCheck = {
+  ok: boolean;
+  error?: string;
+};
+
+function normalizeAppUrl(rawValue: string) {
+  const value = rawValue.trim();
+  if (!value) return null;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error("NEXT_PUBLIC_APP_URL must be a valid absolute URL");
+  }
+
+  const isLocalhost =
+    parsed.hostname === "localhost" ||
+    parsed.hostname === "127.0.0.1";
+
+  if (parsed.protocol !== "https:" && !(parsed.protocol === "http:" && isLocalhost)) {
+    throw new Error("NEXT_PUBLIC_APP_URL must use https, or http only for localhost");
+  }
+
+  return parsed.origin;
+}
+
+function normalizeAbsoluteUrl(rawValue: string, envName: string) {
+  const value = rawValue.trim();
+  if (!value) return null;
+
+  try {
+    return new URL(value).toString();
+  } catch {
+    throw new Error(`${envName} must be a valid absolute URL`);
+  }
+}
+
 function requireShopifyCredentials() {
   if (!SHOPIFY_API_KEY || !SHOPIFY_API_SECRET) {
     throw new Error("Missing Shopify API credentials");
@@ -83,6 +124,44 @@ function requireShopifyCredentials() {
     apiKey: SHOPIFY_API_KEY,
     apiSecret: SHOPIFY_API_SECRET,
   };
+}
+
+export function validateShopifyConfiguration(): MinimalSetupCheck {
+  if (!SHOPIFY_API_KEY || !SHOPIFY_API_SECRET) {
+    return {
+      ok: false,
+      error: "Shopify API credentials are missing. Set SHOPIFY_API_KEY and SHOPIFY_API_SECRET first.",
+    };
+  }
+
+  try {
+    normalizeAppUrl(process.env.NEXT_PUBLIC_APP_URL ?? "");
+    normalizeAbsoluteUrl(SHOPIFY_APP_INSTALL_URL, "SHOPIFY_APP_INSTALL_URL");
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "NEXT_PUBLIC_APP_URL is invalid.",
+    };
+  }
+
+  return { ok: true };
+}
+
+export function resolveShopifyWebhookBaseUrl(fallbackOrigin?: string) {
+  const configuredOrigin = normalizeAppUrl(process.env.NEXT_PUBLIC_APP_URL ?? "");
+  if (configuredOrigin) {
+    return configuredOrigin;
+  }
+
+  if (!fallbackOrigin) {
+    throw new Error("Missing NEXT_PUBLIC_APP_URL for Shopify webhook registration");
+  }
+
+  return new URL(fallbackOrigin).origin;
+}
+
+export function resolveShopifyInstallUrl() {
+  return normalizeAbsoluteUrl(SHOPIFY_APP_INSTALL_URL, "SHOPIFY_APP_INSTALL_URL");
 }
 
 export function normalizeShopDomain(rawValue: string): string | null {
@@ -157,17 +236,23 @@ export function verifyShopifyOAuthSignature(requestUrl: string) {
 }
 
 export function verifyShopifyWebhookSignature(body: string, hmacHeader: string | null) {
-  const webhookSecret = process.env.SHOPIFY_WEBHOOK_SECRET ?? "";
-  if (!webhookSecret || !hmacHeader) {
+  if (!hmacHeader) {
     return false;
   }
 
-  const digest = crypto
-    .createHmac("sha256", webhookSecret)
-    .update(body, "utf8")
-    .digest("base64");
+  const secrets = [...new Set([SHOPIFY_WEBHOOK_SECRET, SHOPIFY_API_SECRET].filter(Boolean))];
+  if (secrets.length === 0) {
+    return false;
+  }
 
-  return timingSafeEqual(digest, hmacHeader);
+  return secrets.some((secret) => {
+    const digest = crypto
+      .createHmac("sha256", secret)
+      .update(body, "utf8")
+      .digest("base64");
+
+    return timingSafeEqual(digest, hmacHeader);
+  });
 }
 
 function timingSafeEqual(left: string, right: string) {
@@ -260,6 +345,137 @@ async function loadIntegrationSecrets(id: string): Promise<IntegrationSecretReco
 /** @deprecated Use fn_shopify_lookup_integration RPC in the webhook route. */
 export async function loadShopifyIntegrationByDomain(_shopDomain: string) {
   return null;
+}
+
+export async function verifyShopifyDbSetup(supabase: SupabaseClient): Promise<MinimalSetupCheck> {
+  const { error: integrationError } = await supabase
+    .from("store_integrations")
+    .select("id, user_id, platform, store_domain, status, auto_fulfill, auto_import_orders, access_token, error_message")
+    .limit(1);
+
+  if (integrationError) {
+    return {
+      ok: false,
+      error: "Supabase store integration schema is missing. Run migration 004_store_integrations_shopify.sql first.",
+    };
+  }
+
+  const { error: ordersError } = await supabase
+    .from("orders")
+    .select("id, user_id, source_platform, source_store_domain, external_order_id, customer_name, customer_email, shipping_address, line_items")
+    .limit(1);
+
+  if (ordersError) {
+    return {
+      ok: false,
+      error: "Supabase order sync columns are missing. Run migration 004_store_integrations_shopify.sql first.",
+    };
+  }
+
+  const { error: queueError } = await supabase
+    .from("fulfillment_queue")
+    .select("id, order_id, user_id, product_name, sku, quantity, ship_to_country, status, customer_email")
+    .limit(1);
+
+  if (queueError) {
+    return {
+      ok: false,
+      error: "Supabase fulfillment queue schema is incomplete. Run the full 004_store_integrations_shopify.sql migration before connecting Shopify.",
+    };
+  }
+
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const { error: rpcError } = await supabase.rpc("fn_shopify_lookup_integration", {
+      p_shop_domain: "__ff_healthcheck__.myshopify.com",
+    });
+
+    if (rpcError) {
+      return {
+        ok: false,
+        error: "Webhook helpers are missing. Run migration 005_shopify_rpc_helpers.sql or set SUPABASE_SERVICE_ROLE_KEY.",
+      };
+    }
+  }
+
+  return { ok: true };
+}
+
+export function classifyShopifyConnectError(error: unknown) {
+  const message = error instanceof Error ? error.message : "Shopify connection failed";
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("missing shopify api credentials")) {
+    return { reason: "shopify_setup_invalid", message };
+  }
+
+  if (
+    normalized.includes("next_public_app_url") ||
+    normalized.includes("callback url") ||
+    normalized.includes("redirect_uri") ||
+    normalized.includes("invalid_client") ||
+    normalized.includes("access token") ||
+    normalized.includes("token exchange") ||
+    normalized.includes("client secret") ||
+    normalized.includes("client_id") ||
+    normalized.includes("invalid api key") ||
+    normalized.includes("invalid_request")
+  ) {
+    return { reason: "token_exchange_failed", message };
+  }
+
+  if (
+    normalized.includes("save shopify integration") ||
+    normalized.includes("store_integrations")
+  ) {
+    return { reason: "integration_save_failed", message };
+  }
+
+  if (normalized.includes("webhook")) {
+    return { reason: "webhook_registration_failed", message };
+  }
+
+  if (
+    normalized.includes("schema") ||
+    normalized.includes("relation") ||
+    normalized.includes("column") ||
+    normalized.includes("fulfillment_queue") ||
+    normalized.includes("source_store_domain")
+  ) {
+    return { reason: "database_not_ready", message };
+  }
+
+  if (
+    normalized.includes("sync") ||
+    normalized.includes("shopify order") ||
+    normalized.includes("orders")
+  ) {
+    return { reason: "initial_sync_failed", message };
+  }
+
+  return { reason: "exception", message };
+}
+
+export function sanitizeShopifyDiagnosticMessage(message: string) {
+  const redactions = [
+    SHOPIFY_API_KEY,
+    SHOPIFY_API_SECRET,
+    SHOPIFY_WEBHOOK_SECRET,
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
+  ].filter(Boolean);
+
+  let sanitized = message;
+  for (const value of redactions) {
+    sanitized = sanitized.split(value).join("[redacted]");
+  }
+
+  sanitized = sanitized.replace(/\s+/g, " ").trim();
+
+  if (sanitized.length > 220) {
+    sanitized = `${sanitized.slice(0, 217)}...`;
+  }
+
+  return sanitized;
 }
 
 /** Persist refreshed Shopify tokens. Uses a temporary admin client ONLY for token refresh
@@ -508,6 +724,70 @@ export function mapShopifyOrderForWebhook(shopifyOrder: ShopifyRestOrder) {
   };
 }
 
+async function upsertShopifyOrderForUser(
+  supabase: SupabaseClient,
+  integration: Pick<IntegrationSecretRecord, "id" | "user_id" | "store_domain" | "store_url" | "auto_fulfill" | "auto_import_orders">,
+  shopifyOrder: ShopifyRestOrder
+) {
+  const mapped = mapShopifyOrderForWebhook(shopifyOrder);
+  const sourceStoreDomain = integration.store_domain ?? integration.store_url;
+
+  const { data: order, error: orderError } = await supabase
+    .from("orders")
+    .upsert(
+      {
+        user_id: integration.user_id,
+        product_name: mapped.productName,
+        quantity: mapped.totalQuantity,
+        unit_price: mapped.unitPrice ?? null,
+        status: mapped.status,
+        destination_country: mapped.destinationCountry,
+        source_platform: "shopify",
+        source_store_domain: sourceStoreDomain,
+        external_order_id: String(shopifyOrder.id),
+        external_order_name: shopifyOrder.name ?? null,
+        customer_name: mapped.customerName,
+        customer_email: mapped.customerEmail,
+        shipping_address: mapped.shippingAddress,
+        line_items: mapped.lineItems,
+      },
+      { onConflict: "source_platform,source_store_domain,external_order_id" }
+    )
+    .select("id, status")
+    .single();
+
+  if (orderError || !order) {
+    throw new Error(orderError?.message ?? "Unable to upsert Shopify order");
+  }
+
+  if (!integration.auto_fulfill || !integration.auto_import_orders || mapped.status === "cancelled") {
+    return { orderId: order.id };
+  }
+
+  const queueStatus = order.status === "processing" ? "packed" : "pending";
+  const { error: queueError } = await supabase
+    .from("fulfillment_queue")
+    .upsert(
+      {
+        order_id: order.id,
+        user_id: integration.user_id,
+        product_name: mapped.productName,
+        sku: mapped.lineItems[0]?.sku ?? null,
+        quantity: mapped.totalQuantity,
+        ship_to_country: mapped.destinationCountry,
+        customer_email: mapped.customerEmail,
+        status: queueStatus,
+      },
+      { onConflict: "order_id" }
+    );
+
+  if (queueError) {
+    throw new Error(queueError.message);
+  }
+
+  return { orderId: order.id };
+}
+
 /** @deprecated Use fn_shopify_upsert_order RPC (no admin client needed). */
 export async function upsertShopifyOrder(
   supabase: SupabaseClient,
@@ -649,6 +929,20 @@ export async function markShopifyIntegrationError(
     .eq("id", integrationId);
 }
 
+export async function markShopifyIntegrationConnected(
+  supabase: SupabaseClient,
+  integrationId: string,
+  warningMessage?: string
+) {
+  await supabase
+    .from("store_integrations")
+    .update({
+      status: "connected",
+      error_message: warningMessage ?? null,
+    })
+    .eq("id", integrationId);
+}
+
 /** Sync historical orders from Shopify REST API into the DB.
  *  Uses SECURITY DEFINER RPC for writes — no admin client needed. */
 export async function syncShopifyOrders(supabase: SupabaseClient, integrationId: string) {
@@ -687,23 +981,7 @@ export async function syncShopifyOrders(supabase: SupabaseClient, integrationId:
     const orders = payload.orders ?? [];
 
     for (const order of orders) {
-      const mapped = mapShopifyOrderForWebhook(order);
-      await supabase.rpc("fn_shopify_upsert_order", {
-        p_shop_domain:         shopDomain,
-        p_user_id:             freshIntegration.user_id,
-        p_integration_id:      freshIntegration.id,
-        p_external_id:         String(order.id),
-        p_external_name:       order.name ?? null,
-        p_product_name:        mapped.productName,
-        p_quantity:            mapped.totalQuantity,
-        p_unit_price:          mapped.unitPrice ?? null,
-        p_status:              mapped.status,
-        p_customer_name:       mapped.customerName,
-        p_customer_email:      mapped.customerEmail,
-        p_shipping_address:    mapped.shippingAddress,
-        p_line_items:          mapped.lineItems,
-        p_destination_country: mapped.destinationCountry,
-      });
+      await upsertShopifyOrderForUser(supabase, freshIntegration, order);
       importedOrderIds.add(String(order.id));
     }
 
@@ -723,4 +1001,53 @@ export async function syncShopifyOrders(supabase: SupabaseClient, integrationId:
     .eq("id", integrationId);
 
   return { importedOrders: importedOrderIds.size, totalOrders: count ?? 0 };
+}
+
+export async function loadShopifyIntegrationByDomainAdmin(shopDomain: string) {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("store_integrations")
+    .select("id, user_id, store_domain, store_url, auto_fulfill, auto_import_orders, status")
+    .eq("platform", "shopify")
+    .eq("store_domain", shopDomain)
+    .neq("status", "disconnected")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function disconnectShopifyByDomainAdmin(shopDomain: string) {
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("store_integrations")
+    .update({
+      status: "disconnected",
+      access_token: null,
+      access_token_expires_at: null,
+      refresh_token: null,
+      refresh_token_expires_at: null,
+      error_message: "Shopify app was uninstalled",
+    })
+    .eq("platform", "shopify")
+    .eq("store_domain", shopDomain);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function upsertShopifyOrderAdmin(shopDomain: string, shopifyOrder: ShopifyRestOrder) {
+  const integration = await loadShopifyIntegrationByDomainAdmin(shopDomain);
+  if (!integration) return null;
+
+  const admin = createAdminClient();
+  return upsertShopifyOrderForUser(
+    admin,
+    integration as Pick<IntegrationSecretRecord, "id" | "user_id" | "store_domain" | "store_url" | "auto_fulfill" | "auto_import_orders">,
+    shopifyOrder
+  );
 }
