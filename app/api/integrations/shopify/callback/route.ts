@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import {
   classifyShopifyConnectError,
   exchangeShopifyCodeForToken,
+  loadPendingShopifyInstall,
   markShopifyIntegrationConnected,
   markShopifyIntegrationError,
   normalizeShopDomain,
@@ -48,6 +49,84 @@ function redirectToIntegrations(
   return url;
 }
 
+function buildNavigationResponse(
+  targetUrl: URL,
+  options: {
+    title: string;
+    message: string;
+    closePopup?: boolean;
+  }
+) {
+  const html = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${options.title}</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      main {
+        width: min(92vw, 34rem);
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      }
+      p { margin: 0.75rem 0 0; line-height: 1.5; color: #475569; }
+      a { color: #4f46e5; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>${options.title}</h1>
+      <p>${options.message}</p>
+      <p>If nothing happens, <a href="${targetUrl.toString()}">continue to FastFulfill</a>.</p>
+    </main>
+    <script>
+      (function () {
+        var target = ${JSON.stringify(targetUrl.toString())};
+        var shouldClosePopup = ${options.closePopup ? "true" : "false"};
+
+        try {
+          if (window.opener && !window.opener.closed) {
+            try {
+              window.opener.location.replace(target);
+              if (shouldClosePopup) {
+                window.close();
+                return;
+              }
+            } catch (error) {}
+          }
+
+          if (window.top && window.top !== window) {
+            window.top.location.replace(target);
+            return;
+          }
+        } catch (error) {}
+
+        window.location.replace(target);
+      })();
+    </script>
+  </body>
+</html>`;
+
+  return new NextResponse(html, {
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
 function clearOauthCookies(response: NextResponse) {
   response.cookies.delete(OAUTH_STATE_COOKIE);
   response.cookies.delete(STORE_NAME_COOKIE);
@@ -60,8 +139,13 @@ function buildErrorRedirect(
   detail?: string
 ) {
   console.error("[shopify-callback] FAIL reason=%s step=%s detail=%s", reason, step, detail);
-  const response = NextResponse.redirect(
-    redirectToIntegrations(request, "error", { reason, step, detail })
+  const response = buildNavigationResponse(
+    redirectToIntegrations(request, "error", { reason, step, detail }),
+    {
+      title: "Shopify connection failed",
+      message: "FastFulfill is sending you back to the integrations page with the exact error details.",
+      closePopup: true,
+    }
   );
   clearOauthCookies(response);
   return response;
@@ -73,12 +157,19 @@ function buildSuccessRedirect(
   step?: string,
   detail?: string
 ) {
-  const response = NextResponse.redirect(
+  const response = buildNavigationResponse(
     redirectToIntegrations(
       request,
       "connected",
       warning || step || detail ? { warning, step, detail } : undefined
-    )
+    ),
+    {
+      title: warning ? "Shopify connected with warnings" : "Shopify connected",
+      message: warning
+        ? "FastFulfill connected the store and is returning you to the integrations page with the warning details."
+        : "FastFulfill connected the Shopify store and is returning you to the integrations page.",
+      closePopup: true,
+    }
   );
   clearOauthCookies(response);
   return response;
@@ -156,8 +247,27 @@ export async function GET(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const effectiveUserId = user?.id ?? signedState?.userId ?? null;
+  let effectiveUserId = user?.id ?? signedState?.userId ?? null;
+  let effectiveStoreName = storeName;
   let db: SupabaseClient = supabase;
+
+  if (!effectiveUserId && shopDomain) {
+    try {
+      const pendingInstall = await loadPendingShopifyInstall(shopDomain);
+      if (pendingInstall?.user_id) {
+        effectiveUserId = pendingInstall.user_id;
+        effectiveStoreName = pendingInstall.store_name || effectiveStoreName;
+        console.log(
+          "[shopify-callback] recovered pending install shop=%s integration=%s user=%s",
+          shopDomain,
+          pendingInstall.id,
+          pendingInstall.user_id
+        );
+      }
+    } catch (error) {
+      console.error("[shopify-callback] pending install lookup failed", error);
+    }
+  }
 
   if (!user && effectiveUserId) {
     try {
@@ -207,7 +317,7 @@ export async function GET(request: NextRequest) {
   try {
     integrationId = await saveShopifyIntegration(db, {
       userId: effectiveUserId,
-      storeName,
+      storeName: effectiveStoreName,
       shopDomain,
       tokens,
     });
@@ -221,6 +331,13 @@ export async function GET(request: NextRequest) {
       sanitizeShopifyDiagnosticMessage(classified.message)
     );
   }
+
+  console.log(
+    "[shopify-callback] integration saved shop=%s integration=%s user=%s",
+    shopDomain,
+    integrationId,
+    effectiveUserId
+  );
 
   let webhookBaseUrl: string;
   try {
@@ -259,7 +376,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    await syncShopifyOrders(db, integrationId);
+    const syncResult = await syncShopifyOrders(db, integrationId);
+    console.log(
+      "[shopify-callback] initial sync completed integration=%s imported=%s total=%s",
+      integrationId,
+      syncResult.importedOrders,
+      syncResult.totalOrders
+    );
   } catch (error) {
     const classified = classifyShopifyConnectError(error);
     console.error("[shopify-callback] initial sync failed:", classified.message);

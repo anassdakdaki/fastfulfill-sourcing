@@ -207,9 +207,20 @@ export default function IntegrationsPage() {
     setConnectError("");
   }
 
+  function openPendingPopup() {
+    const popup = window.open("", "_blank", "popup=yes,width=1100,height=800");
+    if (popup) {
+      popup.document.write(
+        "<!doctype html><title>Connecting Shopify...</title><body style=\"font-family:system-ui;padding:24px\">Redirecting to Shopify...</body>"
+      );
+    }
+    return popup;
+  }
+
   async function handleConnect(e: React.FormEvent) {
     e.preventDefault();
     if (!connectingPlatform) return;
+    const popup = openPendingPopup();
     setConnectSaving(true);
     setConnectError("");
 
@@ -220,14 +231,16 @@ export default function IntegrationsPage() {
     });
 
     if (error) {
+      if (popup) popup.close();
       setConnectError(error);
       setConnectSaving(false);
       return;
     }
 
     if (redirectTo) {
-      const popup = window.open(redirectTo, "_blank", "noopener,noreferrer");
-      if (!popup) {
+      if (popup) {
+        popup.location.href = redirectTo;
+      } else {
         window.location.assign(redirectTo);
       }
       setConnectSaving(false);
@@ -240,6 +253,7 @@ export default function IntegrationsPage() {
 
   async function handleDirectConnect(platform: IntegrationPlatform) {
     if (platform !== LIVE_PLATFORM) return;
+    const popup = openPendingPopup();
     setConnectSaving(true);
     setConnectError("");
 
@@ -248,14 +262,16 @@ export default function IntegrationsPage() {
     });
 
     if (error) {
+      if (popup) popup.close();
       setConnectError(error);
       setConnectSaving(false);
       return;
     }
 
     if (redirectTo) {
-      const popup = window.open(redirectTo, "_blank", "noopener,noreferrer");
-      if (!popup) {
+      if (popup) {
+        popup.location.href = redirectTo;
+      } else {
         window.location.assign(redirectTo);
       }
       setConnectSaving(false);
@@ -583,6 +599,7 @@ export default function IntegrationsPage() {
                           <p className="text-xs text-red-600">{connectError}</p>
                         )}
                         <Button
+                          type="button"
                           size="sm"
                           className="w-full"
                           onClick={() => handleDirectConnect(platform)}

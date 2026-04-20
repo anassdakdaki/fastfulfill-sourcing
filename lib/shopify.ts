@@ -89,6 +89,10 @@ type ShopifyOAuthStatePayload = {
   createdAt: number;
 };
 
+type ShopifyInstallLinkPayload = {
+  permanent_domain?: string;
+};
+
 function normalizeAppUrl(rawValue: string) {
   const value = rawValue.trim();
   if (!value) return null;
@@ -169,6 +173,34 @@ export function resolveShopifyWebhookBaseUrl(fallbackOrigin?: string) {
 
 export function resolveShopifyInstallUrl() {
   return normalizeAbsoluteUrl(SHOPIFY_APP_INSTALL_URL, "SHOPIFY_APP_INSTALL_URL");
+}
+
+export function resolveShopifyInstallDomain() {
+  const installUrl = resolveShopifyInstallUrl();
+  if (!installUrl) return null;
+
+  const url = new URL(installUrl);
+  const explicitDomain =
+    normalizeShopDomain(url.searchParams.get("shop") ?? "") ??
+    normalizeShopDomain(url.searchParams.get("store") ?? "") ??
+    normalizeShopDomain(url.searchParams.get("permanent_domain") ?? "");
+
+  if (explicitDomain) {
+    return explicitDomain;
+  }
+
+  const signature = url.searchParams.get("signature") ?? "";
+  const [encodedPayload] = signature.split("--");
+  if (!encodedPayload) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(base64UrlDecode(encodedPayload)) as ShopifyInstallLinkPayload;
+    return normalizeShopDomain(payload.permanent_domain ?? "");
+  } catch {
+    return null;
+  }
 }
 
 export function normalizeShopDomain(rawValue: string): string | null {
@@ -979,6 +1011,78 @@ export async function saveShopifyIntegration(
   }
 
   return data.id as string;
+}
+
+export async function primeShopifyPendingInstall(
+  supabase: SupabaseClient,
+  input: {
+    userId: string;
+    storeName?: string;
+  }
+) {
+  const shopDomain = resolveShopifyInstallDomain();
+  if (!shopDomain) {
+    throw new Error("Unable to determine the Shopify store domain from SHOPIFY_APP_INSTALL_URL");
+  }
+
+  const { data, error } = await supabase
+    .from("store_integrations")
+    .upsert(
+      {
+        user_id: input.userId,
+        platform: "shopify",
+        store_name: input.storeName?.trim() || shopDomain,
+        store_url: shopDomain,
+        store_domain: shopDomain,
+        status: "disconnected",
+        auto_fulfill: true,
+        auto_import_orders: true,
+        orders_synced: 0,
+        products_mapped: 0,
+        error_message: null,
+        metadata: {
+          pending_install: true,
+          pending_started_at: new Date().toISOString(),
+        },
+      },
+      { onConflict: "platform,store_domain" }
+    )
+    .select("id, user_id, store_name, store_domain")
+    .single();
+
+  if (error || !data) {
+    throw new Error(error?.message ?? "Unable to prepare Shopify install");
+  }
+
+  return data as {
+    id: string;
+    user_id: string;
+    store_name: string;
+    store_domain: string;
+  };
+}
+
+export async function loadPendingShopifyInstall(shopDomain: string) {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("store_integrations")
+    .select("id, user_id, store_name, store_domain, metadata, status")
+    .eq("platform", "shopify")
+    .eq("store_domain", shopDomain)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as {
+    id: string;
+    user_id: string;
+    store_name: string;
+    store_domain: string;
+    metadata?: { pending_install?: boolean } | null;
+    status: string;
+  } | null;
 }
 
 export async function markShopifyIntegrationError(

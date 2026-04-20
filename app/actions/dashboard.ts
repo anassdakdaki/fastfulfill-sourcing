@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   markShopifyIntegrationError,
   normalizeShopDomain,
+  primeShopifyPendingInstall,
   resolveShopifyInstallUrl,
   syncShopifyOrders,
   validateShopifyConfiguration,
@@ -77,6 +78,7 @@ export async function loadMyIntegrations() {
   const { data, error } = await supabase
     .from("store_integrations")
     .select("id, user_id, platform, store_name, store_url, store_domain, status, auto_fulfill, auto_import_orders, orders_synced, products_mapped, last_sync, connected_at, error_message")
+    .neq("status", "disconnected")
     .order("connected_at", { ascending: false });
   return { data: data ?? [], error: error?.message ?? null };
 }
@@ -116,6 +118,10 @@ export async function connectStore(input: {
 
   const installUrl = resolveShopifyInstallUrl();
   if (installUrl) {
+    await primeShopifyPendingInstall(supabase, {
+      userId: user.id,
+      storeName: input.store_name,
+    });
     return { error: null, redirectTo: installUrl };
   }
 
