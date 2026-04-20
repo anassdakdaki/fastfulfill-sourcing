@@ -533,6 +533,8 @@ export function classifyShopifyConnectError(error: unknown) {
     normalized.includes("schema") ||
     normalized.includes("relation") ||
     normalized.includes("column") ||
+    normalized.includes("updated_at") ||
+    normalized.includes("record \"new\" has no field") ||
     normalized.includes("fulfillment_queue") ||
     normalized.includes("source_store_domain")
   ) {
