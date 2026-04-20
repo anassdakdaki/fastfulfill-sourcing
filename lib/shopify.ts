@@ -1000,9 +1000,37 @@ export async function saveShopifyIntegration(
     metadata: {},
   };
 
+  const { data: existingRows, error: existingError } = await supabase
+    .from("store_integrations")
+    .select("id")
+    .eq("platform", "shopify")
+    .eq("store_domain", input.shopDomain)
+    .limit(1);
+
+  if (existingError) {
+    throw new Error(existingError.message);
+  }
+
+  const existingId = existingRows?.[0]?.id as string | undefined;
+
+  if (existingId) {
+    const { data, error } = await supabase
+      .from("store_integrations")
+      .update(values)
+      .eq("id", existingId)
+      .select("id")
+      .single();
+
+    if (error || !data) {
+      throw new Error(error?.message ?? "Unable to update Shopify integration");
+    }
+
+    return data.id as string;
+  }
+
   const { data, error } = await supabase
     .from("store_integrations")
-    .upsert(values, { onConflict: "platform,store_domain" })
+    .insert(values)
     .select("id")
     .single();
 
@@ -1025,28 +1053,60 @@ export async function primeShopifyPendingInstall(
     throw new Error("Unable to determine the Shopify store domain from SHOPIFY_APP_INSTALL_URL");
   }
 
+  const { data: existingRows, error: existingError } = await supabase
+    .from("store_integrations")
+    .select("id, user_id, store_name, store_domain")
+    .eq("platform", "shopify")
+    .eq("store_domain", shopDomain)
+    .limit(1);
+
+  if (existingError) {
+    throw new Error(existingError.message);
+  }
+
+  const values = {
+    user_id: input.userId,
+    platform: "shopify",
+    store_name: input.storeName?.trim() || shopDomain,
+    store_url: shopDomain,
+    store_domain: shopDomain,
+    status: "disconnected",
+    auto_fulfill: true,
+    auto_import_orders: true,
+    orders_synced: 0,
+    products_mapped: 0,
+    error_message: null,
+    metadata: {
+      pending_install: true,
+      pending_started_at: new Date().toISOString(),
+    },
+  };
+
+  const existingId = existingRows?.[0]?.id as string | undefined;
+
+  if (existingId) {
+    const { data, error } = await supabase
+      .from("store_integrations")
+      .update(values)
+      .eq("id", existingId)
+      .select("id, user_id, store_name, store_domain")
+      .single();
+
+    if (error || !data) {
+      throw new Error(error?.message ?? "Unable to update pending Shopify install");
+    }
+
+    return data as {
+      id: string;
+      user_id: string;
+      store_name: string;
+      store_domain: string;
+    };
+  }
+
   const { data, error } = await supabase
     .from("store_integrations")
-    .upsert(
-      {
-        user_id: input.userId,
-        platform: "shopify",
-        store_name: input.storeName?.trim() || shopDomain,
-        store_url: shopDomain,
-        store_domain: shopDomain,
-        status: "disconnected",
-        auto_fulfill: true,
-        auto_import_orders: true,
-        orders_synced: 0,
-        products_mapped: 0,
-        error_message: null,
-        metadata: {
-          pending_install: true,
-          pending_started_at: new Date().toISOString(),
-        },
-      },
-      { onConflict: "platform,store_domain" }
-    )
+    .insert(values)
     .select("id, user_id, store_name, store_domain")
     .single();
 

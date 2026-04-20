@@ -224,31 +224,39 @@ export default function IntegrationsPage() {
     setConnectSaving(true);
     setConnectError("");
 
-    const { error, redirectTo } = await connectStore({
-      platform:   connectingPlatform,
-      store_name: connectForm.store_name,
-      store_url:  connectForm.store_url,
-    });
+    try {
+      const { error, redirectTo } = await connectStore({
+        platform: connectingPlatform,
+        store_name: connectForm.store_name,
+        store_url: connectForm.store_url,
+      });
 
-    if (error) {
-      if (popup) popup.close();
-      setConnectError(error);
-      setConnectSaving(false);
-      return;
-    }
-
-    if (redirectTo) {
-      if (popup) {
-        popup.location.href = redirectTo;
-      } else {
-        window.location.assign(redirectTo);
+      if (error) {
+        if (popup) popup.close();
+        setConnectError(error);
+        setConnectSaving(false);
+        return;
       }
-      setConnectSaving(false);
-      setConnectingPlatform(null);
-      return;
-    }
 
-    setConnectSaving(false);
+      if (redirectTo) {
+        if (popup) {
+          popup.location.href = redirectTo;
+        } else {
+          window.location.assign(redirectTo);
+        }
+        setConnectSaving(false);
+        setConnectingPlatform(null);
+        return;
+      }
+
+      if (popup) popup.close();
+      setConnectError("FastFulfill did not receive a Shopify install URL.");
+      setConnectSaving(false);
+    } catch (error) {
+      if (popup) popup.close();
+      setConnectError(error instanceof Error ? error.message : "Shopify connection failed before the redirect started.");
+      setConnectSaving(false);
+    }
   }
 
   async function handleDirectConnect(platform: IntegrationPlatform) {
@@ -257,28 +265,36 @@ export default function IntegrationsPage() {
     setConnectSaving(true);
     setConnectError("");
 
-    const { error, redirectTo } = await connectStore({
-      platform,
-    });
+    try {
+      const { error, redirectTo } = await connectStore({
+        platform,
+      });
 
-    if (error) {
-      if (popup) popup.close();
-      setConnectError(error);
-      setConnectSaving(false);
-      return;
-    }
-
-    if (redirectTo) {
-      if (popup) {
-        popup.location.href = redirectTo;
-      } else {
-        window.location.assign(redirectTo);
+      if (error) {
+        if (popup) popup.close();
+        setConnectError(error);
+        setConnectSaving(false);
+        return;
       }
-      setConnectSaving(false);
-      return;
-    }
 
-    setConnectSaving(false);
+      if (redirectTo) {
+        if (popup) {
+          popup.location.href = redirectTo;
+        } else {
+          window.location.assign(redirectTo);
+        }
+        setConnectSaving(false);
+        return;
+      }
+
+      if (popup) popup.close();
+      setConnectError("FastFulfill did not receive a Shopify install URL.");
+      setConnectSaving(false);
+    } catch (error) {
+      if (popup) popup.close();
+      setConnectError(error instanceof Error ? error.message : "Shopify connection failed before the redirect started.");
+      setConnectSaving(false);
+    }
   }
 
   const connectedCount = integrations.length;
