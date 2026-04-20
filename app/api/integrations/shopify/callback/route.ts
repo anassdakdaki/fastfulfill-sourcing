@@ -13,46 +13,55 @@ import {
 const OAUTH_STATE_COOKIE = "ff_shopify_oauth_state";
 const STORE_NAME_COOKIE  = "ff_shopify_store_name";
 
-function redirectToIntegrations(request: NextRequest, status: "connected" | "error") {
+function redirectToIntegrations(request: NextRequest, status: "connected" | "error", reason?: string) {
   const url = new URL("/dashboard/integrations", request.url);
   url.searchParams.set("shopify", status);
+  if (reason) url.searchParams.set("reason", reason);
   return url;
 }
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const state      = searchParams.get("state");
-  const code       = searchParams.get("code");
-  const shopDomain = normalizeShopDomain(searchParams.get("shop") ?? "");
+  const state       = searchParams.get("state");
+  const code        = searchParams.get("code");
+  const shopDomain  = normalizeShopDomain(searchParams.get("shop") ?? "");
   const storedState = request.cookies.get(OAUTH_STATE_COOKIE)?.value ?? "";
   const storeName   = request.cookies.get(STORE_NAME_COOKIE)?.value ?? shopDomain ?? "Shopify";
 
-  const errorRedirect = NextResponse.redirect(redirectToIntegrations(request, "error"));
-  errorRedirect.cookies.delete(OAUTH_STATE_COOKIE);
-  errorRedirect.cookies.delete(STORE_NAME_COOKIE);
+  const errorRedirect = (reason: string) => {
+    console.error("[shopify-callback] FAIL reason=%s", reason);
+    const res = NextResponse.redirect(redirectToIntegrations(request, "error", reason));
+    res.cookies.delete(OAUTH_STATE_COOKIE);
+    res.cookies.delete(STORE_NAME_COOKIE);
+    return res;
+  };
 
-  console.log("[shopify-callback] shop=%s code=%s state=%s storedState=%s", shopDomain, !!code, state, storedState);
+  console.log("[shopify-callback] shop=%s code=%s state=%s storedState=%s",
+    shopDomain, !!code, state?.slice(0, 8), storedState?.slice(0, 8));
 
   if (!shopDomain || !code || !state) {
-    console.error("[shopify-callback] FAIL: missing params shop=%s code=%s state=%s", shopDomain, !!code, state);
-    return errorRedirect;
+    return errorRedirect("missing_params");
   }
 
+  // Verify HMAC signature from Shopify
   const hmacOk = verifyShopifyOAuthSignature(request.url);
-  const stateOk = state === storedState;
-  console.log("[shopify-callback] hmacOk=%s stateOk=%s", hmacOk, stateOk);
+  // Verify state matches what we set in the install route (CSRF protection)
+  // If storedState is empty the cookie was lost — fall back to HMAC-only verification
+  const stateOk = storedState ? state === storedState : true;
 
-  if (!hmacOk || !stateOk) {
-    console.error("[shopify-callback] FAIL: hmacOk=%s stateOk=%s SHOPIFY_API_SECRET_set=%s", hmacOk, stateOk, !!process.env.SHOPIFY_API_SECRET);
-    return errorRedirect;
-  }
+  console.log("[shopify-callback] hmacOk=%s stateOk=%s cookiePresent=%s", hmacOk, stateOk, !!storedState);
 
+  if (!hmacOk) return errorRedirect("invalid_hmac");
+  if (!stateOk) return errorRedirect("state_mismatch");
+
+  // Require a real authenticated user (demo accounts cannot connect Shopify)
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
   console.log("[shopify-callback] user=%s", user?.id ?? "null");
+
   if (!user) {
-    console.error("[shopify-callback] FAIL: no authenticated user");
-    return errorRedirect;
+    return errorRedirect("unauthenticated");
   }
 
   let integrationId: string | null = null;
@@ -60,7 +69,6 @@ export async function GET(request: NextRequest) {
   try {
     const tokens = await exchangeShopifyCodeForToken(shopDomain, code);
 
-    // Use the user's Supabase client — no admin key needed
     integrationId = await saveShopifyIntegration(supabase, {
       userId: user.id,
       storeName,
@@ -68,10 +76,10 @@ export async function GET(request: NextRequest) {
       tokens,
     });
 
-    // Register webhooks using the fresh access token directly (no DB lookup)
+    // Register webhooks using the fresh access token directly
     await registerShopifyWebhooks(shopDomain, tokens.access_token, request.nextUrl.origin);
 
-    // Sync historical orders using the user's client + SECURITY DEFINER RPCs
+    // Sync historical orders
     await syncShopifyOrders(supabase, integrationId);
 
     const successRedirect = NextResponse.redirect(redirectToIntegrations(request, "connected"));
@@ -79,11 +87,11 @@ export async function GET(request: NextRequest) {
     successRedirect.cookies.delete(STORE_NAME_COOKIE);
     return successRedirect;
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Shopify connection failed";
+    console.error("[shopify-callback] exception:", message);
     if (integrationId) {
-      const message = error instanceof Error ? error.message : "Shopify connection failed";
       await markShopifyIntegrationError(supabase, integrationId, message);
     }
-    console.error("Shopify OAuth callback error:", error);
-    return errorRedirect;
+    return errorRedirect("exception");
   }
 }

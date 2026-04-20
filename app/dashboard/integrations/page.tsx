@@ -246,9 +246,19 @@ export default function IntegrationsPage() {
           <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-red-900">Shopify connection failed</p>
-            <p className="text-xs text-red-700 mt-1">
-              FastFulfill could not finish the Shopify install flow. Check your Shopify app credentials, webhook secret, and allowed callback URL, then try again.
-            </p>
+            {searchParams.get("reason") === "unauthenticated" ? (
+              <p className="text-xs text-red-700 mt-1">
+                You must be signed in with a real account (not the demo) to connect Shopify.
+                Please <a href="/auth/login" className="underline font-semibold">sign in</a> with your account first.
+              </p>
+            ) : (
+              <p className="text-xs text-red-700 mt-1">
+                FastFulfill could not finish the Shopify install flow. Check your Shopify app credentials, webhook secret, and allowed callback URL, then try again.
+                {searchParams.get("reason") && (
+                  <span className="ml-1 font-mono bg-red-100 px-1 rounded">({searchParams.get("reason")})</span>
+                )}
+              </p>
+            )}
           </div>
         </div>
       )}
