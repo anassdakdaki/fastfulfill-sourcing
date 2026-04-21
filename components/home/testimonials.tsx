@@ -2,50 +2,56 @@ const TESTIMONIALS = [
   {
     name: "Sarah K.",
     role: "Beauty Brand Owner",
-    country: "United States",
+    country: "🇺🇸 United States",
     avatar: "SK",
-    text: "FastFulfill cut my sourcing time from weeks to 48 hours. My agent found suppliers I never could have found on Alibaba, and the quality control saved me from a terrible batch.",
+    text: "FastFulfill cut my sourcing time from weeks to 48 hours. My agent found suppliers I never could have found on Alibaba, and the QC caught a bad batch before it reached my customers.",
     stars: 5,
+    metric: "3× faster sourcing",
   },
   {
     name: "James M.",
-    role: "Dropshipper",
-    country: "United Kingdom",
+    role: "Shopify Dropshipper",
+    country: "🇬🇧 United Kingdom",
     avatar: "JM",
-    text: "I was sceptical at first, but the pricing is genuinely cheaper than sourcing myself. 7-day shipping to UK customers and I'm running 4x my old revenue.",
+    text: "I was skeptical at first, but the pricing is genuinely cheaper than sourcing myself. 9-day shipping to UK and I'm doing 4× my old revenue with the same product.",
     stars: 5,
+    metric: "4× revenue growth",
   },
   {
     name: "Amir T.",
     role: "Pet Supplies Store",
-    country: "Germany",
+    country: "🇩🇪 Germany",
     avatar: "AT",
-    text: "The dashboard makes it so easy to see all my orders and inventory in one place. The tracking is accurate and my customers love the fast delivery.",
+    text: "The dashboard makes it easy to see all orders in one place. Tracking is accurate and my customers love the fast delivery. Much better than my previous agent.",
     stars: 5,
+    metric: "12-day EU delivery",
   },
   {
     name: "Lena P.",
     role: "Fitness Brand",
-    country: "Australia",
+    country: "🇦🇺 Australia",
     avatar: "LP",
-    text: "Switched from another agent after one month. FastFulfill's platform is on a completely different level: professional, fast, and the team actually responds.",
+    text: "Switched from another agent after one month. FastFulfill's platform is professional, responsive, and the team actually responds to questions — same day.",
     stars: 5,
+    metric: "Same-day responses",
   },
   {
     name: "Carlos R.",
     role: "Multi-category Seller",
-    country: "Canada",
+    country: "🇨🇦 Canada",
     avatar: "CR",
-    text: "The private label support is fantastic. They handle all the packaging design and branding coordination with the factory. Game changer for my brand.",
+    text: "The private label support is the best part. They handle all the packaging design and coordination with the factory. My brand looks premium without the premium price.",
     stars: 5,
+    metric: "Full private label",
   },
   {
     name: "Nadia B.",
     role: "Gadget Store",
-    country: "France",
+    country: "🇫🇷 France",
     avatar: "NB",
-    text: "Best sourcing platform I've used in 4 years of dropshipping. The quote turnaround is fast and the pricing is always competitive.",
+    text: "Best sourcing platform I've used in 4 years. Quote turnaround is fast, pricing is always competitive, and I've never had a customs issue since switching.",
     stars: 5,
+    metric: "0 customs issues",
   },
 ];
 
@@ -54,15 +60,18 @@ export function Testimonials() {
     <section className="py-24 bg-white">
       <div className="container-section">
         <div className="text-center mb-14">
-          <p className="text-xs font-semibold uppercase tracking-widest text-brand-600 mb-3">Testimonials</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-brand-600 mb-3">Results</p>
           <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
-            Loved by Sellers Worldwide
+            Sellers switching to FastFulfill
           </h2>
+          <p className="mt-4 text-gray-500 max-w-xl mx-auto">
+            Real results from sellers who moved from other platforms and agents.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {TESTIMONIALS.map((t) => (
-            <div key={t.name} className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+            <div key={t.name} className="bg-gray-50 hover:bg-white rounded-2xl p-6 border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all">
               {/* Stars */}
               <div className="flex gap-0.5 mb-4">
                 {Array.from({ length: t.stars }).map((_, i) => (
@@ -71,15 +80,22 @@ export function Testimonials() {
                   </svg>
                 ))}
               </div>
+
               <p className="text-sm text-gray-700 leading-relaxed mb-5">&ldquo;{t.text}&rdquo;</p>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                  {t.avatar}
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                    {t.avatar}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{t.name}</p>
+                    <p className="text-xs text-gray-500">{t.role} · {t.country}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">{t.name}</p>
-                  <p className="text-xs text-gray-500">{t.role} - {t.country}</p>
-                </div>
+                <span className="text-xs font-bold text-brand-600 bg-brand-50 border border-brand-100 px-2.5 py-1 rounded-full shrink-0">
+                  {t.metric}
+                </span>
               </div>
             </div>
           ))}
