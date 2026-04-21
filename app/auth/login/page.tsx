@@ -2,9 +2,9 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Package2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,13 +16,24 @@ const DEMO_ACCOUNTS = [
   { label: "Fulfillment demo", email: "fulfillment@fastfullfill.com", password: "fulfill1234",     role: "fulfillment" },
 ];
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const redirectTo = searchParams.get("redirectTo");
+  const message = searchParams.get("message");
+
+  function safeRedirect(fallback: string) {
+    if (!redirectTo?.startsWith("/") || redirectTo.startsWith("//")) {
+      return fallback;
+    }
+
+    return redirectTo;
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -48,7 +59,7 @@ export default function LoginPage() {
       const dest =
         role === "supplier"    ? "/supplier" :
         role === "fulfillment" ? "/fulfillment" :
-        "/dashboard";
+        safeRedirect("/dashboard");
       router.push(dest);
       router.refresh();
     }
@@ -70,6 +81,12 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+          {message === "connect_shopify" && (
+            <div className="mb-5 rounded-xl bg-brand-50 border border-brand-200 px-4 py-3 text-sm text-brand-700">
+              Sign in first, then FastFulfill will continue the Shopify store connection.
+            </div>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-5">
             <Input
               label="Email address"
@@ -104,7 +121,7 @@ export default function LoginPage() {
           <div className="mt-6 space-y-3 text-center">
             <p className="text-sm text-gray-500">
               Don&apos;t have an account?{" "}
-              <Link href="/auth/signup" className="font-semibold text-brand-600 hover:text-brand-700">
+              <Link href={`/auth/signup${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`} className="font-semibold text-brand-600 hover:text-brand-700">
                 Sign up as buyer
               </Link>
               {" "}·{" "}
@@ -134,5 +151,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginContent />
+    </Suspense>
   );
 }

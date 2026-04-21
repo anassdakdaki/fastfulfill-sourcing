@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPage() {
-  const updated = "April 20, 2026";
+  const updated = "April 21, 2026";
   const email   = "privacy@fastfulfill.com";
   const appUrl  = process.env.NEXT_PUBLIC_APP_URL ?? "https://fastfullfillsourcing.vercel.app";
 
@@ -29,7 +29,7 @@ export default function PrivacyPage() {
         <ul className="list-disc pl-6 space-y-2">
           <li><strong>Account data:</strong> email address, name, business name, role (buyer / supplier / warehouse).</li>
           <li><strong>Order data:</strong> product names, quantities, shipping addresses, tracking numbers imported from connected stores.</li>
-          <li><strong>Shopify store data:</strong> store domain, OAuth access tokens (encrypted at rest), order webhooks.</li>
+          <li><strong>Shopify store data:</strong> store domain, OAuth access tokens, products, inventory, fulfillment data, and order webhooks.</li>
           <li><strong>Payment data:</strong> invoices and Stripe checkout sessions. Card details are processed by Stripe — we never see raw card numbers.</li>
           <li><strong>Usage data:</strong> page views and server logs retained for up to 30 days.</li>
         </ul>
@@ -49,9 +49,10 @@ export default function PrivacyPage() {
       <section className="mb-8">
         <h2 className="text-xl font-semibold text-slate-800 mb-3">4. Shopify Data</h2>
         <p className="mb-2">
-          When you connect a Shopify store, we request the <strong>read_orders</strong> scope to
-          import orders into FastFulfill. We do not access products, customers, or any other
-          store data beyond orders.
+          When you connect a Shopify store, we request access to read orders, products,
+          inventory, and merchant-managed fulfillment orders. We also request permission
+          to write merchant-managed fulfillment orders so FastFulfill can send tracking
+          and shipment updates back to Shopify.
         </p>
         <p>
           We comply with Shopify&rsquo;s GDPR requirements. Upon receiving a

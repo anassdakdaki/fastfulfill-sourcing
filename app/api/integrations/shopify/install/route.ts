@@ -6,6 +6,7 @@ import {
   createShopifyOAuthState,
   loadPendingShopifyInstall,
   normalizeShopDomain,
+  resolveShopifyInstallUrl,
   resolveShopifyWebhookBaseUrl,
   validateShopifyConfiguration,
   verifyShopifyOAuthSignature,
@@ -111,6 +112,13 @@ export async function GET(request: NextRequest) {
   let effectiveStoreName = storeName || shopDomain;
 
   if (!effectiveUserId) {
+    if (!resolveShopifyInstallUrl()) {
+      const loginUrl = new URL("/auth/login", request.url);
+      loginUrl.searchParams.set("redirectTo", `${request.nextUrl.pathname}${request.nextUrl.search}`);
+      loginUrl.searchParams.set("message", "connect_shopify");
+      return NextResponse.redirect(loginUrl);
+    }
+
     try {
       const pendingInstall = await loadPendingShopifyInstall(shopDomain);
       if (pendingInstall?.user_id) {

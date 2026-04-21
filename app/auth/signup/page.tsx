@@ -2,9 +2,9 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Package2, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,8 +17,9 @@ const PERKS = [
   "Free to join — no credit card required",
 ];
 
-export default function SignupPage() {
+function SignupContent() {
   const router   = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
 
   const [form, setForm] = useState({ full_name: "", company_name: "", email: "", password: "" });
@@ -26,6 +27,15 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState("");
   const [success, setSuccess] = useState(false);
+  const redirectTo = searchParams.get("redirectTo");
+
+  function safeRedirect() {
+    if (!redirectTo?.startsWith("/") || redirectTo.startsWith("//")) {
+      return "/dashboard";
+    }
+
+    return redirectTo;
+  }
 
   function upd(field: keyof typeof form, value: string) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -42,7 +52,7 @@ export default function SignupPage() {
       password: form.password,
       options:  {
         data: { full_name: form.full_name },
-        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
+        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(safeRedirect())}`,
       },
     });
 
@@ -59,7 +69,7 @@ export default function SignupPage() {
     }
 
     if (data.session) {
-      router.push("/dashboard");
+      router.push(safeRedirect());
       router.refresh();
     } else {
       setSuccess(true);
@@ -79,7 +89,7 @@ export default function SignupPage() {
             We sent a confirmation link to <strong>{form.email}</strong>.
             Click it to activate your account, then sign in.
           </p>
-          <Link href="/auth/login" className="mt-6 inline-block">
+          <Link href={`/auth/login${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`} className="mt-6 inline-block">
             <Button size="lg">Go to Sign In</Button>
           </Link>
         </div>
@@ -116,7 +126,7 @@ export default function SignupPage() {
           </ul>
           <p className="mt-10 text-xs text-gray-400">
             Already have an account?{" "}
-            <Link href="/auth/login" className="text-brand-600 font-semibold hover:text-brand-700">Sign in</Link>
+            <Link href={`/auth/login${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`} className="text-brand-600 font-semibold hover:text-brand-700">Sign in</Link>
           </p>
         </div>
 
@@ -209,14 +219,22 @@ export default function SignupPage() {
             </form>
 
             <div className="mt-5 pt-5 border-t border-gray-100 text-center">
-              <p className="text-sm text-gray-500">
-                Already have an account?{" "}
-                <Link href="/auth/login" className="font-semibold text-brand-600 hover:text-brand-700">Sign in</Link>
-              </p>
+            <p className="text-sm text-gray-500">
+              Already have an account?{" "}
+                <Link href={`/auth/login${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`} className="font-semibold text-brand-600 hover:text-brand-700">Sign in</Link>
+            </p>
             </div>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupContent />
+    </Suspense>
   );
 }

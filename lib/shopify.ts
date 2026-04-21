@@ -5,7 +5,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const SHOPIFY_API_VERSION = "2026-04";
-export const SHOPIFY_SCOPES = ["read_orders"];
+export const SHOPIFY_SCOPES = [
+  "read_inventory",
+  "read_merchant_managed_fulfillment_orders",
+  "write_merchant_managed_fulfillment_orders",
+  "read_orders",
+  "read_products",
+];
 const ACCESS_TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 
 const SHOPIFY_API_KEY = process.env.SHOPIFY_API_KEY ?? "";
