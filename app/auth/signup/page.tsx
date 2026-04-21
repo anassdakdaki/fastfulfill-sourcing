@@ -79,13 +79,13 @@ function SignupContent() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
         <div className="w-full max-w-md text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 size={32} className="text-green-600" />
+          <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 size={32} className="text-green-600 dark:text-green-400" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Check your email</h1>
-          <p className="mt-3 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Check your email</h1>
+          <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
             We sent a confirmation link to <strong>{form.email}</strong>.
             Click it to activate your account, then sign in.
           </p>
@@ -98,35 +98,35 @@ function SignupContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
 
         {/* Left — value prop (desktop only) */}
         <div className="hidden md:block pt-2">
-          <Link href="/" className="inline-flex items-center gap-2.5 font-bold text-gray-900 text-lg mb-8">
+          <Link href="/" className="inline-flex items-center gap-2.5 font-bold text-gray-900 dark:text-white text-lg mb-8">
             <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center">
               <Package2 size={19} className="text-white" />
             </div>
             FastFulfill
           </Link>
-          <h2 className="text-3xl font-bold text-gray-900 leading-tight">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white leading-tight">
             Source, store &<br />fulfill — on autopilot.
           </h2>
-          <p className="mt-3 text-gray-500 text-sm leading-relaxed">
+          <p className="mt-3 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
             Tell us what you want to sell. We find the supplier, bulk-order it,
             store it in our warehouse, and ship every customer order for you.
             You never touch the product.
           </p>
           <ul className="mt-6 space-y-3">
             {PERKS.map((p) => (
-              <li key={p} className="flex items-center gap-2.5 text-sm text-gray-700">
+              <li key={p} className="flex items-center gap-2.5 text-sm text-gray-700 dark:text-gray-300">
                 <CheckCircle2 size={16} className="text-brand-600 shrink-0" /> {p}
               </li>
             ))}
           </ul>
-          <p className="mt-10 text-xs text-gray-400">
+          <p className="mt-10 text-xs text-gray-400 dark:text-gray-500">
             Already have an account?{" "}
-            <Link href={`/auth/login${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`} className="text-brand-600 font-semibold hover:text-brand-700">Sign in</Link>
+            <Link href={`/auth/login${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`} className="text-brand-600 dark:text-brand-400 font-semibold hover:text-brand-700">Sign in</Link>
           </p>
         </div>
 
@@ -134,7 +134,7 @@ function SignupContent() {
         <div>
           {/* Mobile logo */}
           <div className="md:hidden text-center mb-8">
-            <Link href="/" className="inline-flex items-center gap-2.5 font-bold text-gray-900 text-lg">
+            <Link href="/" className="inline-flex items-center gap-2.5 font-bold text-gray-900 dark:text-white text-lg">
               <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center">
                 <Package2 size={19} className="text-white" />
               </div>
@@ -142,16 +142,16 @@ function SignupContent() {
             </Link>
             <div className="flex justify-center gap-4 mt-4 flex-wrap">
               {PERKS.slice(0, 2).map((p) => (
-                <span key={p} className="flex items-center gap-1 text-xs text-gray-600">
+                <span key={p} className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
                   <CheckCircle2 size={12} className="text-green-500" /> {p}
                 </span>
               ))}
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h1 className="text-xl font-bold text-gray-900 mb-1">Create your buyer account</h1>
-            <p className="text-sm text-gray-500 mb-6">Free to join. No credit card required.</p>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-8">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Create your buyer account</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Free to join. No credit card required.</p>
 
             <form onSubmit={handleSignup} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -211,17 +211,17 @@ function SignupContent() {
                 Create Free Account
               </Button>
 
-              <p className="text-xs text-center text-gray-400">
+              <p className="text-xs text-center text-gray-400 dark:text-gray-500">
                 By signing up you agree to our{" "}
-                <a href="/terms" className="underline hover:text-gray-600">Terms</a> and{" "}
-                <a href="/privacy" className="underline hover:text-gray-600">Privacy Policy</a>.
+                <a href="/terms" className="underline hover:text-gray-600 dark:hover:text-gray-300">Terms</a> and{" "}
+                <a href="/privacy" className="underline hover:text-gray-600 dark:hover:text-gray-300">Privacy Policy</a>.
               </p>
             </form>
 
-            <div className="mt-5 pt-5 border-t border-gray-100 text-center">
-            <p className="text-sm text-gray-500">
+            <div className="mt-5 pt-5 border-t border-gray-100 dark:border-gray-800 text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Already have an account?{" "}
-                <Link href={`/auth/login${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`} className="font-semibold text-brand-600 hover:text-brand-700">Sign in</Link>
+                <Link href={`/auth/login${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`} className="font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700">Sign in</Link>
             </p>
             </div>
           </div>

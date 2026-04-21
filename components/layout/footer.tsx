@@ -15,15 +15,15 @@ const FOOTER_LINKS = {
     { href: "#", label: "Contact" },
   ],
   Legal: [
-    { href: "#", label: "Privacy Policy" },
-    { href: "#", label: "Terms of Service" },
+    { href: "/privacy", label: "Privacy Policy" },
+    { href: "/terms", label: "Terms of Service" },
     { href: "#", label: "Cookie Policy" },
   ],
 };
 
 export function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-400">
+    <footer className="bg-slate-900 text-slate-400">
       <div className="container-section py-14">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
           {/* Brand */}
@@ -37,7 +37,7 @@ export function Footer() {
             <p className="text-sm leading-relaxed">
               Source products from China and fulfill orders worldwide - faster and cheaper than ever.
             </p>
-            <p className="text-xs mt-4 text-gray-600">Copyright {new Date().getFullYear()} FastFulfill. All rights reserved.</p>
+            <p className="text-xs mt-4 text-slate-600">Copyright {new Date().getFullYear()} FastFulfill. All rights reserved.</p>
           </div>
 
           {/* Links */}
@@ -46,7 +46,7 @@ export function Footer() {
               <p className="text-sm font-semibold text-white mb-4">{section}</p>
               <ul className="space-y-2.5">
                 {links.map((link) => (
-                  <li key={link.href}>
+                  <li key={link.label}>
                     <Link href={link.href} className="text-sm hover:text-white transition-colors">
                       {link.label}
                     </Link>

@@ -22,8 +22,8 @@ export default async function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Welcome back! Here&apos;s what&apos;s happening.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Overview</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Welcome back! Here&apos;s what&apos;s happening.</p>
         </div>
         <Link href="/dashboard/source">
           <Button size="sm">
@@ -79,9 +79,9 @@ export default async function DashboardPage() {
       </div>
 
       {/* Recent Orders */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-900">Recent Orders</h2>
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Recent Orders</h2>
           <Link href="/dashboard/orders">
             <Button variant="ghost" size="sm">
               View all <ArrowRight size={14} />
@@ -102,24 +102,24 @@ export default async function DashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50">
+                <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
                   {["Product", "Qty", "Status", "Date", "Tracking"].map((h) => (
-                    <th key={h} className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
+                    <th key={h} className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                 {recentOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{order.product_name}</td>
-                    <td className="px-6 py-4 text-gray-600">{order.quantity}</td>
+                  <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{order.product_name}</td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{order.quantity}</td>
                     <td className="px-6 py-4">
                       <Badge className={ORDER_STATUS_COLORS[order.status as keyof typeof ORDER_STATUS_COLORS] ?? "bg-gray-100 text-gray-600"}>
                         {ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] ?? order.status}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4 text-gray-500">{formatDate(order.created_at)}</td>
-                    <td className="px-6 py-4 text-gray-500 font-mono text-xs">
+                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{formatDate(order.created_at)}</td>
+                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400 font-mono text-xs">
                       {order.tracking_number ?? "-"}
                     </td>
                   </tr>
@@ -131,9 +131,9 @@ export default async function DashboardPage() {
       </div>
 
       {/* Sourcing Requests */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-900">Sourcing Requests</h2>
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Sourcing Requests</h2>
           <Link href="/dashboard/source">
             <Button variant="ghost" size="sm">
               View all <ArrowRight size={14} />
@@ -156,24 +156,24 @@ export default async function DashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50">
+                <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
                   {["Product", "Qty", "Country", "Status", "Quoted"].map((h) => (
-                    <th key={h} className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
+                    <th key={h} className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                 {recentRequests.map((req) => (
-                  <tr key={req.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{req.product_name ?? "—"}</td>
-                    <td className="px-6 py-4 text-gray-600">{req.quantity}</td>
-                    <td className="px-6 py-4 text-gray-500">{req.target_country}</td>
+                  <tr key={req.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{req.product_name ?? "—"}</td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{req.quantity}</td>
+                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{req.target_country}</td>
                     <td className="px-6 py-4">
                       <Badge className={SOURCE_STATUS_COLORS[req.status as keyof typeof SOURCE_STATUS_COLORS] ?? "bg-gray-100 text-gray-600"}>
                         {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4 text-gray-500">
+                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
                       {req.quoted_price ? `$${req.quoted_price}/unit` : "—"}
                     </td>
                   </tr>

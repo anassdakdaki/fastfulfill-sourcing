@@ -4,17 +4,18 @@ const FLOW = [
     icon: "🛍️",
     title: "Shopify order placed",
     desc: "Customer buys on your store",
-    color: "bg-green-50 border-green-200",
-    textColor: "text-green-700",
-    badge: "Shopify webhook",
+    color: "bg-green-50 border-green-200 dark:bg-green-950/40 dark:border-green-900",
+    textColor: "text-green-700 dark:text-green-400",
+    badgeBg: "bg-white/70 dark:bg-green-900/50",
   },
   {
     step: "2",
     icon: "📥",
     title: "FastFulfill receives it",
     desc: "Auto-synced to your dashboard in seconds",
-    color: "bg-brand-50 border-brand-200",
-    textColor: "text-brand-700",
+    color: "bg-brand-50 border-brand-200 dark:bg-brand-950/40 dark:border-brand-900",
+    textColor: "text-brand-700 dark:text-brand-400",
+    badgeBg: "bg-white/70 dark:bg-brand-900/50",
     badge: "Real-time sync",
   },
   {
@@ -22,8 +23,9 @@ const FLOW = [
     icon: "🔍",
     title: "Warehouse picks & inspects",
     desc: "Item pulled from stock, QC checked",
-    color: "bg-purple-50 border-purple-200",
-    textColor: "text-purple-700",
+    color: "bg-purple-50 border-purple-200 dark:bg-purple-950/40 dark:border-purple-900",
+    textColor: "text-purple-700 dark:text-purple-400",
+    badgeBg: "bg-white/70 dark:bg-purple-900/50",
     badge: "QC every order",
   },
   {
@@ -31,8 +33,9 @@ const FLOW = [
     icon: "📦",
     title: "Packed in your branding",
     desc: "Custom box, inserts, your label",
-    color: "bg-orange-50 border-orange-200",
-    textColor: "text-orange-700",
+    color: "bg-orange-50 border-orange-200 dark:bg-orange-950/40 dark:border-orange-900",
+    textColor: "text-orange-700 dark:text-orange-400",
+    badgeBg: "bg-white/70 dark:bg-orange-900/50",
     badge: "White-label",
   },
   {
@@ -40,8 +43,9 @@ const FLOW = [
     icon: "✈️",
     title: "Ships to your customer",
     desc: "Direct DDP — no customs surprise",
-    color: "bg-blue-50 border-blue-200",
-    textColor: "text-blue-700",
+    color: "bg-blue-50 border-blue-200 dark:bg-blue-950/40 dark:border-blue-900",
+    textColor: "text-blue-700 dark:text-blue-400",
+    badgeBg: "bg-white/70 dark:bg-blue-900/50",
     badge: "7–12 days",
   },
   {
@@ -49,24 +53,25 @@ const FLOW = [
     icon: "📍",
     title: "Tracking syncs back",
     desc: "Customer gets tracking number automatically",
-    color: "bg-gray-50 border-gray-200",
-    textColor: "text-gray-700",
+    color: "bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700",
+    textColor: "text-gray-700 dark:text-gray-300",
+    badgeBg: "bg-white/70 dark:bg-gray-700",
     badge: "Auto-notified",
   },
 ];
 
 export function FulfillmentFlow() {
   return (
-    <section className="py-24 bg-white" id="fulfillment">
+    <section className="py-24 bg-white dark:bg-gray-950" id="fulfillment">
       <div className="container-section">
         <div className="text-center mb-14">
           <p className="text-xs font-semibold uppercase tracking-widest text-brand-600 mb-3">
             How Orders Flow
           </p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">
             From Shopify sale to customer door
           </h2>
-          <p className="mt-4 text-gray-500 max-w-xl mx-auto">
+          <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
             Everything is automated. You don&apos;t touch a single package — the system handles it end to end.
           </p>
         </div>
@@ -76,14 +81,14 @@ export function FulfillmentFlow() {
             <div key={i} className="relative">
               {/* Connector */}
               {i < FLOW.length - 1 && (
-                <div className="hidden lg:block absolute top-7 right-0 w-3 h-px bg-gray-200 translate-x-1.5 z-10" />
+                <div className="hidden lg:block absolute top-7 right-0 w-3 h-px bg-gray-200 dark:bg-gray-700 translate-x-1.5 z-10" />
               )}
 
               <div className={`border rounded-2xl p-4 text-center h-full flex flex-col items-center gap-2 ${item.color}`}>
                 <div className="text-2xl">{item.icon}</div>
-                <p className="text-xs font-bold text-gray-900 leading-tight">{item.title}</p>
-                <p className="text-xs text-gray-500 leading-relaxed">{item.desc}</p>
-                <span className={`mt-auto text-xs font-semibold px-2 py-0.5 rounded-full bg-white/70 ${item.textColor}`}>
+                <p className="text-xs font-bold text-gray-900 dark:text-gray-100 leading-tight">{item.title}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{item.desc}</p>
+                <span className={`mt-auto text-xs font-semibold px-2 py-0.5 rounded-full ${item.badgeBg} ${item.textColor}`}>
                   {item.badge}
                 </span>
               </div>
@@ -98,11 +103,11 @@ export function FulfillmentFlow() {
             { icon: "🔒", title: "Defects caught before shipping", desc: "Physical inspection means unhappy customers stay off your reviews" },
             { icon: "📊", title: "Full visibility at all times", desc: "Every order's status is visible in your dashboard, from sourcing to delivery" },
           ].map((item) => (
-            <div key={item.title} className="flex gap-4 bg-gray-50 border border-gray-100 rounded-2xl p-5">
+            <div key={item.title} className="flex gap-4 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5">
               <span className="text-2xl shrink-0">{item.icon}</span>
               <div>
-                <p className="text-sm font-bold text-gray-900 mb-1">{item.title}</p>
-                <p className="text-xs text-gray-500 leading-relaxed">{item.desc}</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">{item.title}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{item.desc}</p>
               </div>
             </div>
           ))}

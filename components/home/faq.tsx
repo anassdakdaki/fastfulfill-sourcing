@@ -43,14 +43,14 @@ export function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <section className="py-24 bg-gray-50" id="faq">
+    <section className="py-24 bg-gray-50 dark:bg-gray-900" id="faq">
       <div className="container-section">
         <div className="text-center mb-14">
           <p className="text-xs font-semibold uppercase tracking-widest text-brand-600 mb-3">FAQ</p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">
             Questions before you start
           </h2>
-          <p className="mt-4 text-gray-500 max-w-xl mx-auto">
+          <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
             Everything dropshippers ask before trusting a new fulfillment partner.
           </p>
         </div>
@@ -59,24 +59,24 @@ export function FAQ() {
           {FAQS.map((faq, i) => (
             <div
               key={i}
-              className="bg-white border border-gray-200 rounded-2xl overflow-hidden"
+              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden"
             >
               <button
                 onClick={() => setOpen(open === i ? null : i)}
-                className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
               >
-                <span className="text-sm font-semibold text-gray-900">{faq.q}</span>
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">{faq.q}</span>
                 <ChevronDown
                   size={16}
                   className={cn(
                     "shrink-0 text-gray-400 transition-transform duration-200",
-                    open === i && "rotate-180 text-brand-600"
+                    open === i && "rotate-180 text-brand-600 dark:text-brand-400"
                   )}
                 />
               </button>
               {open === i && (
-                <div className="px-6 pb-5 border-t border-gray-100">
-                  <p className="mt-3 text-sm text-gray-600 leading-relaxed">{faq.a}</p>
+                <div className="px-6 pb-5 border-t border-gray-100 dark:border-gray-700">
+                  <p className="mt-3 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{faq.a}</p>
                 </div>
               )}
             </div>

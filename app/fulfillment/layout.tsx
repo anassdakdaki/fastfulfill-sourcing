@@ -25,7 +25,7 @@ export default async function FulfillmentLayout({
   const badges = await loadFulfillmentSidebarBadges();
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
       <FulfillmentSidebar
         userEmail={user.email}
         pendingInbound={badges.pendingInbound}

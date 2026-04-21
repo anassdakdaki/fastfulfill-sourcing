@@ -30,14 +30,14 @@ export function StatCard({
   return (
     <div className="stat-card">
       <div className="flex items-start justify-between">
-        <p className="text-sm font-medium text-gray-500">{label}</p>
+        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
         {icon && (
-          <div className="p-2 bg-brand-50 rounded-lg text-brand-600">{icon}</div>
+          <div className="p-2 bg-brand-50 dark:bg-brand-900/30 rounded-lg text-brand-600 dark:text-brand-400">{icon}</div>
         )}
       </div>
-      <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+      <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>
       {change && (
-        <p className={cn("text-xs font-medium mt-1", positive ? "text-green-600" : "text-red-500")}>
+        <p className={cn("text-xs font-medium mt-1", positive ? "text-green-600 dark:text-green-400" : "text-red-500 dark:text-red-400")}>
           {positive ? "+" : "-"} {change}
         </p>
       )}

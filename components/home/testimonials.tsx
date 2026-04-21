@@ -57,21 +57,21 @@ const TESTIMONIALS = [
 
 export function Testimonials() {
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-white dark:bg-gray-950">
       <div className="container-section">
         <div className="text-center mb-14">
           <p className="text-xs font-semibold uppercase tracking-widest text-brand-600 mb-3">Results</p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">
             Sellers switching to FastFulfill
           </h2>
-          <p className="mt-4 text-gray-500 max-w-xl mx-auto">
+          <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
             Real results from sellers who moved from other platforms and agents.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {TESTIMONIALS.map((t) => (
-            <div key={t.name} className="bg-gray-50 hover:bg-white rounded-2xl p-6 border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all">
+            <div key={t.name} className="bg-gray-50 hover:bg-white dark:bg-gray-900 dark:hover:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-md transition-all">
               {/* Stars */}
               <div className="flex gap-0.5 mb-4">
                 {Array.from({ length: t.stars }).map((_, i) => (
@@ -81,7 +81,7 @@ export function Testimonials() {
                 ))}
               </div>
 
-              <p className="text-sm text-gray-700 leading-relaxed mb-5">&ldquo;{t.text}&rdquo;</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-5">&ldquo;{t.text}&rdquo;</p>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -89,11 +89,11 @@ export function Testimonials() {
                     {t.avatar}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">{t.name}</p>
-                    <p className="text-xs text-gray-500">{t.role} · {t.country}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{t.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{t.role} · {t.country}</p>
                   </div>
                 </div>
-                <span className="text-xs font-bold text-brand-600 bg-brand-50 border border-brand-100 px-2.5 py-1 rounded-full shrink-0">
+                <span className="text-xs font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/30 border border-brand-100 dark:border-brand-800 px-2.5 py-1 rounded-full shrink-0">
                   {t.metric}
                 </span>
               </div>
