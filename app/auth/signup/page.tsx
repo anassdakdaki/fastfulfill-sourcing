@@ -14,7 +14,7 @@ const PERKS = [
   "Source products from verified suppliers",
   "We store & fulfill every order for you",
   "Quote within 24 hours, always",
-  "Free to join — no credit card required",
+  "Free to join with no credit card required",
 ];
 
 function SignupContent() {
@@ -101,7 +101,7 @@ function SignupContent() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
 
-        {/* Left — value prop (desktop only) */}
+        {/* Left value prop for desktop only */}
         <div className="hidden md:block pt-2">
           <Link href="/" className="inline-flex items-center gap-2.5 font-bold text-gray-900 dark:text-white text-lg mb-8">
             <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center">
@@ -110,7 +110,7 @@ function SignupContent() {
             FastFulfill
           </Link>
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white leading-tight">
-            Source, store &<br />fulfill — on autopilot.
+              Source, store &<br />fulfill on autopilot.
           </h2>
           <p className="mt-3 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
             Tell us what you want to sell. We find the supplier, bulk-order it,
@@ -130,7 +130,7 @@ function SignupContent() {
           </p>
         </div>
 
-        {/* Right — form */}
+        {/* Right form */}
         <div>
           {/* Mobile logo */}
           <div className="md:hidden text-center mb-8">

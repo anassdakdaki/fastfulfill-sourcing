@@ -24,7 +24,7 @@ export function Hero() {
         {/* Label */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold mb-8">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
-          Shopify dropshippers — quotes in 24h, shipped in 7–12 days
+          Shopify dropshippers with quotes in 24h and shipping in 7 to 12 days
         </div>
 
         {/* Headline */}
@@ -42,7 +42,7 @@ export function Hero() {
 
         {/* Sub */}
         <p className="mt-7 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          Send us a product link — we source it, inspect it, pack it,
+          Send us a product link. We source it, inspect it, pack it,
           and ship it directly to your customers. No Alibaba. No WeChat chaos.
           One platform.
         </p>
@@ -57,7 +57,7 @@ export function Hero() {
           </Link>
           <Link href="/pricing">
             <button className="text-sm font-semibold text-slate-300 hover:text-white transition-colors underline underline-offset-4">
-              See pricing — no monthly fee
+              See pricing with no monthly fee
             </button>
           </Link>
         </div>

@@ -7,7 +7,7 @@ export async function loadMyInventory() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { data: [], error: "Not authenticated" };
 
-  // Get all orders this buyer has placed — group by product to build inventory view
+  // Get all orders this buyer has placed and group by product to build inventory view
   const { data: orders, error } = await supabase
     .from("orders")
     .select("product_name, quantity, status, created_at")

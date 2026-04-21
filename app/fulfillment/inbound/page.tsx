@@ -153,7 +153,7 @@ export default function InboundStockPage() {
                             )}
                           </span>
                         ) : (
-                          <span className="text-gray-300">—</span>
+                      <span className="text-gray-300">Not set</span>
                         )}
                       </td>
                       <td className="px-5 py-4 text-gray-600">

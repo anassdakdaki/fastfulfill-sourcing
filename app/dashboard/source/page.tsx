@@ -109,7 +109,7 @@ export default function SourceRequestPage() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Source a Product</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Request a product — we source, store, and fulfill it for you.</p>
+          <p className="text-sm text-gray-500 mt-0.5">Request a product. We source, store, and fulfill it for you.</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setShowHowItWorks(v => !v)} className="text-sm text-brand-600 hover:text-brand-700 font-medium">
@@ -144,7 +144,7 @@ export default function SourceRequestPage() {
         </div>
       )}
 
-      {/* Store gate — must connect a store before sourcing */}
+              {/* Store gate must connect a store before sourcing */}
       {storeConnected === false && (
         <div className="flex items-start gap-4 bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
           <div className="w-9 h-9 bg-red-100 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
@@ -171,7 +171,7 @@ export default function SourceRequestPage() {
           <p className="text-sm font-semibold text-amber-900">Minimum 50 units required per product</p>
           <p className="text-xs text-amber-700 mt-1">
             FastFulfill sources your products in bulk and stores them in our fulfillment warehouse.
-            Orders ship individually to your customers — you never deal with suppliers or logistics.
+                Orders ship individually to your customers. You never deal with suppliers or logistics.
           </p>
         </div>
       </div>
@@ -223,7 +223,7 @@ export default function SourceRequestPage() {
                 />
                 {qtyError && <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1"><AlertCircle size={12} />{qtyError}</p>}
                 {form.quantity && !qtyError && parseInt(form.quantity) >= MIN_MOQ && (
-                  <p className="mt-1.5 text-xs text-green-600 flex items-center gap-1"><CheckCircle size={12} />Good — {form.quantity} units</p>
+                    <p className="mt-1.5 text-xs text-green-600 flex items-center gap-1"><CheckCircle size={12} />Good quantity at {form.quantity} units</p>
                 )}
               </div>
             </div>
@@ -311,7 +311,7 @@ export default function SourceRequestPage() {
                   <tr key={req.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        {req.product_name ?? "—"}
+                        {req.product_name ?? "Not set"}
                         {req.product_url && (
                           <a href={req.product_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-brand-600">
                             <ExternalLink size={13} />
@@ -329,7 +329,7 @@ export default function SourceRequestPage() {
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-gray-500 whitespace-nowrap">
-                      {req.quoted_price ? `$${req.quoted_price}/unit` : "—"}
+                        {req.quoted_price ? `$${req.quoted_price}/unit` : "Not set"}
                     </td>
                     <td className="px-6 py-4 text-gray-500 whitespace-nowrap">{formatDate(req.created_at)}</td>
                     <td className="px-6 py-4 font-mono text-xs text-gray-400">FF-REQ-{String(i + 1).padStart(4, "0")}</td>

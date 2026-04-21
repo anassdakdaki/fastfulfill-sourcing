@@ -22,7 +22,7 @@ const STEPS = [
     emoji: "📦",
     title: "Orders ship automatically",
     description: "Connect your Shopify store. Every new order syncs into FastFulfill, gets packed, and ships direct to your customer with full tracking.",
-    badge: "7–12 day delivery",
+    badge: "7 to 12 day delivery",
     badgeColor: "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800",
   },
 ];
@@ -39,7 +39,7 @@ export function HowItWorks() {
             Three steps. Fully automated.
           </h2>
           <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-            From product idea to your customer&apos;s door — without touching a single package yourself.
+            From product idea to your customer&apos;s door without touching a single package yourself.
           </p>
         </div>
 
@@ -79,7 +79,7 @@ export function HowItWorks() {
           <div>
             <p className="text-sm font-bold text-green-900 dark:text-green-300">Shopify orders sync automatically</p>
             <p className="text-xs text-green-700 dark:text-green-400 mt-0.5">
-              Connect your store once — every new order appears in your FastFulfill dashboard in real time, no manual importing.
+              Connect your store once. Every new order appears in your FastFulfill dashboard in real time, no manual importing.
             </p>
           </div>
           <div className="sm:ml-auto shrink-0">

@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
   const supabase = await createClient();
 
-  // Find order by tracking number or id (public endpoint - no auth required)
+// Find order by tracking number or id with no auth required
   let orderQuery = supabase.from("orders").select("id, product_name, quantity, status, tracking_number, destination_country");
 
   if (trackingNumber) {

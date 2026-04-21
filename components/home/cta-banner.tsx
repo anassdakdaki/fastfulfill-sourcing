@@ -45,7 +45,7 @@ export function CtaBanner() {
                 className="border-white/20 text-white hover:bg-white/10 hover:border-white/30 text-base px-8 h-12 w-full sm:w-auto"
               >
                 <Package2 size={18} />
-                Order a Sample — from $30
+                Order a Sample from $30
               </Button>
             </Link>
           </div>

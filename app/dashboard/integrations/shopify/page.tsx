@@ -17,10 +17,10 @@ import {
 type Step = 1 | 2 | 3;
 
 const FEATURES = [
-  { icon: ShoppingBag, label: "Order sync — new orders imported instantly" },
-  { icon: Zap,         label: "Auto-fulfill — ship as soon as an order arrives" },
-  { icon: Package,     label: "Inventory tracking — stock levels kept in sync" },
-  { icon: Store,       label: "Product catalog — all listings mapped automatically" },
+  { icon: ShoppingBag, label: "Order sync imports new orders instantly" },
+  { icon: Zap,         label: "Auto fulfill ships as soon as an order arrives" },
+  { icon: Package,     label: "Inventory tracking keeps stock levels in sync" },
+  { icon: Store,       label: "Product catalog maps all listings automatically" },
 ];
 
 const INSTALL_STEPS = [
@@ -129,7 +129,7 @@ export default function ShopifyIntegrationPage() {
       {/* Step indicator */}
       <StepIndicator current={step} />
 
-      {/* ── Step 1: Enter store URL ── */}
+          {/* Step 1: Enter store URL */}
       {step === 1 && (
         <div className="card p-6 space-y-6">
           <div>
@@ -186,7 +186,7 @@ export default function ShopifyIntegrationPage() {
         </div>
       )}
 
-      {/* ── Step 2: Installing ── */}
+          {/* Step 2: Installing */}
       {step === 2 && (
         <div className="card p-8 flex flex-col items-center text-center space-y-6">
           <Loader2 size={40} className="animate-spin text-[#96bf48]" />
@@ -229,7 +229,7 @@ export default function ShopifyIntegrationPage() {
         </div>
       )}
 
-      {/* ── Step 3: Connected ── */}
+          {/* Step 3: Connected */}
       {step === 3 && (
         <div className="space-y-4">
           <div className="card p-6 text-center space-y-3">

@@ -7,11 +7,11 @@ import { cn } from "@/lib/utils";
 const FAQS = [
   {
     q: "What is the minimum order quantity (MOQ)?",
-    a: "For sourcing and fulfillment, there is no minimum — we can handle single-unit dropshipping. For bulk orders or private label, MOQs depend on the product and supplier, typically starting at 50–200 units. Your agent will clarify this in the quote.",
+    a: "For sourcing and fulfillment, there is no minimum. We can handle single unit dropshipping. For bulk orders or private label, MOQs depend on the product and supplier, typically starting at 50 to 200 units. Your agent will clarify this in the quote.",
   },
   {
     q: "How does Shopify integration work?",
-    a: "You connect your Shopify store with one click via OAuth. Once connected, every new order automatically appears in your FastFulfill dashboard. When the order ships, the tracking number is pushed back to Shopify and your customer is notified — no manual work needed.",
+    a: "You connect your Shopify store with one click via OAuth. Once connected, every new order automatically appears in your FastFulfill dashboard. When the order ships, the tracking number is pushed back to Shopify and your customer is notified with no manual work needed.",
   },
   {
     q: "What happens if a product arrives damaged or defective?",
@@ -23,11 +23,11 @@ const FAQS = [
   },
   {
     q: "Can I order a sample before placing a bulk order?",
-    a: "Yes — we strongly recommend it. Your agent can arrange a physical sample from the supplier, shipped to you directly. Sample costs are typically $20–80 depending on the product, plus shipping. This is the best way to verify quality before committing.",
+    a: "Yes. We strongly recommend it. Your agent can arrange a physical sample from the supplier, shipped to you directly. Sample costs are typically $20 to $80 depending on the product, plus shipping. This is the best way to verify quality before committing.",
   },
   {
     q: "How long does shipping take?",
-    a: "Typical delivery times: USA 7–12 days, UK 8–13 days, EU 9–15 days, Australia 10–16 days. These are real estimates based on our shipping partners — not the inflated averages you see on other platforms. Express options are available for faster timelines.",
+    a: "Typical delivery times: USA 7 to 12 days, UK 8 to 13 days, EU 9 to 15 days, Australia 10 to 16 days. These are real estimates based on our shipping partners, not the inflated averages you see on other platforms. Express options are available for faster timelines.",
   },
   {
     q: "Do you handle returns?",
@@ -35,7 +35,7 @@ const FAQS = [
   },
   {
     q: "Can I use my own packaging and branding?",
-    a: "Absolutely. We offer full white-label and private label support — custom boxes, inserts, poly bags, thank-you cards, stickers, and hang tags. Packaging artwork is coordinated with the factory by your agent.",
+    a: "Absolutely. We offer full white label and private label support with custom boxes, inserts, poly bags, thank you cards, stickers, and hang tags. Packaging artwork is coordinated with the factory by your agent.",
   },
 ];
 

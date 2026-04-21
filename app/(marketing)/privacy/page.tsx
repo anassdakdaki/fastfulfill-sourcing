@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy – FastFulfill",
+  title: "Privacy Policy | FastFulfill",
   description: "How FastFulfill collects, uses, and protects your data.",
 };
 
@@ -30,7 +30,7 @@ export default function PrivacyPage() {
           <li><strong>Account data:</strong> email address, name, business name, role (buyer / supplier / warehouse).</li>
           <li><strong>Order data:</strong> product names, quantities, shipping addresses, tracking numbers imported from connected stores.</li>
           <li><strong>Shopify store data:</strong> store domain, OAuth access tokens, products, inventory, fulfillment data, and order webhooks.</li>
-          <li><strong>Payment data:</strong> invoices and Stripe checkout sessions. Card details are processed by Stripe — we never see raw card numbers.</li>
+                <li><strong>Payment data:</strong> invoices and Stripe checkout sessions. Card details are processed by Stripe. We never see raw card numbers.</li>
           <li><strong>Usage data:</strong> page views and server logs retained for up to 30 days.</li>
         </ul>
       </section>
@@ -66,10 +66,10 @@ export default function PrivacyPage() {
         <h2 className="text-xl font-semibold text-slate-800 mb-3">5. Data Sharing</h2>
         <p>We do not sell your data. We share data only with:</p>
         <ul className="list-disc pl-6 space-y-2 mt-2">
-          <li><strong>Supabase</strong> — database and authentication hosting.</li>
-          <li><strong>Stripe</strong> — payment processing.</li>
-          <li><strong>Resend</strong> — transactional email delivery.</li>
-          <li><strong>Vercel</strong> — application hosting and serverless functions.</li>
+                <li><strong>Supabase</strong> for database and authentication hosting.</li>
+                <li><strong>Stripe</strong> for payment processing.</li>
+                <li><strong>Resend</strong> for transactional email delivery.</li>
+                <li><strong>Vercel</strong> for application hosting and serverless functions.</li>
         </ul>
       </section>
 

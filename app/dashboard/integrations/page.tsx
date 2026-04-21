@@ -20,7 +20,7 @@ import {
 import { formatDate } from "@/lib/utils";
 import type { StoreIntegration, IntegrationPlatform } from "@/types/database";
 
-/* ─── Platform meta ─── */
+/* Platform meta */
 const PLATFORM_META: Record<IntegrationPlatform, {
   name: string; description: string; logo: string;
   color: string; features: string[];
@@ -63,7 +63,7 @@ const PLATFORM_META: Record<IntegrationPlatform, {
   },
 };
 
-/* ─── 3PL meta (display only — no DB needed) ─── */
+/* 3PL meta for display only with no DB needed */
 type ThreePLId = "shipbob" | "shipstation" | "easyship" | "dhl";
 const THREE_PL_META: Record<ThreePLId, {
   name: string; logo: string; tagline: string;
@@ -73,26 +73,26 @@ const THREE_PL_META: Record<ThreePLId, {
     name: "ShipBob", logo: "📬",
     tagline: "US, EU, Canada, Australia warehouses",
     color: "bg-blue-50 border-blue-200",
-    bestFor: "Ideal for US/EU sellers — largest 3PL network with full REST API",
+    bestFor: "Ideal for US/EU sellers with the largest 3PL network and full REST API",
     features: ["Auto-forward orders on receipt", "Real-time inventory at warehouse", "Tracking auto-synced back", "Multi-warehouse routing", "Returns management"],
   },
   shipstation: {
     name: "ShipStation", logo: "🚢",
-    tagline: "Connects 70+ carriers — USPS, FedEx, UPS, DHL",
+    tagline: "Connects 70+ carriers including USPS, FedEx, UPS, DHL",
     color: "bg-indigo-50 border-indigo-200",
     bestFor: "Best if you use multiple carriers or your own warehouse staff",
     features: ["Generate labels for 70+ carriers", "Batch fulfill multiple orders", "Branded packing slips", "Automatic tracking updates", "Rate shopping across carriers"],
   },
   easyship: {
     name: "Easyship", logo: "✈️",
-    tagline: "International shipping — strong for Asia → World",
+    tagline: "International shipping built for Asia to world routes",
     color: "bg-cyan-50 border-cyan-200",
-    bestFor: "Best for cross-border — especially sourcing from China/Asia",
+    bestFor: "Best for cross border shipping, especially sourcing from China/Asia",
     features: ["DDP (Duties Delivered Paid) pricing", "250+ courier options", "Asia-origin optimised routing", "Live rate comparison", "Automated customs docs"],
   },
   dhl: {
     name: "DHL eCommerce", logo: "🟡",
-    tagline: "Global network — 220+ countries",
+    tagline: "Global network across 220+ countries",
     color: "bg-yellow-50 border-yellow-200",
     bestFor: "Best for high-volume international, especially EU and Asia",
     features: ["Global last-mile delivery", "China Preferred Partner", "Landed cost calculator", "Parcel tracking API", "Pickup scheduling"],
@@ -414,7 +414,7 @@ export default function IntegrationsPage() {
       )}
 
       {/* ══════════════════════════════════
-          SECTION 1 — STORE INTEGRATIONS
+      SECTION 1 STORE INTEGRATIONS
          ══════════════════════════════════ */}
       <section className="space-y-5">
         <div className="flex items-center gap-2">
@@ -439,7 +439,7 @@ export default function IntegrationsPage() {
           </div>
         )}
 
-        {/* Stats banner — only when connected */}
+      {/* Stats banner only when connected */}
         {!loading && connectedCount > 0 && (
           <div className="bg-brand-50 border border-brand-200 rounded-2xl p-5 flex flex-wrap gap-6">
             <div>
@@ -643,7 +643,7 @@ export default function IntegrationsPage() {
       </section>
 
       {/* ══════════════════════════════════
-          SECTION 2 — FULFILLMENT PARTNERS
+      SECTION 2 FULFILLMENT PARTNERS
          ══════════════════════════════════ */}
       <section className="space-y-5">
         <div className="flex items-center gap-2">
@@ -706,7 +706,7 @@ export default function IntegrationsPage() {
       </section>
 
       {/* ══════════════════════════════════
-          SECTION 3 — FULL FLOW EXPLAINER
+      SECTION 3 FULL FLOW EXPLAINER
          ══════════════════════════════════ */}
       <section className="bg-gray-50 rounded-2xl border border-gray-100 p-6">
         <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">

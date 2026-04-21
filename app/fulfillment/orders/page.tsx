@@ -64,7 +64,7 @@ export default function OrdersQueuePage() {
     [orders, filter]
   );
 
-  // ── Actions ───────────────────────────────────────────────────────────────
+  // Actions
   async function handlePack(id: string) {
     setActing(id);
     const { error } = await packOrder(id);
@@ -95,7 +95,7 @@ export default function OrdersQueuePage() {
     setActing(null);
   }
 
-  // ── CSV Export ─────────────────────────────────────────────────────────────
+  // CSV Export
   function handleExport() {
     const header = ["Order Ref", "Product", "SKU", "Qty", "Ship To Country", "Status", "Tracking Number", "Received At"];
     const lines = [
@@ -116,7 +116,7 @@ export default function OrdersQueuePage() {
     URL.revokeObjectURL(url);
   }
 
-  // ── CSV Import ─────────────────────────────────────────────────────────────
+  // CSV Import
   async function handleCSVImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -287,7 +287,7 @@ export default function OrdersQueuePage() {
                             )}
                           </div>
                         ) : (
-                          <span className="text-gray-300 text-xs">—</span>
+                          <span className="text-gray-300 text-xs">Not set</span>
                         )}
                       </td>
                       <td className="px-5 py-3.5 font-mono text-xs text-gray-500">{order.sku}</td>
@@ -300,7 +300,7 @@ export default function OrdersQueuePage() {
                         {order.tracking_number ? (
                           <span className="font-mono text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-md">{order.tracking_number}</span>
                         ) : (
-                          <span className="text-gray-300 text-xs">—</span>
+                          <span className="text-gray-300 text-xs">Not set</span>
                         )}
                       </td>
                       <td className="px-5 py-3.5">

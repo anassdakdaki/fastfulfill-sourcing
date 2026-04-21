@@ -1,6 +1,6 @@
 const STATS = [
   { value: "24h", label: "Quote turnaround", sub: "guaranteed" },
-  { value: "7–12", label: "Days to USA / EU", sub: "avg delivery" },
+  { value: "7 to 12", label: "Days to USA / EU", sub: "avg delivery" },
   { value: "40+", label: "Countries fulfilled", sub: "DDP shipping" },
   { value: "0", label: "Monthly fee", sub: "pay per order" },
 ];

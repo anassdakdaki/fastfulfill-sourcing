@@ -51,7 +51,7 @@ export function WhatWeSource() {
             <Link href="/auth/signup" className="text-brand-600 dark:text-brand-400 font-semibold hover:underline">
               Submit a sourcing request
             </Link>{" "}
-            — if it&apos;s made in China, we can source it.
+            If it&apos;s made in China, we can source it.
           </p>
         </div>
       </div>

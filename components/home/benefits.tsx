@@ -17,8 +17,8 @@ const BENEFITS = [
   },
   {
     icon: Zap,
-    title: "7–12 Day Delivery",
-    description: "US, UK, EU, Australia. Real shipping timelines — not the inflated estimates you see on dropshipping platforms.",
+    title: "7 to 12 Day Delivery",
+    description: "US, UK, EU, Australia. Real shipping timelines without the inflated estimates you see on dropshipping platforms.",
     color: "bg-yellow-50 text-yellow-600 border-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800",
     highlight: false,
   },

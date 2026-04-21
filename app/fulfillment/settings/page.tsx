@@ -69,7 +69,7 @@ function ToggleRow({
 
 export default function FulfillmentSettingsPage() {
   // Profile
-  const [warehouseName, setWarehouseName] = useState("FastFulfill Warehouse — SHZ");
+  const [warehouseName, setWarehouseName] = useState("FastFulfill Warehouse SHZ");
   const [location, setLocation]           = useState("Shenzhen, China");
   const [contactEmail, setContactEmail]   = useState("ops@fastfullfill.com");
   const [profileSaved, setProfileSaved]   = useState(false);
@@ -108,7 +108,7 @@ export default function FulfillmentSettingsPage() {
         <p className="mt-1 text-sm text-gray-500">Manage your warehouse profile, notifications, and export preferences.</p>
       </div>
 
-      {/* ── Warehouse Profile ── */}
+      {/* Warehouse Profile */}
       <div className="card p-6 space-y-5">
         <h2 className="text-base font-semibold text-gray-900">Warehouse Profile</h2>
         <div className="space-y-4">
@@ -155,7 +155,7 @@ export default function FulfillmentSettingsPage() {
         </div>
       </div>
 
-      {/* ── Notifications ── */}
+      {/* Notifications */}
       <div className="card p-6">
         <h2 className="text-base font-semibold text-gray-900 mb-1">Notifications</h2>
         <p className="text-xs text-gray-400 mb-2">Control which events trigger alerts for your team.</p>
@@ -172,7 +172,7 @@ export default function FulfillmentSettingsPage() {
         </div>
       </div>
 
-      {/* ── CSV Settings ── */}
+      {/* CSV Settings */}
       <div className="card p-6 space-y-5">
         <h2 className="text-base font-semibold text-gray-900">CSV Settings</h2>
         <div>
@@ -228,7 +228,7 @@ export default function FulfillmentSettingsPage() {
         </div>
       </div>
 
-      {/* ── Account ── */}
+      {/* Account */}
       <div className="card p-6 space-y-4">
         <h2 className="text-base font-semibold text-gray-900">Account</h2>
         <div className="flex items-center gap-3">

@@ -31,7 +31,7 @@ const TESTIMONIALS = [
     role: "Fitness Brand",
     country: "🇦🇺 Australia",
     avatar: "LP",
-    text: "Switched from another agent after one month. FastFulfill's platform is professional, responsive, and the team actually responds to questions — same day.",
+    text: "Switched from another agent after one month. FastFulfill's platform is professional, responsive, and the team actually responds to questions the same day.",
     stars: 5,
     metric: "Same-day responses",
   },

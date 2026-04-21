@@ -20,7 +20,7 @@ const ORIGINS = [
 
 const FEATURES = [
   { icon: Plane,       label: "250+ courier options worldwide" },
-  { icon: DollarSign,  label: "DDP pricing — duties included in buyer cost" },
+  { icon: DollarSign,  label: "DDP pricing with duties included in buyer cost" },
   { icon: Globe,       label: "Asia-origin optimised shipping routes" },
   { icon: Zap,         label: "Automated customs documentation" },
   { icon: CheckCircle, label: "Live rate comparison across all couriers" },

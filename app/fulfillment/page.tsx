@@ -80,12 +80,12 @@ export default function FulfillmentOverview() {
       <div className="card overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
           <AlertTriangle size={16} className="text-amber-500" />
-          <h2 className="font-semibold text-gray-900">Priority — Pack &amp; Ship Now</h2>
+            <h2 className="font-semibold text-gray-900">Priority Pack &amp; Ship Now</h2>
           <span className="ml-auto badge bg-amber-100 text-amber-800">{priorityQueue.length} orders</span>
         </div>
         {priorityQueue.length === 0 ? (
           <div className="px-5 py-10 text-center text-sm text-gray-400">
-            All caught up — no pending or packed orders right now 🎉
+              All caught up. No pending or packed orders right now 🎉
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -150,7 +150,7 @@ export default function FulfillmentOverview() {
       <div className="card overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
           <Archive size={16} className="text-slate-500" />
-          <h2 className="font-semibold text-gray-900">Expected Inbound — Next 7 Days</h2>
+            <h2 className="font-semibold text-gray-900">Expected Inbound Next 7 Days</h2>
           <span className="ml-auto badge bg-slate-100 text-slate-700">{inboundActive.length} shipments</span>
         </div>
         {inboundActive.length === 0 ? (

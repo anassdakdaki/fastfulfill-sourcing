@@ -162,7 +162,7 @@ export default function SourcingSettingsPage() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Reviewing — sent when you mark a request as &quot;Reviewing&quot;
+                Reviewing. Sent when you mark a request as &quot;Reviewing&quot;
             </label>
             <textarea
               rows={3} value={templates.reviewing}
@@ -172,7 +172,7 @@ export default function SourcingSettingsPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Declined — sent when you decline a request
+                Declined. Sent when you decline a request
             </label>
             <textarea
               rows={3} value={templates.declined}

@@ -139,9 +139,9 @@ export default function OrdersPage() {
                   <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{order.product_name}</td>
                     <td className="px-6 py-4 text-gray-600">{order.quantity}</td>
-                    <td className="px-6 py-4 text-gray-500">{order.destination_country ?? "—"}</td>
+                      <td className="px-6 py-4 text-gray-500">{order.destination_country ?? "Not set"}</td>
                     <td className="px-6 py-4 text-gray-500">
-                      {order.unit_price ? formatCurrency(order.unit_price) : "—"}
+                        {order.unit_price ? formatCurrency(order.unit_price) : "Not set"}
                     </td>
                     <td className="px-6 py-4">
                       <Badge className={ORDER_STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"}>
@@ -150,7 +150,7 @@ export default function OrdersPage() {
                     </td>
                     <td className="px-6 py-4 text-gray-500 whitespace-nowrap">{formatDate(order.created_at)}</td>
                     <td className="px-6 py-4 text-gray-500 font-mono text-xs whitespace-nowrap">
-                      {order.tracking_number ?? "—"}
+                        {order.tracking_number ?? "Not set"}
                     </td>
                   </tr>
                 ))}

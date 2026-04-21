@@ -10,8 +10,8 @@ import {
 const STEPS = ["Enter API Key", "Connecting", "Connected"];
 
 const FEATURES = [
-  { icon: Heart,   label: "Etsy order sync — new orders imported instantly" },
-  { icon: Package, label: "Inventory tracking — listings kept in stock" },
+  { icon: Heart,   label: "Etsy order sync with new orders imported instantly" },
+  { icon: Package, label: "Inventory tracking keeps listings in stock" },
   { icon: Star,    label: "Product catalog mapping for all active listings" },
   { icon: Zap,     label: "Auto-fulfill Etsy orders via FastFulfill" },
 ];

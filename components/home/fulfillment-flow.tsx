@@ -42,11 +42,11 @@ const FLOW = [
     step: "5",
     icon: "✈️",
     title: "Ships to your customer",
-    desc: "Direct DDP — no customs surprise",
+    desc: "Direct DDP with no customs surprise",
     color: "bg-blue-50 border-blue-200 dark:bg-blue-950/40 dark:border-blue-900",
     textColor: "text-blue-700 dark:text-blue-400",
     badgeBg: "bg-white/70 dark:bg-blue-900/50",
-    badge: "7–12 days",
+    badge: "7 to 12 days",
   },
   {
     step: "6",
@@ -72,7 +72,7 @@ export function FulfillmentFlow() {
             From Shopify sale to customer door
           </h2>
           <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-            Everything is automated. You don&apos;t touch a single package — the system handles it end to end.
+              Everything is automated. You don&apos;t touch a single package because the system handles it end to end.
           </p>
         </div>
 

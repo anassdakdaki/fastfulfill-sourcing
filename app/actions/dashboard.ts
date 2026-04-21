@@ -12,7 +12,7 @@ import {
 } from "@/lib/shopify";
 import type { IntegrationPlatform } from "@/types/database";
 
-// ── Dashboard overview ────────────────────────────────────────────────────────
+// Dashboard overview
 
 export async function loadDashboardOverview() {
   const supabase = await createClient();
@@ -60,7 +60,7 @@ export async function loadDashboardStats() {
   };
 }
 
-// ── Orders ────────────────────────────────────────────────────────────────────
+// Orders
 
 export async function loadMyOrders() {
   const supabase = await createClient();
@@ -71,7 +71,7 @@ export async function loadMyOrders() {
   return { data: data ?? [], error: error?.message ?? null };
 }
 
-// ── Store Integrations ────────────────────────────────────────────────────────
+// Store Integrations
 
 export async function loadMyIntegrations() {
   const supabase = await createClient();
@@ -207,7 +207,7 @@ export async function toggleAutoFulfill(id: string, value: boolean) {
   return { error: error?.message ?? null };
 }
 
-// ── Sidebar badge counts ──────────────────────────────────────────────────────
+// Sidebar badge counts
 
 export async function loadSidebarBadges() {
   const supabase = await createClient();

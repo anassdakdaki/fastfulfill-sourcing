@@ -135,7 +135,7 @@ export default function WooCommerceIntegrationPage() {
       {/* Step indicator */}
       <StepIndicator current={step} />
 
-      {/* ── Step 1: Enter credentials ── */}
+          {/* Step 1: Enter credentials */}
       {step === 1 && (
         <div className="card p-6 space-y-6">
           <div>
@@ -191,7 +191,7 @@ export default function WooCommerceIntegrationPage() {
               />
             </div>
 
-            {/* How to get API keys — accordion */}
+      {/* How to get API keys accordion */}
             <div className="border border-purple-100 rounded-xl overflow-hidden">
               <button
                 type="button"
@@ -233,7 +233,7 @@ export default function WooCommerceIntegrationPage() {
         </div>
       )}
 
-      {/* ── Step 2: Verifying ── */}
+          {/* Step 2: Verifying */}
       {step === 2 && (
         <div className="card p-8 flex flex-col items-center text-center space-y-6">
           <Loader2 size={40} className="animate-spin text-[#7f54b3]" />
@@ -276,7 +276,7 @@ export default function WooCommerceIntegrationPage() {
         </div>
       )}
 
-      {/* ── Step 3: Connected ── */}
+          {/* Step 3: Connected */}
       {step === 3 && (
         <div className="space-y-4">
           <div className="card p-6 text-center space-y-3">

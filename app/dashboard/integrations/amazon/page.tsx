@@ -21,8 +21,8 @@ const MARKETPLACES = [
 ];
 
 const FEATURES = [
-  { icon: ShoppingCart, label: "Amazon order sync — auto-import FBM orders" },
-  { icon: Package,      label: "Inventory sync — keep stock aligned with Amazon" },
+  { icon: ShoppingCart, label: "Amazon order sync with auto import for FBM orders" },
+  { icon: Package,      label: "Inventory sync keeps stock aligned with Amazon" },
   { icon: Globe,        label: "Multi-marketplace support" },
   { icon: Zap,          label: "Auto-fulfill FBM orders via FastFulfill" },
 ];
@@ -100,7 +100,7 @@ export default function AmazonConnectPage() {
         ))}
       </div>
 
-      {/* Stage 0 — Select marketplaces */}
+        {/* Stage 0 select marketplaces */}
       {stage === 0 && (
         <div className="card p-6 space-y-6">
           <div>
@@ -161,7 +161,7 @@ export default function AmazonConnectPage() {
         </div>
       )}
 
-      {/* Stage 1 — Authorizing */}
+        {/* Stage 1 authorizing */}
       {stage === 1 && (
         <div className="card p-10 text-center space-y-6">
           <Loader2 size={52} className="mx-auto animate-spin" style={{ color: "#FF9900" }} />
@@ -188,7 +188,7 @@ export default function AmazonConnectPage() {
         </div>
       )}
 
-      {/* Stage 2 — Connected */}
+        {/* Stage 2 connected */}
       {stage === 2 && (
         <div className="space-y-4">
           <div className="card p-8 text-center space-y-3">

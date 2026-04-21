@@ -99,7 +99,7 @@ export default function SupplierSignupPage() {
             Thanks for applying as a supplier on <strong>FastFulfill</strong>.
           </p>
           <p className="text-gray-500 text-sm">
-            We&apos;ll review your application and send a confirmation to <strong>{account.email}</strong> within 1–2 business days.
+                    We&apos;ll review your application and send a confirmation to <strong>{account.email}</strong> within 1 to 2 business days.
           </p>
           <Link href="/auth/login" className="mt-6 inline-block">
             <Button variant="outline">Back to login</Button>
@@ -246,7 +246,7 @@ export default function SupplierSignupPage() {
               </div>
 
               <p className="text-xs text-center text-gray-400">
-                Your account will be reviewed before activation. Usually 1–2 business days.
+              Your account will be reviewed before activation. Usually 1 to 2 business days.
               </p>
             </form>
           )}

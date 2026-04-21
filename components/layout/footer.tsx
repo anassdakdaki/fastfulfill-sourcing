@@ -35,7 +35,7 @@ export function Footer() {
               FastFulfill
             </Link>
             <p className="text-sm leading-relaxed">
-              Source products from China and fulfill orders worldwide - faster and cheaper than ever.
+            Source products from China and fulfill orders worldwide faster and cheaper than ever.
             </p>
             <p className="text-xs mt-4 text-slate-600">Copyright {new Date().getFullYear()} FastFulfill. All rights reserved.</p>
           </div>

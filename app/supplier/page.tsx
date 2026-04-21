@@ -43,11 +43,11 @@ export default function SourcingDeskOverview() {
 
   // Recent activity feed (combined, latest first)
   const activity = [
-    { id: "a1", icon: CheckCircle2, color: "text-green-500", bg: "bg-green-50", text: "Seller #3344 accepted quote FF-QTE-0020 — Resistance Band Set", time: "2h ago" },
-    { id: "a2", icon: MessageSquarePlus, color: "text-brand-500", bg: "bg-brand-50", text: "New sourcing request from Seller #7703 — Foldable LED Desk Lamp", time: "5h ago" },
-    { id: "a3", icon: MessageSquarePlus, color: "text-brand-500", bg: "bg-brand-50", text: "New sourcing request from Seller #4821 — Stainless Steel Bottle", time: "9h ago" },
-    { id: "a4", icon: RotateCcw, color: "text-amber-500", bg: "bg-amber-50", text: "Procurement FF-PRC-0008 updated — Resistance Band order confirmed", time: "1d ago" },
-    { id: "a5", icon: FileText, color: "text-purple-500", bg: "bg-purple-50", text: "Quote FF-QTE-0021 sent to Seller #1155 — Bamboo Cutting Board Set", time: "1d ago" },
+  { id: "a1", icon: CheckCircle2, color: "text-green-500", bg: "bg-green-50", text: "Seller #3344 accepted quote FF-QTE-0020 for Resistance Band Set", time: "2h ago" },
+  { id: "a2", icon: MessageSquarePlus, color: "text-brand-500", bg: "bg-brand-50", text: "New sourcing request from Seller #7703 for Foldable LED Desk Lamp", time: "5h ago" },
+  { id: "a3", icon: MessageSquarePlus, color: "text-brand-500", bg: "bg-brand-50", text: "New sourcing request from Seller #4821 for Stainless Steel Bottle", time: "9h ago" },
+  { id: "a4", icon: RotateCcw, color: "text-amber-500", bg: "bg-amber-50", text: "Procurement FF-PRC-0008 updated for Resistance Band order confirmed", time: "1d ago" },
+  { id: "a5", icon: FileText, color: "text-purple-500", bg: "bg-purple-50", text: "Quote FF-QTE-0021 sent to Seller #1155 for Bamboo Cutting Board Set", time: "1d ago" },
   ];
 
   return (
@@ -58,7 +58,7 @@ export default function SourcingDeskOverview() {
           <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Sourcing Desk</p>
           <h1 className="text-2xl font-bold text-gray-900">Command Center</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Review seller requests, send quotes, and track procurement — all in one place.
+            Review seller requests, send quotes, and track procurement all in one place.
           </p>
         </div>
         <Link
@@ -102,7 +102,7 @@ export default function SourcingDeskOverview() {
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle size={16} className="text-amber-600" />
             <h2 className="font-semibold text-amber-900">
-              {urgentRequests.length} request{urgentRequests.length > 1 ? "s" : ""} waiting over 24h — reply needed
+              {urgentRequests.length} request{urgentRequests.length > 1 ? "s" : ""} waiting over 24h. Reply needed
             </h2>
           </div>
           <div className="space-y-2">

@@ -226,7 +226,7 @@ function InvoicesContent() {
                     </td>
                     <td className="px-6 py-4 text-gray-500 whitespace-nowrap">{formatDate(inv.issued_at)}</td>
                     <td className={`px-6 py-4 whitespace-nowrap font-medium ${inv.status === "overdue" ? "text-red-600" : "text-gray-500"}`}>
-                      {inv.due_at ? formatDate(inv.due_at) : "—"}
+                          {inv.due_at ? formatDate(inv.due_at) : "Not set"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {inv.status !== "paid" ? (

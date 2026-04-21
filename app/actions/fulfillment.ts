@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-// ── Inbound Shipments ─────────────────────────────────────────────────────────
+// Inbound Shipments
 
 export async function loadInboundShipments() {
   const supabase = await createClient();
@@ -31,7 +31,7 @@ export async function updateInboundStatus(id: string, status: string) {
   return { error: error?.message ?? null };
 }
 
-// ── Warehouse Stock ───────────────────────────────────────────────────────────
+// Warehouse Stock
 
 export async function loadWarehouseStock() {
   const supabase = await createClient();
@@ -42,7 +42,7 @@ export async function loadWarehouseStock() {
   return { data: data ?? [], error: error?.message ?? null };
 }
 
-// ── Fulfillment Queue ─────────────────────────────────────────────────────────
+// Fulfillment Queue
 
 export async function loadFulfillmentQueue() {
   const supabase = await createClient();

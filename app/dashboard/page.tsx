@@ -33,7 +33,7 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Onboarding banner — shown until store is connected */}
+      {/* Onboarding banner shown until store is connected */}
       {!hasConnectedStore && (
         <div className="flex items-start gap-4 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
           <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
@@ -165,7 +165,7 @@ export default async function DashboardPage() {
               <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                 {recentRequests.map((req) => (
                   <tr key={req.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{req.product_name ?? "—"}</td>
+                      <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{req.product_name ?? "Not set"}</td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{req.quantity}</td>
                     <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{req.target_country}</td>
                     <td className="px-6 py-4">
@@ -174,7 +174,7 @@ export default async function DashboardPage() {
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
-                      {req.quoted_price ? `$${req.quoted_price}/unit` : "—"}
+                          {req.quoted_price ? `$${req.quoted_price}/unit` : "Not set"}
                     </td>
                   </tr>
                 ))}

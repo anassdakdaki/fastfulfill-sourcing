@@ -91,7 +91,7 @@ export default function ProcurementPage() {
     <div className="py-8 px-6 max-w-6xl mx-auto space-y-8">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Active Deals — Procurement</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Active Deals Procurement</h1>
           <p className="mt-1 text-sm text-gray-500">Track every accepted deal from sourcing through to warehouse arrival.</p>
         </div>
         <button onClick={() => setShowSupplier((v) => !v)}
@@ -139,7 +139,7 @@ export default function ProcurementPage() {
             <div key={item.id} className={`card overflow-hidden ${item.status === "at_warehouse" ? "border-green-200" : ""}`}>
               {item.status === "at_warehouse" && (
                 <div className="bg-green-600 text-white text-xs font-semibold px-5 py-1.5 flex items-center justify-between">
-                  <span>✅ Received at warehouse — ready to log into fulfillment inventory</span>
+                <span>✅ Received at warehouse and ready to log into fulfillment inventory</span>
                   <Link href="/fulfillment/inbound" className="flex items-center gap-1 underline underline-offset-2 hover:no-underline">
                     Open Fulfillment Portal <ExternalLink size={10} />
                   </Link>

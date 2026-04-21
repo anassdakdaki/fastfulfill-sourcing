@@ -14,11 +14,11 @@ const SHIPPING_PREFS = [
 ];
 
 const CURRENCY_OPTIONS = [
-  { value: "USD", label: "USD - US Dollar"       },
-  { value: "EUR", label: "EUR - Euro"            },
-  { value: "GBP", label: "GBP - British Pound"   },
-  { value: "CAD", label: "CAD - Canadian Dollar" },
-  { value: "AUD", label: "AUD - Australian Dollar" },
+  { value: "USD", label: "USD US Dollar"       },
+  { value: "EUR", label: "EUR Euro"            },
+  { value: "GBP", label: "GBP British Pound"   },
+  { value: "CAD", label: "CAD Canadian Dollar" },
+  { value: "AUD", label: "AUD Australian Dollar" },
 ];
 
 function Section({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {

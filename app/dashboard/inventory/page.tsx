@@ -40,7 +40,7 @@ export default function InventoryPage() {
         <span>
           This is stock stored at the <strong>FastFulfill Fulfillment Center</strong> on your behalf.
           Stock is added when you confirm a sourcing quote (min 50 units). Customer orders ship
-          automatically from this warehouse — you never manage logistics directly.
+            automatically from this warehouse. You never manage logistics directly.
         </span>
       </div>
 

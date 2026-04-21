@@ -159,7 +159,7 @@ export default function FulfillmentPage() {
                       />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900">{item.product_name}</p>
-                        <p className="text-xs text-gray-500">{item.sku} - {item.warehouse_location} - <span className={item.quantity < 50 ? "text-orange-600 font-medium" : ""}>{item.quantity} in stock</span></p>
+                              <p className="text-xs text-gray-500">{item.sku} at {item.warehouse_location}. <span className={item.quantity < 50 ? "text-orange-600 font-medium" : ""}>{item.quantity} in stock</span></p>
                       </div>
                       {selected && (
                         <div className="flex items-center gap-2">
@@ -180,7 +180,7 @@ export default function FulfillmentPage() {
               </div>
               <div className="flex gap-3 pt-2">
                 <Button size="sm" disabled={selectedItems.length === 0} onClick={() => setStep(2)}>
-                  Next - Destination
+                    Next Destination
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => setShowForm(false)}>Cancel</Button>
               </div>
@@ -201,7 +201,7 @@ export default function FulfillmentPage() {
               />
               <Input
                 label="Destination Address"
-                placeholder="e.g. Amazon FBA US - LGA8, or 12 Oxford St, London"
+                placeholder="e.g. Amazon FBA US LGA8, or 12 Oxford St, London"
                 value={form.destination_address}
                 onChange={(e) => setForm({ ...form, destination_address: e.target.value })}
                 required
@@ -221,7 +221,7 @@ export default function FulfillmentPage() {
                   disabled={!form.destination_type || !form.destination_address || !form.shipping_method}
                   onClick={() => setStep(3)}
                 >
-                  Next - Review
+                    Next Review
                 </Button>
               </div>
             </div>

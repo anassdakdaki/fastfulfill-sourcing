@@ -16,7 +16,7 @@ export async function sendQuoteEmail(to: string, productName: string, quoteRef: 
   await resend.emails.send({
     from: FROM,
     to,
-    subject: `Your quote is ready – ${productName}`,
+    subject: `Your quote is ready for ${productName}`,
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px">
         <div style="background:#f0f4ff;border-radius:12px;padding:24px;margin-bottom:24px">
@@ -45,7 +45,7 @@ export async function sendShipmentEmail(to: string, productName: string, trackin
   await resend.emails.send({
     from: FROM,
     to,
-    subject: `Your order has shipped – ${productName}`,
+    subject: `Your order has shipped for ${productName}`,
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px">
         <div style="background:#f0fdf4;border-radius:12px;padding:24px;margin-bottom:24px">
@@ -74,7 +74,7 @@ export async function sendInvoiceEmail(to: string, invoiceNumber: string, total:
   await resend.emails.send({
     from: FROM,
     to,
-    subject: `Invoice ${invoiceNumber} – $${total.toFixed(2)} due`,
+    subject: `Invoice ${invoiceNumber} for $${total.toFixed(2)} due`,
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px">
         <div style="background:#fef3c7;border-radius:12px;padding:24px;margin-bottom:24px">

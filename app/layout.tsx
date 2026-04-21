@@ -4,14 +4,14 @@ import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
   title: {
-    default: "FastFulfill - Source, Store & Ship from China",
+    default: "FastFulfill Source, Store & Ship from China",
     template: "%s | FastFulfill",
   },
   description:
-    "The all-in-one ecommerce sourcing and fulfillment platform. Source products from China, manage inventory, and ship to customers worldwide - faster and cheaper.",
+    "The all in one ecommerce sourcing and fulfillment platform. Source products from China, manage inventory, and ship to customers worldwide faster and cheaper.",
   keywords: ["dropshipping", "sourcing", "fulfillment", "China", "ecommerce"],
   openGraph: {
-    title: "FastFulfill - Source, Store & Ship from China",
+    title: "FastFulfill Source, Store & Ship from China",
     description:
       "The all-in-one ecommerce sourcing and fulfillment platform.",
     type: "website",

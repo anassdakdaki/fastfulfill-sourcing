@@ -229,7 +229,7 @@ export default function SourcingRequestsPage() {
             <div key={req.id} className={`card overflow-hidden transition-all ${req.urgency === "rush" ? "border-red-200" : ""}`}>
               {req.urgency === "rush" && req.status === "new" && (
                 <div className="bg-red-600 text-white text-xs font-semibold px-5 py-1.5 flex items-center gap-2">
-                  ⚡ Rush request — seller expects fast response
+                  ⚡ Rush request. Seller expects fast response
                 </div>
               )}
 
@@ -255,7 +255,7 @@ export default function SourcingRequestsPage() {
                   {isSent ? (
                     <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
                       <CheckCircle2 size={16} className="text-green-600" />
-                      <span className="text-sm text-green-800 font-medium">Quote sent to {req.seller_ref} — awaiting their response.</span>
+                    <span className="text-sm text-green-800 font-medium">Quote sent to {req.seller_ref}. Awaiting their response.</span>
                     </div>
                   ) : (
                     <>
@@ -329,7 +329,7 @@ export default function SourcingRequestsPage() {
                           {calc.cost > 0 && (
                             <div className="rounded-2xl bg-gradient-to-r from-brand-50 via-white to-green-50 border border-brand-100 px-5 py-4">
                               <p className="text-xs font-semibold uppercase tracking-wider text-brand-700 mb-3 flex items-center gap-1.5">
-                                <Calculator size={12} /> Live Margin Preview — {DEFAULT_MARGIN}% markup applied
+                    <Calculator size={12} /> Live Margin Preview with {DEFAULT_MARGIN}% markup applied
                               </p>
                               <div className="flex flex-wrap items-center gap-3 text-sm">
                                 <div className="bg-white rounded-xl px-4 py-2.5 border border-gray-100 text-center min-w-[90px]">
@@ -398,7 +398,7 @@ export default function SourcingRequestsPage() {
                           "bg-amber-50 text-amber-800 border border-amber-200"
                         }`}>
                           <CheckCircle2 size={14} />
-                          {req.status === "accepted" && "Seller accepted this quote — view Procurement for next steps."}
+                  {req.status === "accepted" && "Seller accepted this quote. View Procurement for next steps."}
                           {req.status === "quoted"   && "Quote has been sent. Waiting for seller to respond."}
                           {req.status === "declined" && "This request was declined."}
                         </div>
