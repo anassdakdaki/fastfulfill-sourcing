@@ -1,16 +1,57 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const CATEGORIES = [
-  { emoji: "🎧", name: "Electronics & Gadgets", examples: "Earbuds, LED strips, phone cases, smart home" },
-  { emoji: "👗", name: "Fashion & Apparel", examples: "Clothing, accessories, shoes, streetwear" },
-  { emoji: "💄", name: "Beauty & Skincare", examples: "Serums, tools, cosmetics, packaging" },
-  { emoji: "🏋️", name: "Fitness & Sports", examples: "Resistance bands, mats, weights, gear" },
-  { emoji: "🏠", name: "Home & Kitchen", examples: "Organizers, cookware, decor, lighting" },
-  { emoji: "🐾", name: "Pet Supplies", examples: "Beds, toys, feeders, grooming tools" },
-  { emoji: "👶", name: "Baby & Kids", examples: "Toys, clothing, safety gear, nursery" },
-  { emoji: "🌱", name: "Eco & Sustainable", examples: "Reusable products, bamboo, organic packaging" },
-  { emoji: "🛠️", name: "Tools & Industrial", examples: "Hand tools, storage, workshop accessories" },
-  { emoji: "🎮", name: "Gaming & Hobby", examples: "Controllers, accessories, collectibles" },
+  {
+    name: "Electronics & Gadgets",
+    examples: "Earbuds, LED strips, phone cases, smart home",
+    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=640&q=80",
+  },
+  {
+    name: "Fashion & Apparel",
+    examples: "Clothing, accessories, shoes, streetwear",
+    image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=640&q=80",
+  },
+  {
+    name: "Beauty & Skincare",
+    examples: "Serums, tools, cosmetics, packaging",
+    image: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?auto=format&fit=crop&w=640&q=80",
+  },
+  {
+    name: "Fitness & Sports",
+    examples: "Resistance bands, mats, weights, gear",
+    image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=640&q=80",
+  },
+  {
+    name: "Home & Kitchen",
+    examples: "Organizers, cookware, decor, lighting",
+    image: "https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=640&q=80",
+  },
+  {
+    name: "Pet Supplies",
+    examples: "Beds, toys, feeders, grooming tools",
+    image: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?auto=format&fit=crop&w=640&q=80",
+  },
+  {
+    name: "Baby & Kids",
+    examples: "Toys, clothing, safety gear, nursery",
+    image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=640&q=80",
+  },
+  {
+    name: "Eco & Sustainable",
+    examples: "Reusable products, bamboo, organic packaging",
+    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=640&q=80",
+  },
+  {
+    name: "Tools & Industrial",
+    examples: "Hand tools, storage, workshop accessories",
+    image: "https://images.unsplash.com/photo-1581783898377-1c85bf937427?auto=format&fit=crop&w=640&q=80",
+  },
+  {
+    name: "Gaming & Hobby",
+    examples: "Controllers, accessories, collectibles",
+    image: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&w=640&q=80",
+  },
 ];
 
 export function WhatWeSource() {
@@ -30,17 +71,30 @@ export function WhatWeSource() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {CATEGORIES.map((cat) => (
             <div
               key={cat.name}
-              className="group bg-gray-50 hover:bg-brand-50 border border-gray-100 hover:border-brand-200 rounded-2xl p-4 transition-all cursor-default dark:bg-gray-900 dark:border-gray-800 dark:hover:bg-brand-900/20 dark:hover:border-brand-800"
+              className="group overflow-hidden bg-white hover:bg-brand-50 border border-gray-100 hover:border-brand-200 rounded-xl shadow-sm transition-all cursor-default dark:bg-gray-900 dark:border-gray-800 dark:hover:bg-brand-900/20 dark:hover:border-brand-800"
             >
-              <div className="text-3xl mb-3">{cat.emoji}</div>
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1 group-hover:text-brand-700 dark:group-hover:text-brand-300 transition-colors">
-                {cat.name}
-              </h3>
-              <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">{cat.examples}</p>
+              <div className="relative h-28 bg-gray-100 dark:bg-gray-800">
+                <Image
+                  src={cat.image}
+                  alt={`${cat.name} products`}
+                  fill
+                  sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+              </div>
+              <div className="p-4">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1 group-hover:text-brand-700 dark:group-hover:text-brand-300 transition-colors">
+                  {cat.name}
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                  {cat.examples}
+                </p>
+              </div>
             </div>
           ))}
         </div>
