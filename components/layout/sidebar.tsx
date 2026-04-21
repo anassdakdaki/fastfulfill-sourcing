@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -10,17 +10,14 @@ import {
   Archive,
   Search,
   Package2,
-  LogOut,
   ChevronRight,
   Package,
   Tag,
   FileText,
-  Settings,
   Plug,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { AccountMenu } from "@/components/layout/account-menu";
 
 interface SidebarProps {
   userEmail?: string;
@@ -30,13 +27,6 @@ interface SidebarProps {
 
 export function Sidebar({ userEmail, pendingQuotes = 0, hasConnectedStore = true }: SidebarProps) {
   const pathname = usePathname();
-  const router   = useRouter();
-  const supabase = createClient();
-
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    router.push("/");
-  }
 
   type NavItem = {
     href: string;
@@ -48,39 +38,39 @@ export function Sidebar({ userEmail, pendingQuotes = 0, hasConnectedStore = true
 
   const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     {
-      label: "Operations",
+      label: "Daily work",
       items: [
-        { href: "/dashboard",             label: "Overview",     icon: LayoutDashboard },
+        { href: "/dashboard",             label: "Home",         icon: LayoutDashboard },
         { href: "/dashboard/orders",      label: "Orders",       icon: ShoppingCart },
-        { href: "/dashboard/fulfillment", label: "Fulfillment",  icon: Package },
-        { href: "/dashboard/tracking",    label: "Tracking",     icon: MapPin },
-        { href: "/dashboard/inventory",   label: "Inventory",    icon: Archive },
+        { href: "/dashboard/fulfillment", label: "Packing & shipping", icon: Package },
+        { href: "/dashboard/tracking",    label: "Track orders", icon: MapPin },
+        { href: "/dashboard/inventory",   label: "Products in stock", icon: Archive },
       ],
     },
     {
-      label: "Sourcing",
+      label: "Find products",
       items: [
-        { href: "/dashboard/source", label: "Source Request", icon: Search },
+        { href: "/dashboard/source", label: "Ask for a product", icon: Search },
         {
           href:       "/dashboard/quotes",
-          label:      "Quotes",
+          label:      "Prices from us",
           icon:       Tag,
           badge:      pendingQuotes > 0 ? pendingQuotes : undefined,
         },
       ],
     },
     {
-      label: "Finance",
+      label: "Money",
       items: [
-        { href: "/dashboard/invoices", label: "Invoices", icon: FileText },
+        { href: "/dashboard/invoices", label: "Bills", icon: FileText },
       ],
     },
     {
-      label: "Developer",
+      label: "Stores",
       items: [
         {
           href:       "/dashboard/integrations",
-          label:      "Integrations",
+          label:      "Connect stores",
           icon:       Plug,
           badge:      !hasConnectedStore ? 1 : undefined,
           badgeColor: !hasConnectedStore ? "bg-amber-500" : undefined,
@@ -140,39 +130,17 @@ export function Sidebar({ userEmail, pendingQuotes = 0, hasConnectedStore = true
       </nav>
 
       {/* Bottom */}
-      <div className="px-3 py-4 border-t border-gray-100 dark:border-gray-800 space-y-0.5">
-        <Link
-          href="/dashboard/settings"
-          className={cn(
-            "sidebar-link",
-            pathname.startsWith("/dashboard/settings") ? "sidebar-link-active" : "sidebar-link-inactive"
-          )}
-        >
-          <Settings size={17} />
-          <span className="flex-1">Settings</span>
-          {pathname.startsWith("/dashboard/settings") && <ChevronRight size={14} className="text-brand-400" />}
-        </Link>
-        <button
-          onClick={handleSignOut}
-          className="sidebar-link w-full text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
-        >
-          <LogOut size={17} />
-          Sign out
-        </button>
-        {userEmail && (
-          <div className="mt-3 px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{userEmail}</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Buyer account</p>
-            </div>
-            <ThemeToggle />
-          </div>
-        )}
-        {!userEmail && (
-          <div className="mt-3 flex justify-end px-1">
-            <ThemeToggle />
-          </div>
-        )}
+      <div className="px-3 py-4 border-t border-gray-100 dark:border-gray-800">
+        <AccountMenu
+          userEmail={userEmail}
+          roleLabel="Seller account"
+          signOutRedirect="/"
+          profileHref="/dashboard/settings"
+          billingHref="/dashboard/invoices"
+          notificationsHref="/dashboard/settings"
+          trackingHref="/dashboard/tracking"
+          apiHref="/dashboard/integrations"
+        />
       </div>
     </aside>
   );

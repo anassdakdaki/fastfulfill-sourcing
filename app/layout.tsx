@@ -8,12 +8,12 @@ export const metadata: Metadata = {
     template: "%s | FastFulfill",
   },
   description:
-    "The all in one ecommerce sourcing and fulfillment platform. Source products from China, manage inventory, and ship to customers worldwide faster and cheaper.",
-  keywords: ["dropshipping", "sourcing", "fulfillment", "China", "ecommerce"],
+    "Find products from China, store them, and ship orders to customers worldwide faster and cheaper.",
+  keywords: ["ecommerce", "China products", "shipping", "warehouse", "online sellers"],
   openGraph: {
     title: "FastFulfill Source, Store & Ship from China",
     description:
-      "The all-in-one ecommerce sourcing and fulfillment platform.",
+      "Find products from China, store them, and ship orders to customers worldwide.",
     type: "website",
   },
 };

@@ -60,14 +60,13 @@ export function WhatWeSource() {
       <div className="container-section">
         <div className="text-center mb-14">
           <p className="text-xs font-semibold uppercase tracking-widest text-brand-600 mb-3">
-            Product Categories
+            Product Types
           </p>
           <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">
-            We source across every niche
+            We can find many types of products
           </h2>
           <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-            Whether you&apos;re dropshipping one product or building a brand,
-            we have factory connections for your niche.
+            Whether you sell one product or many products, we help you find good suppliers in China.
           </p>
         </div>
 
@@ -82,6 +81,7 @@ export function WhatWeSource() {
                   src={cat.image}
                   alt={`${cat.name} products`}
                   fill
+                  unoptimized
                   sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw"
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
@@ -103,9 +103,9 @@ export function WhatWeSource() {
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Don&apos;t see your category?{" "}
             <Link href="/auth/signup" className="text-brand-600 dark:text-brand-400 font-semibold hover:underline">
-              Submit a sourcing request
+              Ask us to find it
             </Link>{" "}
-            If it&apos;s made in China, we can source it.
+            If it is made in China, we can help find it.
           </p>
         </div>
       </div>

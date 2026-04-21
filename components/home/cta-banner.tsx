@@ -1,40 +1,37 @@
 import Link from "next/link";
-import { ArrowRight, Clock, Package2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock, Package2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function CtaBanner() {
   return (
-    <section className="py-24 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 relative overflow-hidden">
-      {/* Background decoration */}
+    <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 py-24">
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-600/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-3xl" />
+        <div className="absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-brand-600/10 blur-3xl" />
+        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-indigo-600/10 blur-3xl" />
       </div>
 
       <div className="container-section">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold mb-8">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-brand-500/20 bg-brand-500/10 px-4 py-1.5 text-xs font-semibold text-brand-400">
             <Clock size={12} />
-            Quotes delivered within 24 hours
+            Product prices sent within 24 hours
           </div>
 
-          <h2 className="text-3xl md:text-5xl font-extrabold text-white leading-tight mb-6">
-            Ready to cut costs and<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-indigo-400">
+          <h2 className="mb-6 text-3xl font-extrabold leading-tight text-white md:text-5xl">
+            Ready to pay less and<br />
+            <span className="bg-gradient-to-r from-brand-400 to-indigo-400 bg-clip-text text-transparent">
               ship faster?
             </span>
           </h2>
 
-          <p className="text-lg text-slate-400 mb-10 max-w-xl mx-auto">
-            Submit a product. Get a sourcing quote in 24 hours.
-            No subscription. No minimum order. No risk.
+          <p className="mx-auto mb-10 max-w-xl text-lg text-slate-400">
+            Send us a product. Get a clear price in 24 hours. No subscription. No minimum order. No risk.
           </p>
 
-          {/* Two CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
+          <div className="mb-10 flex flex-col justify-center gap-4 sm:flex-row">
             <Link href="/auth/signup">
-              <Button size="lg" className="shadow-xl shadow-brand-500/20 text-base px-8 h-12 w-full sm:w-auto">
-                Request a Free Quote
+              <Button size="lg" className="h-12 w-full px-8 text-base shadow-xl shadow-brand-500/20 sm:w-auto">
+                Get a Free Product Price
                 <ArrowRight size={18} />
               </Button>
             </Link>
@@ -42,7 +39,7 @@ export function CtaBanner() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white/20 text-white hover:bg-white/10 hover:border-white/30 text-base px-8 h-12 w-full sm:w-auto"
+                className="h-12 w-full border-white/20 px-8 text-base text-white hover:border-white/30 hover:bg-white/10 sm:w-auto"
               >
                 <Package2 size={18} />
                 Order a Sample from $30
@@ -50,16 +47,15 @@ export function CtaBanner() {
             </Link>
           </div>
 
-          {/* Trust bullets */}
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-slate-400">
             {[
               "No monthly fee",
               "No credit card to start",
-              "Quote in 24h or it's free",
-              "Shenzhen warehouse",
+              "Price in 24h or it is free",
+              "Warehouse in Shenzhen",
             ].map((item) => (
               <span key={item} className="flex items-center gap-2">
-                <span className="text-brand-500">✓</span>
+                <CheckCircle2 size={14} className="text-brand-500" />
                 {item}
               </span>
             ))}

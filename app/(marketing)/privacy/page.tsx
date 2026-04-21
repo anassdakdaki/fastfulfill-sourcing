@@ -11,21 +11,21 @@ export default function PrivacyPage() {
   const appUrl  = process.env.NEXT_PUBLIC_APP_URL ?? "https://fastfullfillsourcing.vercel.app";
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-16 text-slate-700">
-      <h1 className="text-3xl font-bold text-slate-900 mb-2">Privacy Policy</h1>
-      <p className="text-sm text-slate-500 mb-10">Last updated: {updated}</p>
+    <div className="max-w-3xl mx-auto px-6 py-16 text-slate-700 dark:text-slate-300">
+      <h1 className="text-3xl font-bold text-slate-900 mb-2 dark:text-white">Privacy Policy</h1>
+      <p className="text-sm text-slate-500 mb-10 dark:text-slate-400">Last updated: {updated}</p>
 
       <section className="mb-8">
-        <h2 className="text-xl font-semibold text-slate-800 mb-3">1. Overview</h2>
+        <h2 className="text-xl font-semibold text-slate-800 mb-3 dark:text-slate-100">1. Overview</h2>
         <p>
           FastFulfill (&ldquo;we&rdquo;, &ldquo;us&rdquo;) operates the sourcing and fulfillment
-          platform at <a href={appUrl} className="text-indigo-600 underline">{appUrl}</a>.
+          platform at <a href={appUrl} className="text-indigo-600 underline dark:text-indigo-400">{appUrl}</a>.
           This policy explains what data we collect, how we use it, and your rights.
         </p>
       </section>
 
       <section className="mb-8">
-        <h2 className="text-xl font-semibold text-slate-800 mb-3">2. Data We Collect</h2>
+        <h2 className="text-xl font-semibold text-slate-800 mb-3 dark:text-slate-100">2. Data We Collect</h2>
         <ul className="list-disc pl-6 space-y-2">
           <li><strong>Account data:</strong> email address, name, business name, role (buyer / supplier / warehouse).</li>
           <li><strong>Order data:</strong> product names, quantities, shipping addresses, tracking numbers imported from connected stores.</li>
@@ -36,7 +36,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-xl font-semibold text-slate-800 mb-3">3. How We Use Your Data</h2>
+        <h2 className="text-xl font-semibold text-slate-800 mb-3 dark:text-slate-100">3. How We Use Your Data</h2>
         <ul className="list-disc pl-6 space-y-2">
           <li>To provide sourcing quotes, order management, and fulfillment services.</li>
           <li>To sync orders from your connected Shopify store in real time.</li>
@@ -47,7 +47,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-xl font-semibold text-slate-800 mb-3">4. Shopify Data</h2>
+        <h2 className="text-xl font-semibold text-slate-800 mb-3 dark:text-slate-100">4. Shopify Data</h2>
         <p className="mb-2">
           When you connect a Shopify store, we request access to read orders, products,
           inventory, and merchant-managed fulfillment orders. We also request permission
@@ -56,14 +56,14 @@ export default function PrivacyPage() {
         </p>
         <p>
           We comply with Shopify&rsquo;s GDPR requirements. Upon receiving a
-          <code className="bg-slate-100 px-1 rounded text-sm">customers/redact</code> or{" "}
-          <code className="bg-slate-100 px-1 rounded text-sm">shop/redact</code> webhook, we
+          <code className="bg-slate-100 px-1 rounded text-sm dark:bg-slate-800 dark:text-slate-100">customers/redact</code> or{" "}
+          <code className="bg-slate-100 px-1 rounded text-sm dark:bg-slate-800 dark:text-slate-100">shop/redact</code> webhook, we
           anonymize or delete the relevant records from our database within 30 days.
         </p>
       </section>
 
       <section className="mb-8">
-        <h2 className="text-xl font-semibold text-slate-800 mb-3">5. Data Sharing</h2>
+        <h2 className="text-xl font-semibold text-slate-800 mb-3 dark:text-slate-100">5. Data Sharing</h2>
         <p>We do not sell your data. We share data only with:</p>
         <ul className="list-disc pl-6 space-y-2 mt-2">
                 <li><strong>Supabase</strong> for database and authentication hosting.</li>
@@ -74,7 +74,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-xl font-semibold text-slate-800 mb-3">6. Data Retention</h2>
+        <h2 className="text-xl font-semibold text-slate-800 mb-3 dark:text-slate-100">6. Data Retention</h2>
         <p>
           We retain your account and order data for as long as your account is active.
           If you close your account, we delete your personal data within 30 days,
@@ -83,7 +83,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-xl font-semibold text-slate-800 mb-3">7. Your Rights</h2>
+        <h2 className="text-xl font-semibold text-slate-800 mb-3 dark:text-slate-100">7. Your Rights</h2>
         <p>You have the right to:</p>
         <ul className="list-disc pl-6 space-y-2 mt-2">
           <li>Access the personal data we hold about you.</li>
@@ -94,12 +94,12 @@ export default function PrivacyPage() {
         </ul>
         <p className="mt-3">
           To exercise these rights, email us at{" "}
-          <a href={`mailto:${email}`} className="text-indigo-600 underline">{email}</a>.
+          <a href={`mailto:${email}`} className="text-indigo-600 underline dark:text-indigo-400">{email}</a>.
         </p>
       </section>
 
       <section className="mb-8">
-        <h2 className="text-xl font-semibold text-slate-800 mb-3">8. Cookies</h2>
+        <h2 className="text-xl font-semibold text-slate-800 mb-3 dark:text-slate-100">8. Cookies</h2>
         <p>
           We use only essential session cookies required for authentication and security
           (OAuth state tokens, Supabase session). We do not use tracking or advertising cookies.
@@ -107,7 +107,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-xl font-semibold text-slate-800 mb-3">9. Security</h2>
+        <h2 className="text-xl font-semibold text-slate-800 mb-3 dark:text-slate-100">9. Security</h2>
         <p>
           All data is transmitted over HTTPS. Shopify access tokens are stored encrypted.
           Passwords are handled by Supabase Auth (bcrypt-hashed). We conduct regular
@@ -116,7 +116,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-xl font-semibold text-slate-800 mb-3">10. Changes to This Policy</h2>
+        <h2 className="text-xl font-semibold text-slate-800 mb-3 dark:text-slate-100">10. Changes to This Policy</h2>
         <p>
           We may update this policy periodically. We&rsquo;ll notify you by email or
           an in-app notice for material changes. Continued use of FastFulfill after
@@ -125,10 +125,10 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold text-slate-800 mb-3">11. Contact</h2>
+        <h2 className="text-xl font-semibold text-slate-800 mb-3 dark:text-slate-100">11. Contact</h2>
         <p>
           Questions? Email us at{" "}
-          <a href={`mailto:${email}`} className="text-indigo-600 underline">{email}</a>.
+          <a href={`mailto:${email}`} className="text-indigo-600 underline dark:text-indigo-400">{email}</a>.
         </p>
       </section>
     </div>

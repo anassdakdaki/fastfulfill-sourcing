@@ -32,21 +32,21 @@ const ROWS = [
     agent: "partial",
   },
   {
-    feature: "Private label / branding",
+    feature: "Logo and brand packaging",
     ff: "yes",
     zendrop: "no",
     cj: "no",
     agent: "partial",
   },
   {
-    feature: "Physical QC inspection",
+    feature: "Quality check before shipping",
     ff: "yes",
     zendrop: "no",
     cj: "no",
     agent: "partial",
   },
   {
-    feature: "Shopify auto-sync",
+    feature: "Store auto-sync",
     ff: "yes",
     zendrop: "yes",
     cj: "yes",
@@ -60,7 +60,7 @@ const ROWS = [
     agent: "negotiated",
   },
   {
-    feature: "Dedicated sourcing agent",
+    feature: "Product helper",
     ff: "yes",
     zendrop: "no",
     cj: "no",
@@ -117,8 +117,7 @@ export function Comparison() {
             How we compare
           </h2>
           <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-            Less cost. Faster shipping. Real quality control. Here&apos;s how FastFulfill
-            stacks up against the alternatives.
+            Lower prices, faster shipping, and product checks before delivery.
           </p>
         </div>
 
@@ -171,9 +170,9 @@ export function Comparison() {
 
         <div className="mt-8 text-center">
           <Link href="/auth/signup">
-            <Button size="lg">Get a Free Quote in 24h</Button>
+            <Button size="lg">Get a Free Product Price in 24h</Button>
           </Link>
-          <p className="mt-3 text-xs text-gray-400 dark:text-gray-500">No credit card. No monthly fee. Just the quote.</p>
+          <p className="mt-3 text-xs text-gray-400 dark:text-gray-500">No credit card. No monthly fee. Just a clear price.</p>
         </div>
       </div>
     </section>

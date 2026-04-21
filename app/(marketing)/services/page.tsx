@@ -8,74 +8,74 @@ export const metadata: Metadata = { title: "Services" };
 const SERVICES = [
   {
     icon: Search,
-    color: "bg-brand-50 text-brand-600",
-    title: "Product Sourcing",
+    color: "bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-300",
+    title: "Find Products",
     description:
-      "Share a product URL or description and our sourcing team will find the best factory, negotiate price, and arrange samples, all within 24 hours.",
+      "Share a product link, name, or photo. We find factory options, check the price, and can arrange a sample within 24 hours.",
     features: [
-      "Factory-direct pricing",
-      "Multi-supplier comparison",
-      "Sample ordering & QC",
-      "Private label support",
-      "MOQ negotiation",
+      "Clear factory price",
+      "Compare supplier options",
+      "Sample order support",
+      "Product quality check",
+      "Minimum order explained",
     ],
   },
   {
     icon: Warehouse,
-    color: "bg-purple-50 text-purple-600",
-    title: "Warehousing",
+    color: "bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300",
+    title: "Store Products",
     description:
-      "Store your inventory in our strategically located warehouses in Shenzhen, Guangzhou, and Yiwu. Full visibility of stock levels in your dashboard.",
+      "Store your products in our warehouses in China and see what is available from your dashboard.",
     features: [
-      "Secure climate-controlled storage",
-      "Real-time inventory tracking",
-      "Photo & video documentation",
-      "Flexible storage terms",
-      "Low minimum storage requirements",
+      "Safe storage",
+      "See stock count anytime",
+      "Product photos and videos",
+      "Flexible storage time",
+      "Low minimum storage",
     ],
   },
   {
     icon: Package,
-    color: "bg-orange-50 text-orange-600",
-    title: "Order Fulfillment",
+    color: "bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300",
+    title: "Pack and Ship Orders",
     description:
-      "Send us your orders and we pick, pack, and ship. Custom packaging, branded inserts, and kitting services available.",
+      "Send us your orders and we pick, pack, and ship them to your customers. Custom packaging is available.",
     features: [
-      "Same-day processing",
-      "Custom packaging & branding",
-      "Product bundles & kitting",
-      "Returns management",
-      "B2C & B2B fulfillment",
+      "Fast order handling",
+      "Custom packaging",
+      "Product bundles",
+      "Return support",
+      "Online store and bulk orders",
     ],
   },
   {
     icon: Globe,
-    color: "bg-green-50 text-green-600",
+    color: "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-300",
     title: "Global Shipping",
     description:
-      "Ship to 40+ countries with DDP shipping with no surprise customs fees for your customers. Express options available for 7-day delivery.",
+      "Ship to 40+ countries with tracking. We explain the shipping cost and delivery time before you confirm.",
     features: [
-      "DDP shipping (duties paid)",
-      "7-15 day express delivery",
-      "Full tracking on every package",
-      "ePacket & standard options",
-      "Bulk freight for large orders",
+      "No surprise shipping steps",
+      "7-15 day fast delivery options",
+      "Tracking on every package",
+      "Standard and express options",
+      "Large order shipping",
     ],
   },
 ];
 
 export default function ServicesPage() {
   return (
-    <div>
+    <div className="bg-white dark:bg-gray-950">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-gray-50 to-brand-50 py-20 border-b border-gray-100 text-center">
+      <section className="bg-gradient-to-br from-gray-50 to-brand-50 py-20 border-b border-gray-100 text-center dark:from-gray-950 dark:to-gray-900 dark:border-gray-800">
         <div className="container-section max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-widest text-brand-600 mb-3">Our Services</p>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
-            Everything from Source to Doorstep
+          <p className="text-xs font-semibold uppercase tracking-widest text-brand-600 mb-3 dark:text-brand-300">Our Services</p>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4 dark:text-white">
+            Everything from Product Search to Delivery
           </h1>
-          <p className="text-gray-500 text-lg">
-            FastFulfill is your all-in-one China operations team for sourcing, storage, fulfillment, and shipping under one roof.
+          <p className="text-gray-500 text-lg dark:text-gray-400">
+            FastFulfill helps you find products, store them, pack orders, and ship to customers from one place.
           </p>
           <div className="mt-8 flex gap-4 justify-center flex-wrap">
             <Link href="/auth/signup">
@@ -89,7 +89,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Services */}
-      <section className="py-20">
+      <section className="py-20 bg-white dark:bg-gray-950">
         <div className="container-section">
           <div className="space-y-16">
             {SERVICES.map((service, i) => {
@@ -104,21 +104,21 @@ export default function ServicesPage() {
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5 ${service.color}`}>
                       <Icon size={22} />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-3">{service.title}</h2>
-                    <p className="text-gray-500 leading-relaxed mb-6">{service.description}</p>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-3 dark:text-white">{service.title}</h2>
+                    <p className="text-gray-500 leading-relaxed mb-6 dark:text-gray-400">{service.description}</p>
                     <Link href="/auth/signup">
                       <Button size="sm">
-                        Start {service.title} <ArrowRight size={14} />
+                        Start <ArrowRight size={14} />
                       </Button>
                     </Link>
                   </div>
-                  <div className="flex-1 bg-gray-50 rounded-2xl border border-gray-100 p-8">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
+                  <div className="flex-1 bg-gray-50 rounded-2xl border border-gray-100 p-8 dark:bg-gray-900 dark:border-gray-800">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4 dark:text-gray-500">
                       What&apos;s included
                     </p>
                     <ul className="space-y-3">
                       {service.features.map((f) => (
-                        <li key={f} className="flex items-center gap-3 text-sm text-gray-700">
+                        <li key={f} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                           <CheckCircle2 size={16} className="text-green-500 shrink-0" />
                           {f}
                         </li>

@@ -437,14 +437,9 @@ function tokenExpiresSoon(expiresAt: string | null) {
 }
 
 /** @internal Used only within syncShopifyOrders – loaded via the caller's client. */
-async function loadIntegrationSecrets(id: string): Promise<IntegrationSecretRecord> {
-  // This path is kept for ensureFreshIntegration; supabase client is passed at callsite.
-  // Actual loading happens in syncShopifyOrders using the caller's client.
-  throw new Error(`loadIntegrationSecrets(${id}): call syncShopifyOrders(supabase, id) instead`);
-}
-
 /** @deprecated Use fn_shopify_lookup_integration RPC in the webhook route. */
 export async function loadShopifyIntegrationByDomain(_shopDomain: string) {
+  void _shopDomain;
   return null;
 }
 
@@ -621,63 +616,6 @@ async function ensureFreshIntegration(integration: IntegrationSecretRecord) {
   };
 }
 
-async function shopifyGraphQL<T>(
-  integration: IntegrationSecretRecord,
-  query: string,
-  variables: Record<string, unknown>
-) {
-  const freshIntegration = await ensureFreshIntegration(integration);
-
-  const response = await fetch(
-    `https://${freshIntegration.store_domain ?? freshIntegration.store_url}/admin/api/${SHOPIFY_API_VERSION}/graphql.json`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Access-Token": freshIntegration.access_token ?? "",
-      },
-      body: JSON.stringify({ query, variables }),
-    }
-  );
-
-  if (response.status === 401 && freshIntegration.refresh_token) {
-    const refreshed = await refreshShopifyToken(
-      freshIntegration.store_domain ?? freshIntegration.store_url,
-      freshIntegration.refresh_token
-    );
-    const persisted = await persistIntegrationTokens(freshIntegration.id, refreshed);
-    const retryResponse = await fetch(
-      `https://${freshIntegration.store_domain ?? freshIntegration.store_url}/admin/api/${SHOPIFY_API_VERSION}/graphql.json`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Access-Token": persisted.access_token,
-        },
-        body: JSON.stringify({ query, variables }),
-      }
-    );
-
-    return parseGraphqlResponse<T>(retryResponse);
-  }
-
-  return parseGraphqlResponse<T>(response);
-}
-
-function parseGraphqlResponse<T>(response: Response) {
-  return response.json().then((payload) => {
-    if (!response.ok) {
-      throw new Error(payload.errors?.[0]?.message ?? "Shopify request failed");
-    }
-
-    if (payload.errors?.length) {
-      throw new Error(payload.errors[0].message ?? "Shopify GraphQL request failed");
-    }
-
-    return payload.data as T;
-  });
-}
-
 async function shopifyRest<T>(integration: IntegrationSecretRecord, url: string) {
   const freshIntegration = await ensureFreshIntegration(integration);
 
@@ -790,10 +728,6 @@ function buildShippingAddress(address?: ShopifyRestAddress | null) {
     company: address.company ?? null,
     phone: address.phone ?? null,
   };
-}
-
-function buildFulfillmentRef() {
-  return `FF-ORD-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
 }
 
 // ── Pure mapping helper (no DB) ───────────────────────────────────────────────

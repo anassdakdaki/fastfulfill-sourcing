@@ -2,20 +2,17 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   Warehouse,
   LayoutDashboard,
   PackageCheck,
   ClipboardList,
   Archive,
-  Settings,
-  Truck,
-  LogOut,
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
+import { AccountMenu } from "@/components/layout/account-menu";
 
 interface FulfillmentSidebarProps {
   userEmail?: string;
@@ -29,33 +26,20 @@ export default function FulfillmentSidebar({
   pendingOrders = 0,
 }: FulfillmentSidebarProps) {
   const pathname = usePathname();
-  const router   = useRouter();
-  const supabase = createClient();
-
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    router.push("/auth/login");
-  }
 
   const NAV_SECTIONS = [
     {
-      label: "Operations",
+      label: "Warehouse work",
       items: [
-        { href: "/fulfillment",          label: "Overview",      icon: LayoutDashboard, badge: 0 },
-        { href: "/fulfillment/inbound",  label: "Inbound Stock", icon: PackageCheck,    badge: pendingInbound, badgeColor: "bg-amber-500" },
-        { href: "/fulfillment/orders",   label: "Orders Queue",  icon: ClipboardList,   badge: pendingOrders,  badgeColor: "bg-red-500" },
+        { href: "/fulfillment",          label: "Home",          icon: LayoutDashboard, badge: 0 },
+        { href: "/fulfillment/inbound",  label: "Stock arriving", icon: PackageCheck, badge: pendingInbound, badgeColor: "bg-amber-500" },
+        { href: "/fulfillment/orders",   label: "Orders to ship", icon: ClipboardList, badge: pendingOrders, badgeColor: "bg-red-500" },
       ],
     },
     {
-      label: "Warehouse",
+      label: "Products",
       items: [
-        { href: "/fulfillment/inventory", label: "Inventory", icon: Archive, badge: 0 },
-      ],
-    },
-    {
-      label: "Account",
-      items: [
-        { href: "/fulfillment/settings", label: "Settings", icon: Settings, badge: 0 },
+        { href: "/fulfillment/inventory", label: "Products in stock", icon: Archive, badge: 0 },
       ],
     },
   ];
@@ -126,24 +110,19 @@ export default function FulfillmentSidebar({
         ))}
       </nav>
 
-      {/* Bottom: user chip + logout */}
-      <div className="px-3 py-4 border-t border-slate-700/60 space-y-1">
-        <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-slate-800">
-          <div className="w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center shrink-0">
-            <Truck size={14} className="text-slate-300" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-slate-300 truncate">Fulfillment Partner</p>
-            {userEmail && <p className="text-[10px] text-slate-500 truncate mt-0.5">{userEmail}</p>}
-          </div>
-        </div>
-        <button
-          onClick={handleSignOut}
-          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:bg-red-950/60 hover:text-red-400 transition-colors w-full"
-        >
-          <LogOut size={17} />
-          <span>Sign out</span>
-        </button>
+      {/* Bottom */}
+      <div className="px-3 py-4 border-t border-slate-700/60">
+        <AccountMenu
+          userEmail={userEmail}
+          accountName="Warehouse team"
+          roleLabel="Fulfillment partner"
+          signOutRedirect="/auth/login"
+          profileHref="/fulfillment/settings"
+          billingHref="/fulfillment/settings"
+          notificationsHref="/fulfillment/settings"
+          trackingHref="/fulfillment/orders"
+          apiHref="/fulfillment/settings"
+        />
       </div>
     </aside>
   );

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowLeft, CheckCircle, Loader2, Truck,
-  Package, Tag, ToggleLeft, ToggleRight, AlertCircle, Zap,
+  ToggleLeft, ToggleRight, AlertCircle,
 } from "lucide-react";
 
 const STEPS = ["API Credentials", "Connecting", "Connected"];

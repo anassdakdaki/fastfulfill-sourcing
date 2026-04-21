@@ -6,12 +6,12 @@ import { cn } from "@/lib/utils";
 
 const FAQS = [
   {
-    q: "What is the minimum order quantity (MOQ)?",
-    a: "For sourcing and fulfillment, there is no minimum. We can handle single unit dropshipping. For bulk orders or private label, MOQs depend on the product and supplier, typically starting at 50 to 200 units. Your agent will clarify this in the quote.",
+    q: "Do I need to order many products at once?",
+    a: "For normal online orders, there is no minimum. We can ship one item at a time. For custom packaging or big orders, the minimum depends on the product and factory. We will explain it before you pay.",
   },
   {
-    q: "How does Shopify integration work?",
-    a: "You connect your Shopify store with one click via OAuth. Once connected, every new order automatically appears in your FastFulfill dashboard. When the order ships, the tracking number is pushed back to Shopify and your customer is notified with no manual work needed.",
+    q: "Which store platforms can I connect?",
+    a: "You can connect Shopify, TikTok Shop, Amazon, WooCommerce, and supported custom stores. Once connected, every new order appears in your FastFulfill dashboard automatically. When the order ships, tracking is pushed back to the sales channel where supported.",
   },
   {
     q: "What happens if a product arrives damaged or defective?",
@@ -19,23 +19,23 @@ const FAQS = [
   },
   {
     q: "When do I pay? Is there a monthly fee?",
-    a: "No monthly subscription. You pay per order fulfilled, plus the product cost. Invoices are issued through the platform and can be paid by card via Stripe. You see the full cost breakdown before confirming any order.",
+    a: "There is no monthly subscription. You pay for the product and shipping when you place an order. You see the full price before you confirm.",
   },
   {
     q: "Can I order a sample before placing a bulk order?",
-    a: "Yes. We strongly recommend it. Your agent can arrange a physical sample from the supplier, shipped to you directly. Sample costs are typically $20 to $80 depending on the product, plus shipping. This is the best way to verify quality before committing.",
+    a: "Yes. We recommend ordering a sample first. We can send one product to you so you can check the quality before buying more.",
   },
   {
     q: "How long does shipping take?",
-    a: "Typical delivery times: USA 7 to 12 days, UK 8 to 13 days, EU 9 to 15 days, Australia 10 to 16 days. These are real estimates based on our shipping partners, not the inflated averages you see on other platforms. Express options are available for faster timelines.",
+    a: "Typical delivery times: USA 7 to 12 days, UK 8 to 13 days, EU 9 to 15 days, Australia 10 to 16 days. Faster shipping can be arranged for some products.",
   },
   {
     q: "Do you handle returns?",
-    a: "Yes. We work with you to set a return policy based on your product type. For defective items, we reship at no cost. For buyer remorse returns, we can receive and re-inventory at your warehouse. This is handled case by case with your agent.",
+    a: "Yes. If an item is defective, we help replace it or solve the issue. Return rules depend on your product and store policy.",
   },
   {
     q: "Can I use my own packaging and branding?",
-    a: "Absolutely. We offer full white label and private label support with custom boxes, inserts, poly bags, thank you cards, stickers, and hang tags. Packaging artwork is coordinated with the factory by your agent.",
+    a: "Yes. We can help with custom boxes, cards, bags, stickers, and labels. We help arrange this with the factory.",
   },
 ];
 
@@ -51,7 +51,7 @@ export function FAQ() {
             Questions before you start
           </h2>
           <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-            Everything dropshippers ask before trusting a new fulfillment partner.
+            Simple answers for new sellers before they start.
           </p>
         </div>
 

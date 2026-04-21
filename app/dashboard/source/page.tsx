@@ -286,7 +286,7 @@ export default function SourceRequestPage() {
               <Search size={22} className="text-gray-400" />
             </div>
             <p className="text-sm font-semibold text-gray-900">No sourcing requests yet</p>
-            <p className="text-sm text-gray-500 mt-1 max-w-xs">Submit your first request and we'll get back to you with a quote within 24 hours.</p>
+            <p className="text-sm text-gray-500 mt-1 max-w-xs">Submit your first request and we&apos;ll get back to you with a quote within 24 hours.</p>
             <Button className="mt-5" size="sm" onClick={() => setShowForm(true)} disabled={storeConnected === false}>
               <Plus size={15} /> New Request
             </Button>

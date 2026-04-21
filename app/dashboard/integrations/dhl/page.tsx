@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowLeft, CheckCircle, Loader2,
-  Globe, ToggleLeft, ToggleRight, AlertCircle, Zap, Package,
+  ToggleLeft, ToggleRight, AlertCircle, Zap, Package,
 } from "lucide-react";
 
 const STEPS = ["Account ID", "Connecting", "Connected"];

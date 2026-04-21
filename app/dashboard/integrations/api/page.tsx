@@ -309,7 +309,11 @@ export default function ApiKeysPage() {
                   <button
                     onClick={() => setRevealedKeys(prev => {
                       const n = new Set(prev);
-                      n.has(k.id) ? n.delete(k.id) : n.add(k.id);
+                      if (n.has(k.id)) {
+                        n.delete(k.id);
+                      } else {
+                        n.add(k.id);
+                      }
                       return n;
                     })}
                     className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100"

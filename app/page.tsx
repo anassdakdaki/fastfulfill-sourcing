@@ -12,9 +12,9 @@ import { CtaBanner } from "@/components/home/cta-banner";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "FastFulfill Shopify Fulfillment from China | Quotes in 24h",
+  title: "FastFulfill Product Sourcing and Shipping from China | Prices in 24h",
   description:
-    "Source products from China, inspect them in our Shenzhen warehouse, and ship direct to your customers in 7 to 12 days. No monthly fee. Connect your Shopify store and automate fulfillment.",
+    "Find products from China, check them in our Shenzhen warehouse, and ship direct to your customers in 7 to 12 days. No monthly fee. Connect Shopify, TikTok Shop, Amazon, WooCommerce, or another store.",
 };
 
 export default function HomePage() {
@@ -35,7 +35,7 @@ export default function HomePage() {
       {/* 5. Benefits / features */}
       <Benefits />
 
-      {/* 6. Fulfillment flow showing how Shopify orders move */}
+      {/* 6. Order flow */}
       <FulfillmentFlow />
 
       {/* 7. Stats bar */}
