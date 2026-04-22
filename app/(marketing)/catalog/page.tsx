@@ -65,11 +65,11 @@ export default function CatalogPage() {
             <p className="text-sm mt-1">Try a different search or category.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
             {filtered.map((product) => (
               <div
                 key={product.id}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow group dark:bg-gray-900 dark:border-gray-800"
+                className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
               >
                 <div className="relative aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
                   <Image
@@ -77,20 +77,20 @@ export default function CatalogPage() {
                     alt={product.name}
                     fill
                     unoptimized
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                   />
-                  <span className="absolute top-3 left-3 text-xs bg-white/90 backdrop-blur-sm border border-gray-100 px-2 py-1 rounded-full font-medium text-gray-600 dark:bg-gray-950/80 dark:border-gray-700 dark:text-gray-300">
+                  <span className="absolute left-2 top-2 rounded-full border border-gray-100 bg-white/90 px-2 py-1 text-[10px] font-medium text-gray-600 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-950/80 dark:text-gray-300 sm:left-3 sm:top-3 sm:text-xs">
                     {product.category}
                   </span>
                 </div>
-                <div className="p-4">
-                  <h3 className="text-sm font-semibold text-gray-900 leading-snug mb-1 dark:text-white">{product.name}</h3>
-                  <p className="text-xs text-gray-400 mb-3 dark:text-gray-500">
+                <div className="p-3 sm:p-4">
+                  <h3 className="mb-1 text-[13px] font-semibold leading-snug text-gray-900 dark:text-white sm:text-sm">{product.name}</h3>
+                  <p className="mb-3 text-[11px] text-gray-400 dark:text-gray-500 sm:text-xs">
                     From <span className="font-semibold text-gray-600 dark:text-gray-300">${product.minPrice}</span> each | Minimum order {product.moq}
                   </p>
                   <Link href="/auth/signup">
-                    <Button className="w-full" size="sm">
+                    <Button className="w-full px-2 text-xs sm:px-3" size="sm">
                       Ask for Price <ArrowRight size={13} />
                     </Button>
                   </Link>

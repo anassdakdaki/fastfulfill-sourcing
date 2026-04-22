@@ -100,7 +100,7 @@ export function AccountMenu({
         className={cn(
           "flex items-center gap-2 rounded-2xl border text-left transition-colors",
           placement === "topbar"
-            ? "h-11 min-w-[220px] justify-end border-gray-200 bg-white px-3 text-gray-950 shadow-sm hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-white dark:hover:bg-gray-800"
+            ? "h-11 max-w-[calc(100vw-5.25rem)] justify-end border-gray-200 bg-white px-3 text-gray-950 shadow-sm hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-white dark:hover:bg-gray-800 sm:min-w-[220px]"
             : "w-full border-slate-700 bg-slate-900 px-3 py-2.5 text-white hover:bg-slate-800"
         )}
       >
@@ -117,14 +117,14 @@ export function AccountMenu({
       {open && (
         <div
           className={cn(
-            "absolute z-50 w-[338px] overflow-hidden rounded-3xl border bg-white text-gray-950 shadow-2xl dark:border-gray-800 dark:bg-gray-950 dark:text-white",
+            "absolute z-50 w-[300px] overflow-hidden rounded-2xl border bg-white text-gray-950 shadow-xl dark:border-gray-800 dark:bg-gray-950 dark:text-white",
             placement === "topbar"
-              ? "right-0 top-14 shadow-gray-900/10 dark:shadow-black/40"
+              ? "right-0 top-12 w-[calc(100vw-1rem)] shadow-gray-900/10 dark:shadow-black/40 sm:w-[300px]"
               : "bottom-14 left-0 border-gray-200 shadow-gray-900/10 dark:shadow-black/40"
           )}
         >
-          <div className="px-7 py-6">
-            <p className="truncate text-base font-bold">{userEmail ?? name}</p>
+          <div className="px-5 py-4">
+            <p className="truncate text-sm font-bold">{userEmail ?? name}</p>
             <div className="mt-1 flex items-center justify-between gap-3">
               <Link
                 href="/pricing"
@@ -136,30 +136,31 @@ export function AccountMenu({
             </div>
           </div>
 
-          <div className="border-t border-gray-200 py-4 dark:border-gray-800">
+          <div className="max-h-[calc(100vh-10rem)] overflow-y-auto border-t border-gray-200 dark:border-gray-800">
+          <div className="py-2">
             {mainItems.map(({ href, label, icon: Icon }) => (
               <Link
                 key={label}
                 href={href}
-                className="flex items-center gap-4 px-7 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50 dark:text-slate-100 dark:hover:bg-slate-900"
+                className="flex items-center gap-3 px-5 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 dark:text-slate-100 dark:hover:bg-slate-900"
                 onClick={() => setOpen(false)}
               >
-                <Icon size={19} className="text-gray-600 dark:text-slate-300" />
+                <Icon size={17} className="text-gray-600 dark:text-slate-300" />
                 <span>{label}</span>
               </Link>
             ))}
 
-            <div className="flex items-center gap-4 px-7 py-3 text-sm font-semibold text-gray-900 dark:text-slate-100">
-              <Sun size={19} className="text-gray-600 dark:text-slate-300" />
+            <div className="flex items-center gap-3 px-5 py-2.5 text-sm font-semibold text-gray-900 dark:text-slate-100">
+              <Sun size={17} className="text-gray-600 dark:text-slate-300" />
               <span className="flex-1">Theme</span>
               <div className="rounded-full bg-gray-100 px-1 py-0.5 dark:bg-slate-800">
                 <ThemeToggle />
               </div>
-              <Moon size={17} className="text-gray-500 dark:text-slate-400" />
+              <Moon size={15} className="text-gray-500 dark:text-slate-400" />
             </div>
 
-            <div className="relative flex items-center gap-4 px-7 py-3 text-sm font-semibold text-gray-900 dark:text-slate-100">
-              <Globe2 size={19} className="text-gray-600 dark:text-slate-300" />
+            <div className="relative flex items-center gap-3 px-5 py-2.5 text-sm font-semibold text-gray-900 dark:text-slate-100">
+              <Globe2 size={17} className="text-gray-600 dark:text-slate-300" />
               <span className="flex-1">Language</span>
               <button
                 type="button"
@@ -170,7 +171,7 @@ export function AccountMenu({
                 <ChevronDown size={14} className={cn("text-gray-500 transition-transform dark:text-slate-500", languageOpen && "rotate-180")} />
               </button>
               {languageOpen && (
-                <div className="absolute right-6 top-11 z-10 w-44 rounded-2xl border border-gray-200 bg-white p-2 shadow-xl dark:border-gray-800 dark:bg-gray-900">
+                <div className="absolute right-5 top-10 z-10 w-40 rounded-2xl border border-gray-200 bg-white p-2 shadow-xl dark:border-gray-800 dark:bg-gray-900">
                   {["English", "Portuguese", "German", "French", "Chinese"].map((language) => (
                     <button
                       key={language}
@@ -186,35 +187,36 @@ export function AccountMenu({
             </div>
           </div>
 
-          <div className="border-t border-gray-200 py-4 dark:border-gray-800">
+          <div className="border-t border-gray-200 py-2 dark:border-gray-800">
             {resourceItems.map(({ href, label, icon: Icon }) => (
               <Link
                 key={label}
                 href={href}
-                className="flex items-center gap-4 px-7 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50 dark:text-slate-100 dark:hover:bg-slate-900"
+                className="flex items-center gap-3 px-5 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 dark:text-slate-100 dark:hover:bg-slate-900"
                 onClick={() => setOpen(false)}
               >
-                <Icon size={19} className="text-gray-600 dark:text-slate-300" />
+                <Icon size={17} className="text-gray-600 dark:text-slate-300" />
                 <span>{label}</span>
               </Link>
             ))}
             <button
               type="button"
               onClick={handleSignOut}
-              className="flex w-full items-center gap-4 px-7 py-3 text-left text-sm font-semibold text-gray-900 hover:bg-gray-50 dark:text-slate-100 dark:hover:bg-slate-900"
+              className="flex w-full items-center gap-3 px-5 py-2.5 text-left text-sm font-semibold text-gray-900 hover:bg-gray-50 dark:text-slate-100 dark:hover:bg-slate-900"
             >
-              <LogOut size={19} />
+              <LogOut size={17} />
               <span>Logout</span>
             </button>
           </div>
 
-          <div className="flex gap-5 border-t border-gray-200 px-7 py-4 text-xs text-gray-500 dark:border-gray-800 dark:text-slate-400">
+          <div className="flex gap-5 border-t border-gray-200 px-5 py-3 text-xs text-gray-500 dark:border-gray-800 dark:text-slate-400">
             <Link href="/pricing" onClick={() => setOpen(false)} className="hover:text-gray-900 dark:hover:text-white">
               Terms
             </Link>
             <Link href="/privacy" onClick={() => setOpen(false)} className="hover:text-gray-900 dark:hover:text-white">
               Privacy policy
             </Link>
+          </div>
           </div>
         </div>
       )}

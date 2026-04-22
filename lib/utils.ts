@@ -41,6 +41,10 @@ export function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
+export function formatReadingTime(minutes: number): string {
+  return `${Math.max(1, Math.round(minutes))} min read`;
+}
+
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   pending:    "Pending",
   processing: "Processing",

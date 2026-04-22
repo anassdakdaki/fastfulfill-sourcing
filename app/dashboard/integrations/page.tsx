@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   CheckCircle2, AlertCircle, RefreshCw, Plug, Key,
-  Zap, ToggleLeft, ToggleRight, Warehouse,
-  Truck, Package, Info, Loader2, X,
+  Zap, ToggleLeft, ToggleRight, Loader2, X,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -63,44 +62,7 @@ const PLATFORM_META: Record<IntegrationPlatform, {
   },
 };
 
-/* 3PL meta for display only with no DB needed */
-type ThreePLId = "shipbob" | "shipstation" | "easyship" | "dhl";
-const THREE_PL_META: Record<ThreePLId, {
-  name: string; logo: string; tagline: string;
-  color: string; bestFor: string; features: string[];
-}> = {
-  shipbob: {
-    name: "ShipBob", logo: "📬",
-    tagline: "US, EU, Canada, Australia warehouses",
-    color: "bg-blue-50 border-blue-200",
-    bestFor: "Ideal for US/EU sellers with the largest 3PL network and full REST API",
-    features: ["Auto-forward orders on receipt", "Real-time inventory at warehouse", "Tracking auto-synced back", "Multi-warehouse routing", "Returns management"],
-  },
-  shipstation: {
-    name: "ShipStation", logo: "🚢",
-    tagline: "Connects 70+ carriers including USPS, FedEx, UPS, DHL",
-    color: "bg-indigo-50 border-indigo-200",
-    bestFor: "Best if you use multiple carriers or your own warehouse staff",
-    features: ["Generate labels for 70+ carriers", "Batch fulfill multiple orders", "Branded packing slips", "Automatic tracking updates", "Rate shopping across carriers"],
-  },
-  easyship: {
-    name: "Easyship", logo: "✈️",
-    tagline: "International shipping built for Asia to world routes",
-    color: "bg-cyan-50 border-cyan-200",
-    bestFor: "Best for cross border shipping, especially sourcing from China/Asia",
-    features: ["DDP (Duties Delivered Paid) pricing", "250+ courier options", "Asia-origin optimised routing", "Live rate comparison", "Automated customs docs"],
-  },
-  dhl: {
-    name: "DHL eCommerce", logo: "🟡",
-    tagline: "Global network across 220+ countries",
-    color: "bg-yellow-50 border-yellow-200",
-    bestFor: "Best for high-volume international, especially EU and Asia",
-    features: ["Global last-mile delivery", "China Preferred Partner", "Landed cost calculator", "Parcel tracking API", "Pickup scheduling"],
-  },
-};
-
 const PLATFORMS  = Object.keys(PLATFORM_META) as IntegrationPlatform[];
-const THREE_PLS  = Object.keys(THREE_PL_META) as ThreePLId[];
 const LIVE_PLATFORM: IntegrationPlatform = "shopify";
 
 const SHOPIFY_CONNECT_REASON_COPY: Record<string, string> = {
@@ -316,7 +278,7 @@ export default function IntegrationsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Integrations</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            Connect Shopify and your fulfillment partners to automate your operation.
+            Connect Shopify and automate your store operation.
           </p>
         </div>
         <Link href="/dashboard/integrations/api">
@@ -643,70 +605,7 @@ export default function IntegrationsPage() {
       </section>
 
       {/* ══════════════════════════════════
-      SECTION 2 FULFILLMENT PARTNERS
-         ══════════════════════════════════ */}
-      <section className="space-y-5">
-        <div className="flex items-center gap-2">
-          <Warehouse size={18} className="text-gray-600" />
-          <h2 className="text-base font-semibold text-gray-900">Fulfillment Partners (3PL)</h2>
-        </div>
-
-        <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-2xl px-5 py-4 text-sm text-blue-900">
-          <Info size={16} className="shrink-0 mt-0.5 text-blue-500" />
-          <div>
-            <p className="font-semibold">How 3PL fulfillment works with FastFulfill</p>
-            <p className="text-xs text-blue-800 mt-1">
-              FastFulfill stores your stock in our warehouse and fulfills orders manually or routes them to a
-              3PL partner via API. Your customers never know who fulfilled the order.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {THREE_PLS.map((id) => {
-            const p = THREE_PL_META[id];
-            return (
-              <div key={id} className={`rounded-2xl border p-5 ${p.color}`}>
-                <div className="flex items-start gap-3 mb-3">
-                  <span className="text-2xl">{p.logo}</span>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold text-gray-900">{p.name}</h3>
-                    <p className="text-xs text-gray-500 mt-0.5">{p.tagline}</p>
-                  </div>
-                  <span className="text-[10px] font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">Full API</span>
-                </div>
-                <p className="text-xs text-gray-600 mb-3 bg-white/60 rounded-xl px-3 py-2 italic">{p.bestFor}</p>
-                <ul className="space-y-1 mb-4">
-                  {p.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
-                      <CheckCircle2 size={11} className="text-green-500 shrink-0" /> {f}
-                    </li>
-                  ))}
-                </ul>
-                <Button size="sm" variant="outline" className="w-full">
-                  <Truck size={13} /> Coming soon
-                </Button>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5">
-          <div className="flex items-start gap-3">
-            <Package size={18} className="text-gray-500 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-gray-800">No 3PL needed to get started</p>
-              <p className="text-xs text-gray-500 mt-1">
-                FastFulfill&apos;s warehouse team handles picking, packing and shipping manually for every order in your
-                fulfillment queue. Connect a 3PL later to automate at scale.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════
-      SECTION 3 FULL FLOW EXPLAINER
+      SECTION 2 FULL FLOW EXPLAINER
          ══════════════════════════════════ */}
       <section className="bg-gray-50 rounded-2xl border border-gray-100 p-6">
         <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">

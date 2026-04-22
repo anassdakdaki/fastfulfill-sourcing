@@ -70,28 +70,28 @@ export function WhatWeSource() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
           {CATEGORIES.map((cat) => (
             <div
               key={cat.name}
               className="group overflow-hidden bg-white hover:bg-brand-50 border border-gray-100 hover:border-brand-200 rounded-xl shadow-sm transition-all cursor-default dark:bg-gray-900 dark:border-gray-800 dark:hover:bg-brand-900/20 dark:hover:border-brand-800"
             >
-              <div className="relative h-28 bg-gray-100 dark:bg-gray-800">
+              <div className="relative h-24 bg-gray-100 dark:bg-gray-800 sm:h-28">
                 <Image
                   src={cat.image}
                   alt={`${cat.name} products`}
                   fill
                   unoptimized
-                  sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw"
+                  sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 50vw"
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
               </div>
-              <div className="p-4">
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1 group-hover:text-brand-700 dark:group-hover:text-brand-300 transition-colors">
+              <div className="p-3 sm:p-4">
+                <h3 className="mb-1 text-[13px] font-bold leading-5 text-gray-900 transition-colors group-hover:text-brand-700 dark:text-white dark:group-hover:text-brand-300 sm:text-sm">
                   {cat.name}
                 </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                <p className="text-[11px] leading-5 text-gray-500 dark:text-gray-400 sm:text-xs sm:leading-relaxed">
                   {cat.examples}
                 </p>
               </div>

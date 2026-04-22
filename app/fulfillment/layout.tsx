@@ -27,13 +27,13 @@ export default async function FulfillmentLayout({
   const badges = await loadFulfillmentSidebarBadges();
 
   return (
-    <div className="portal-theme flex h-screen overflow-hidden bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+    <div className="portal-theme flex min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 lg:h-screen lg:overflow-hidden">
       <FulfillmentSidebar
         pendingInbound={badges.pendingInbound}
         pendingOrders={badges.pendingOrders}
       />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex h-16 shrink-0 items-center justify-end gap-3 px-8">
+      <div className="flex min-w-0 flex-1 flex-col lg:overflow-hidden">
+        <div className="flex h-16 shrink-0 items-center justify-end gap-2 px-4 sm:gap-3 lg:px-8">
           <NotificationBell />
           <AccountMenu
             userEmail={user.email}
@@ -48,7 +48,7 @@ export default async function FulfillmentLayout({
             placement="topbar"
           />
         </div>
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="min-w-0 flex-1 lg:overflow-y-auto">{children}</main>
       </div>
     </div>
   );

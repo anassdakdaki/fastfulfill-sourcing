@@ -103,7 +103,7 @@ export function FulfillmentFlow() {
       id="fulfillment"
     >
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-400/50 to-transparent" />
-      <div className="absolute -top-32 left-1/2 h-64 w-[42rem] -translate-x-1/2 rounded-full bg-brand-600/10 blur-3xl" />
+      <div className="absolute -top-32 left-1/2 h-64 w-[90vw] max-w-[42rem] -translate-x-1/2 rounded-full bg-brand-600/10 blur-3xl" />
 
       <div className="container-section relative">
         <div className="mx-auto mb-12 max-w-2xl text-center">

@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { href: "/catalog", label: "Catalog" },
   { href: "/tracking", label: "Track Order" },
   { href: "/pricing", label: "Pricing" },
+  { href: "/blog", label: "Blog" },
 ];
 
 export function Navbar() {

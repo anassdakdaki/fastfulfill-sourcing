@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 pt-20 pb-32">
+    <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 px-0 pb-20 pt-16 sm:pb-28 sm:pt-20">
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 -right-32 w-[700px] h-[700px] rounded-full bg-brand-600/10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-32 w-[600px] h-[600px] rounded-full bg-indigo-600/10 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 h-[400px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/5 blur-3xl" />
+        <div className="absolute -top-24 right-0 h-80 w-80 rounded-full bg-brand-600/10 blur-3xl sm:-right-32 sm:-top-40 sm:h-[700px] sm:w-[700px]" />
+        <div className="absolute -bottom-24 left-0 h-72 w-72 rounded-full bg-indigo-600/10 blur-3xl sm:-bottom-40 sm:-left-32 sm:h-[600px] sm:w-[600px]" />
+        <div className="absolute left-1/2 top-1/2 h-64 w-[90vw] max-w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/5 blur-3xl sm:h-[400px]" />
       </div>
 
       <div
@@ -20,31 +20,31 @@ export function Hero() {
         }}
       />
 
-      <div className="container-section text-center">
-        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-brand-500/20 bg-brand-500/10 px-4 py-1.5 text-xs font-semibold text-brand-400">
+      <div className="container-section min-w-0 text-center">
+        <div className="mb-8 inline-flex max-w-full items-center gap-2 rounded-full border border-brand-500/20 bg-brand-500/10 px-4 py-1.5 text-center text-xs font-semibold text-brand-400">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-400" />
           For online sellers who want cheaper products and faster shipping
         </div>
 
-        <h1 className="mx-auto max-w-4xl text-4xl font-extrabold leading-[1.1] text-white sm:text-5xl md:text-6xl">
+        <h1 className="mx-auto max-w-4xl text-3xl font-extrabold leading-[1.12] text-white min-[390px]:text-4xl sm:text-5xl md:text-6xl">
           Your Store Orders<br />
           Packed and Shipped from{" "}
           <span className="bg-gradient-to-r from-brand-400 to-indigo-400 bg-clip-text text-transparent">
             China
           </span>
           <br />
-          <span className="text-3xl font-bold text-slate-300 sm:text-4xl md:text-5xl">
+          <span className="text-2xl font-bold text-slate-300 min-[390px]:text-3xl sm:text-4xl md:text-5xl">
             Without the Supplier Chaos
           </span>
         </h1>
 
-        <p className="mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-slate-400 sm:text-xl">
+        <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-slate-400 sm:text-xl">
           Send us a product link. We find the supplier, check the product, pack it, and ship it to your customer. You can connect Shopify, TikTok Shop, Amazon, WooCommerce, or another store.
         </p>
 
-        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Link href="/auth/signup">
-            <Button size="lg" className="h-12 px-8 text-base shadow-xl shadow-brand-500/20">
+        <div className="mt-10 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
+          <Link href="/auth/signup" className="w-full sm:w-auto">
+            <Button size="lg" className="h-12 w-full px-6 text-base shadow-xl shadow-brand-500/20 sm:w-auto sm:px-8">
               Get a Free Product Price
               <ArrowRight size={18} />
             </Button>
@@ -62,22 +62,22 @@ export function Hero() {
             { icon: CheckCircle2, text: "No monthly fee" },
             { icon: Package2, text: "Warehouse in Shenzhen" },
           ].map(({ icon: Icon, text }) => (
-            <div key={text} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-slate-300">
+            <div key={text} className="flex min-w-0 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-slate-300 sm:px-4">
               <Icon size={13} className="text-brand-400" />
               {text}
             </div>
           ))}
         </div>
 
-        <div className="relative mx-auto mt-16 max-w-4xl">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+        <div className="relative mx-auto mt-12 max-w-4xl min-w-0 sm:mt-16">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm sm:p-4">
             <div className="mb-3 flex items-center gap-2">
               <div className="flex gap-1.5">
                 <div className="h-3 w-3 rounded-full bg-red-500/60" />
                 <div className="h-3 w-3 rounded-full bg-yellow-500/60" />
                 <div className="h-3 w-3 rounded-full bg-green-500/60" />
               </div>
-              <div className="flex h-5 flex-1 items-center justify-center rounded-md bg-white/5 text-center font-mono text-xs text-slate-500">
+              <div className="flex h-5 min-w-0 flex-1 items-center justify-center truncate rounded-md bg-white/5 px-2 text-center font-mono text-[10px] text-slate-500 sm:text-xs">
                 fastfullfillsourcing.vercel.app/dashboard
               </div>
             </div>
@@ -100,7 +100,7 @@ export function Hero() {
                 "Yoga Mat - 50 units - Quality check",
                 "LED Strip - 200 units - Finding supplier",
               ].map((row) => (
-                <div key={row} className="rounded-lg border border-white/5 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
+                <div key={row} className="truncate rounded-lg border border-white/5 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
                   {row}
                 </div>
               ))}

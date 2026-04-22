@@ -29,6 +29,16 @@ export interface Database {
         Insert: SourceRequestInsert;
         Update: Partial<SourceRequestInsert>;
       };
+      blog_post_views: {
+        Row: BlogPostView;
+        Insert: Pick<BlogPostView, "slug"> & Partial<BlogPostView>;
+        Update: Partial<BlogPostView>;
+      };
+      blog_post_reactions: {
+        Row: BlogPostReaction;
+        Insert: Omit<BlogPostReaction, "id" | "created_at"> & Partial<Pick<BlogPostReaction, "id" | "created_at">>;
+        Update: Partial<BlogPostReaction>;
+      };
     };
   };
 }
@@ -139,6 +149,20 @@ export interface SourceRequestInsert {
   notes?: string | null;
   status?: "pending" | "reviewing" | "quoted" | "approved" | "rejected";
   quoted_price?: number | null;
+}
+
+export interface BlogPostView {
+  slug: string;
+  view_count: number;
+  updated_at: string;
+}
+
+export interface BlogPostReaction {
+  id: string;
+  slug: string;
+  fingerprint: string;
+  reaction: "helpful" | "bookmark";
+  created_at: string;
 }
 
 // ─── Fulfillment ──────────────────────────────────────────────────────────────

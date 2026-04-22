@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -10,6 +10,8 @@ import {
   ClipboardList,
   Archive,
   ChevronRight,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +25,7 @@ export default function FulfillmentSidebar({
   pendingOrders = 0,
 }: FulfillmentSidebarProps) {
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const NAV_SECTIONS = [
     {
@@ -41,8 +44,8 @@ export default function FulfillmentSidebar({
     },
   ];
 
-  return (
-    <aside className="w-64 shrink-0 bg-white dark:bg-slate-900 border-r border-gray-100 dark:border-slate-800 flex flex-col h-screen sticky top-0">
+  const navContent = (
+    <>
       {/* Logo */}
       <div className="px-5 py-5 border-b border-gray-100 dark:border-slate-700/60">
         <div className="flex items-center gap-2.5">
@@ -77,6 +80,7 @@ export default function FulfillmentSidebar({
                   <Link
                     key={href}
                     href={href}
+                    onClick={() => setMobileOpen(false)}
                     className={cn(
                       "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                       isActive
@@ -108,6 +112,45 @@ export default function FulfillmentSidebar({
       </nav>
 
       <div className="h-4 shrink-0 border-t border-gray-100 dark:border-slate-700/60" />
+    </>
+  );
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setMobileOpen(true)}
+        aria-label="Open menu"
+        className="fixed left-4 top-4 z-40 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 lg:hidden"
+      >
+        <Menu size={19} />
+      </button>
+
+      {mobileOpen ? (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <button
+            type="button"
+            aria-label="Close menu"
+            className="absolute inset-0 bg-gray-950/60"
+            onClick={() => setMobileOpen(false)}
+          />
+          <aside className="relative flex h-full w-[18rem] max-w-[86vw] flex-col border-r border-gray-100 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            <button
+              type="button"
+              onClick={() => setMobileOpen(false)}
+              aria-label="Close menu"
+              className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+            >
+              <X size={18} />
+            </button>
+            {navContent}
+          </aside>
+        </div>
+      ) : null}
+
+      <aside className="hidden w-64 shrink-0 bg-white dark:bg-slate-900 border-r border-gray-100 dark:border-slate-800 lg:flex flex-col h-screen sticky top-0">
+        {navContent}
     </aside>
+    </>
   );
 }

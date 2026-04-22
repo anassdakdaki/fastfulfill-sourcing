@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 export function CtaBanner() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 py-24">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-brand-600/10 blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-indigo-600/10 blur-3xl" />
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-brand-600/10 blur-3xl sm:h-[500px] sm:w-[500px]" />
+        <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-indigo-600/10 blur-3xl sm:h-[400px] sm:w-[400px]" />
       </div>
 
       <div className="container-section">
@@ -39,7 +39,7 @@ export function CtaBanner() {
               <Button
                 size="lg"
                 variant="outline"
-                className="h-12 w-full border-white/20 px-8 text-base text-white hover:border-white/30 hover:bg-white/10 sm:w-auto"
+                className="h-12 w-full border-white/20 bg-transparent px-8 text-base text-white hover:border-white/30 hover:bg-white/10 sm:w-auto"
               >
                 <Package2 size={18} />
                 Order a Sample from $30

@@ -22,13 +22,13 @@ export default async function SupplierLayout({ children }: { children: React.Rea
   const badges = await loadSupplierSidebarBadges();
 
   return (
-    <div className="portal-theme flex h-screen overflow-hidden bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+    <div className="portal-theme flex min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 lg:h-screen lg:overflow-hidden">
       <SupplierSidebar
         pendingRequests={badges.pendingRequests}
         pendingQuotes={badges.pendingQuotes}
       />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex h-16 shrink-0 items-center justify-end gap-3 px-8">
+      <div className="flex min-w-0 flex-1 flex-col lg:overflow-hidden">
+        <div className="flex h-16 shrink-0 items-center justify-end gap-2 px-4 sm:gap-3 lg:px-8">
           <NotificationBell />
           <AccountMenu
             userEmail={user.email}
@@ -43,7 +43,7 @@ export default async function SupplierLayout({ children }: { children: React.Rea
             placement="topbar"
           />
         </div>
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-w-0 flex-1 lg:overflow-y-auto">
           {children}
         </main>
       </div>
