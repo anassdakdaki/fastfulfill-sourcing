@@ -4,6 +4,8 @@ import { BlogSidebar } from "@/components/blog/blog-sidebar";
 import { PostBody } from "@/components/blog/post-body";
 import { PostCTA } from "@/components/blog/post-cta";
 import { PostHeader } from "@/components/blog/post-header";
+import { ReadingProgress } from "@/components/blog/reading-progress";
+import { ShareButtons } from "@/components/blog/share-buttons";
 import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/blog";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fastfulfill.com";
@@ -110,6 +112,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   return (
     <div className="bg-white dark:bg-gray-950">
+      <ReadingProgress />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -121,7 +124,10 @@ export default async function BlogPostPage({ params }: PageProps) {
       <PostHeader post={post} />
       <main className="container-section py-12">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_18rem]">
-          <PostBody content={post.content} />
+          <div>
+            <ShareButtons title={post.title} url={`${SITE_URL}/blog/${post.slug}`} />
+            <PostBody content={post.content} />
+          </div>
           <BlogSidebar relatedPosts={relatedPosts} />
         </div>
         <PostCTA variant="quote" />

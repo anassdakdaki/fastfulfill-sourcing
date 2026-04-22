@@ -16,6 +16,8 @@ const DEMO_ACCOUNTS = [
   { label: "Fulfillment demo", email: "fulfillment@fastfullfill.com", password: "fulfill1234",     role: "fulfillment" },
 ];
 
+const SHOW_DEMO_ACCOUNTS = process.env.NEXT_PUBLIC_ENABLE_DEMO_ACCOUNTS === "true";
+
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -100,7 +102,7 @@ function LoginContent() {
             <Input
               label="Password"
               type="password"
-              placeholder="••••••••"
+              placeholder="********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -124,7 +126,7 @@ function LoginContent() {
               <Link href={`/auth/signup${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`} className="font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300">
                 Sign up as buyer
               </Link>
-              {" "}·{" "}
+              {" "} | {" "}
               <Link href="/auth/supplier-signup" className="font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300">
                 Join as supplier
               </Link>
@@ -132,23 +134,24 @@ function LoginContent() {
           </div>
         </div>
 
-        {/* Demo credentials */}
-        <div className="mt-5 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 p-4">
-          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 text-center">Demo Accounts</p>
-          <div className="grid grid-cols-3 gap-2">
-            {DEMO_ACCOUNTS.map((d) => (
-              <button
-                key={d.role}
-                type="button"
-                onClick={() => { setEmail(d.email); setPassword(d.password); }}
-                className="flex flex-col items-center gap-1 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-xs hover:bg-brand-50 dark:hover:bg-brand-900/30 hover:border-brand-200 dark:hover:border-brand-800 transition-colors"
-              >
-                <span className="font-semibold text-gray-700 dark:text-gray-300">{d.label}</span>
-                <span className="text-gray-400 dark:text-gray-500 font-mono">{d.email}</span>
-              </button>
-            ))}
+        {SHOW_DEMO_ACCOUNTS && (
+          <div className="mt-5 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 p-4">
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 text-center">Demo Accounts</p>
+            <div className="grid grid-cols-3 gap-2">
+              {DEMO_ACCOUNTS.map((d) => (
+                <button
+                  key={d.role}
+                  type="button"
+                  onClick={() => { setEmail(d.email); setPassword(d.password); }}
+                  className="flex flex-col items-center gap-1 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-xs hover:bg-brand-50 dark:hover:bg-brand-900/30 hover:border-brand-200 dark:hover:border-brand-800 transition-colors"
+                >
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">{d.label}</span>
+                  <span className="text-gray-400 dark:text-gray-500 font-mono">{d.email}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

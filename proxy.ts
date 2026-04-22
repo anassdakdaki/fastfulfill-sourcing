@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const DEMO_COOKIE = "ff_demo_session";
-// values: "buyer" | "supplier" | "fulfillment" | "1" (legacy buyer)
+const DEMO_MODE_ENABLED = process.env.ENABLE_DEMO_MODE === "true";
 
 function demoDest(role: string) {
   if (role === "supplier") return "/supplier";
@@ -10,10 +10,9 @@ function demoDest(role: string) {
   return "/dashboard";
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ── Demo logout ───────────────────────────────────────────────────────────
   if (pathname === "/auth/demo-logout") {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
@@ -22,40 +21,44 @@ export async function middleware(request: NextRequest) {
     return res;
   }
 
-  // ── Demo mode bypass ──────────────────────────────────────────────────────
-  const demoRole = request.cookies.get(DEMO_COOKIE)?.value; // "buyer" | "supplier" | "fulfillment" | "1"
-  const isDemo = !!demoRole;
-  const isDemoBuyer       = demoRole === "buyer" || demoRole === "1";
-  const isDemoSupplier    = demoRole === "supplier";
+  const demoRole = DEMO_MODE_ENABLED ? request.cookies.get(DEMO_COOKIE)?.value : undefined;
+  const isDemo = Boolean(demoRole);
+  const isDemoBuyer = demoRole === "buyer" || demoRole === "1";
+  const isDemoSupplier = demoRole === "supplier";
   const isDemoFulfillment = demoRole === "fulfillment";
 
   if (isDemo) {
-    // Redirect demo users away from auth pages
-    if (pathname.startsWith("/auth/login") || pathname.startsWith("/auth/signup") || pathname.startsWith("/auth/supplier-signup")) {
+    if (
+      pathname.startsWith("/auth/login") ||
+      pathname.startsWith("/auth/signup") ||
+      pathname.startsWith("/auth/supplier-signup")
+    ) {
       const url = request.nextUrl.clone();
       url.pathname = demoDest(demoRole!);
       return NextResponse.redirect(url);
     }
-    // Block cross-portal access
+
     if (!isDemoBuyer && pathname.startsWith("/dashboard")) {
       const url = request.nextUrl.clone();
       url.pathname = demoDest(demoRole!);
       return NextResponse.redirect(url);
     }
+
     if (!isDemoSupplier && pathname.startsWith("/supplier")) {
       const url = request.nextUrl.clone();
       url.pathname = demoDest(demoRole!);
       return NextResponse.redirect(url);
     }
+
     if (!isDemoFulfillment && pathname.startsWith("/fulfillment")) {
       const url = request.nextUrl.clone();
       url.pathname = demoDest(demoRole!);
       return NextResponse.redirect(url);
     }
+
     return NextResponse.next({ request });
   }
 
-  // ── Real Supabase auth ────────────────────────────────────────────────────
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -67,9 +70,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
@@ -79,9 +80,10 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // Not logged in — protect all portals
   if (!user) {
     if (
       pathname.startsWith("/dashboard") ||
@@ -93,10 +95,10 @@ export async function middleware(request: NextRequest) {
       url.searchParams.set("redirectTo", pathname);
       return NextResponse.redirect(url);
     }
+
     return supabaseResponse;
   }
 
-  // Logged in — fetch role from profiles
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
@@ -105,24 +107,29 @@ export async function middleware(request: NextRequest) {
 
   const role = profile?.role ?? "buyer";
 
-  // Redirect away from auth pages
-  if (pathname.startsWith("/auth/login") || pathname.startsWith("/auth/signup") || pathname.startsWith("/auth/supplier-signup")) {
+  if (
+    pathname.startsWith("/auth/login") ||
+    pathname.startsWith("/auth/signup") ||
+    pathname.startsWith("/auth/supplier-signup")
+  ) {
     const url = request.nextUrl.clone();
-    url.pathname = role === "supplier" ? "/supplier" : role === "fulfillment" ? "/fulfillment" : "/dashboard";
+    url.pathname =
+      role === "supplier" ? "/supplier" : role === "fulfillment" ? "/fulfillment" : "/dashboard";
     return NextResponse.redirect(url);
   }
 
-  // Role enforcement
   if (role !== "buyer" && pathname.startsWith("/dashboard")) {
     const url = request.nextUrl.clone();
     url.pathname = role === "supplier" ? "/supplier" : "/fulfillment";
     return NextResponse.redirect(url);
   }
+
   if (role !== "supplier" && pathname.startsWith("/supplier")) {
     const url = request.nextUrl.clone();
     url.pathname = role === "fulfillment" ? "/fulfillment" : "/dashboard";
     return NextResponse.redirect(url);
   }
+
   if (role !== "fulfillment" && pathname.startsWith("/fulfillment")) {
     const url = request.nextUrl.clone();
     url.pathname = role === "supplier" ? "/supplier" : "/dashboard";

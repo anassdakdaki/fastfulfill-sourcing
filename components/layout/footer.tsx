@@ -9,15 +9,12 @@ const FOOTER_LINKS = {
     { href: "/tracking", label: "Track Order" },
   ],
   Company: [
-    { href: "#", label: "About Us" },
     { href: "/blog", label: "Blog" },
-    { href: "#", label: "Careers" },
-    { href: "#", label: "Contact" },
+    { href: "/contact", label: "Contact" },
   ],
   Legal: [
     { href: "/privacy", label: "Privacy Policy" },
     { href: "/terms", label: "Terms of Service" },
-    { href: "#", label: "Cookie Policy" },
   ],
 };
 

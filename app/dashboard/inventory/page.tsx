@@ -1,21 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Archive, Search, AlertTriangle, Warehouse, Info } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
-import { DUMMY_INVENTORY } from "@/lib/dummy-data";
+import { loadMyInventoryRecords } from "@/app/actions/buyer-inventory";
 import { formatDate } from "@/lib/utils";
+import type { InventoryItem } from "@/types/database";
 
 export default function InventoryPage() {
   const [search, setSearch] = useState("");
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const filtered = DUMMY_INVENTORY.filter((item) =>
+  useEffect(() => {
+    loadMyInventoryRecords().then(({ data, error }) => {
+      setInventory(data as InventoryItem[]);
+      setError(error ?? "");
+      setLoading(false);
+    });
+  }, []);
+
+  const filtered = inventory.filter((item) =>
     item.product_name.toLowerCase().includes(search.toLowerCase()) ||
     (item.sku?.toLowerCase().includes(search.toLowerCase()) ?? false)
   );
 
-  const totalUnits = DUMMY_INVENTORY.reduce((s, i) => s + i.quantity, 0);
-  const lowStock   = DUMMY_INVENTORY.filter((i) => i.quantity < 50).length;
+  const totalUnits = inventory.reduce((s, i) => s + i.quantity, 0);
+  const lowStock = inventory.filter((i) => i.quantity < 50).length;
 
   return (
     <div className="space-y-6">
@@ -29,7 +41,7 @@ export default function InventoryPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Warehouse Inventory</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {totalUnits.toLocaleString()} units stored across {DUMMY_INVENTORY.length} products at our fulfillment center
+            {totalUnits.toLocaleString()} units stored across {inventory.length} products at our fulfillment center
           </p>
         </div>
       </div>
@@ -48,7 +60,7 @@ export default function InventoryPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Total SKUs</p>
-          <p className="text-2xl font-bold text-gray-900">{DUMMY_INVENTORY.length}</p>
+          <p className="text-2xl font-bold text-gray-900">{inventory.length}</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Total Units</p>
@@ -78,11 +90,19 @@ export default function InventoryPage() {
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="px-6 py-12 text-center text-sm text-gray-400">Loading inventory...</div>
+        ) : error ? (
+          <EmptyState
+            icon={<AlertTriangle size={28} />}
+            title="Inventory unavailable"
+            description={error}
+          />
+        ) : filtered.length === 0 ? (
           <EmptyState
             icon={<Archive size={28} />}
             title="No inventory found"
-            description="Try adjusting your search."
+            description={search ? "Try adjusting your search." : "Accept a quote or connect Shopify to start building warehouse stock."}
           />
         ) : (
           <div className="overflow-x-auto">

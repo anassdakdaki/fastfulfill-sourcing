@@ -588,8 +588,8 @@ export default function IntegrationsPage() {
                         </Button>
                       </div>
                     ) : !isLive ? (
-                      <Button size="sm" variant="outline" className="w-full" disabled>
-                        Coming soon
+                      <Button size="sm" variant="outline" className="w-full cursor-not-allowed opacity-70" disabled>
+                        Available soon
                       </Button>
                     ) : (
                       <Button size="sm" className="w-full" onClick={() => openConnectForm(platform)}>

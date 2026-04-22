@@ -1,4 +1,4 @@
-import { ShoppingCart, Truck, Search, ArrowRight, Plug, AlertTriangle } from "lucide-react";
+import { ShoppingCart, Truck, Search, ArrowRight, Plug, AlertTriangle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { StatCard } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +53,43 @@ export default async function DashboardPage() {
           </Link>
         </div>
       )}
+
+      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white">First order checklist</h2>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Follow this path to go from signup to your first shipped order.
+            </p>
+          </div>
+          <Link href={hasConnectedStore ? "/dashboard/source" : "/dashboard/integrations"}>
+            <Button size="sm" variant="outline">
+              Continue <ArrowRight size={14} />
+            </Button>
+          </Link>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-5">
+          {[
+            { label: "Connect Shopify", done: hasConnectedStore, href: "/dashboard/integrations" },
+            { label: "Submit first product", done: recentRequests.length > 0, href: "/dashboard/source" },
+            { label: "Choose destination", done: recentRequests.length > 0, href: "/dashboard/source" },
+            { label: "Request sample", done: false, href: "/dashboard/source" },
+            { label: "View quote", done: stats.pendingRequests === 0 && recentRequests.length > 0, href: "/dashboard/quotes" },
+          ].map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="flex items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-xs font-medium text-gray-600 transition-colors hover:border-brand-200 hover:bg-brand-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300 dark:hover:border-brand-900 dark:hover:bg-brand-950/30"
+            >
+              <CheckCircle2
+                size={15}
+                className={item.done ? "text-green-500" : "text-gray-300 dark:text-gray-600"}
+              />
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">

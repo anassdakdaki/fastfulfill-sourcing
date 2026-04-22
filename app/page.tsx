@@ -5,6 +5,7 @@ import { Comparison } from "@/components/home/comparison";
 import { WhatWeSource } from "@/components/home/what-we-source";
 import { Benefits } from "@/components/home/benefits";
 import { FulfillmentFlow } from "@/components/home/fulfillment-flow";
+import { FirstRequest } from "@/components/home/first-request";
 import { Stats } from "@/components/home/stats";
 import { Testimonials } from "@/components/home/testimonials";
 import { FAQ } from "@/components/home/faq";
@@ -38,16 +39,19 @@ export default function HomePage() {
       {/* 6. Order flow */}
       <FulfillmentFlow />
 
-      {/* 7. Stats bar */}
+      {/* 7. First request trust section */}
+      <FirstRequest />
+
+      {/* 8. Stats bar */}
       <Stats />
 
-      {/* 8. Testimonials */}
+      {/* 9. Testimonials */}
       <Testimonials />
 
-      {/* 9. FAQ */}
+      {/* 10. FAQ */}
       <FAQ />
 
-      {/* 10. CTA banner */}
+      {/* 11. CTA banner */}
       <CtaBanner />
     </PublicLayout>
   );

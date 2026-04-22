@@ -46,6 +46,20 @@ export async function loadMyInventory() {
   return { data: Object.values(map), error: null };
 }
 
+export async function loadMyInventoryRecords() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { data: [], error: "Not authenticated" };
+
+  const { data, error } = await supabase
+    .from("inventory")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("updated_at", { ascending: false });
+
+  return { data: data ?? [], error: error?.message ?? null };
+}
+
 export async function loadWarehouseStockForBuyer() {
   const supabase = await createClient();
   // warehouse_stock rows linked to this user

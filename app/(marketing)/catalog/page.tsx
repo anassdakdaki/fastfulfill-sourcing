@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Search, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DUMMY_CATALOG } from "@/lib/dummy-data";
+import { CATALOG_PRODUCTS } from "@/lib/catalog";
 
 const CATEGORIES = ["All", "Gadgets", "Beauty", "Kitchen", "Fitness", "Pets", "Photography"];
 
@@ -13,7 +13,7 @@ export default function CatalogPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
 
-  const filtered = DUMMY_CATALOG.filter((p) => {
+  const filtered = CATALOG_PRODUCTS.filter((p) => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     const matchCat = category === "All" || p.category === category;
     return matchSearch && matchCat;

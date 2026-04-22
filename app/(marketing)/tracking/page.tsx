@@ -3,36 +3,49 @@
 import { useState } from "react";
 import { Search, MapPin, CheckCircle2, Package, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DUMMY_ORDERS, DUMMY_TRACKING_EVENTS } from "@/lib/dummy-data";
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS, formatDate } from "@/lib/utils";
 import type { Order, TrackingEvent } from "@/types/database";
 
+type TrackingOrder = Pick<Order, "id" | "product_name" | "quantity" | "status" | "tracking_number" | "destination_country">;
+type TrackingResult = { order: TrackingOrder; events: TrackingEvent[] };
+
 export default function PublicTrackingPage() {
   const [query, setQuery] = useState("");
-  const [result, setResult] = useState<{ order: Order; events: TrackingEvent[] } | null>(null);
+  const [result, setResult] = useState<TrackingResult | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
+    const trackingNumber = query.trim();
+    if (!trackingNumber) return;
+
     setNotFound(false);
     setResult(null);
+    setError("");
     setLoading(true);
 
-    await new Promise((r) => setTimeout(r, 600));
+    try {
+      const response = await fetch(`/api/tracking?tracking_number=${encodeURIComponent(trackingNumber)}`);
 
-    const order = DUMMY_ORDERS.find(
-      (o) => o.tracking_number?.toLowerCase() === query.toLowerCase()
-    );
+      if (response.status === 404) {
+        setNotFound(true);
+        return;
+      }
 
-    if (!order) {
-      setNotFound(true);
-    } else {
-      const events = DUMMY_TRACKING_EVENTS.filter((e) => e.order_id === order.id);
-      setResult({ order, events });
+      const payload = await response.json();
+      if (!response.ok) {
+        setError(payload.error ?? "Tracking lookup failed. Try again in a moment.");
+        return;
+      }
+
+      setResult(payload as TrackingResult);
+    } catch {
+      setError("Tracking lookup failed. Check your connection and try again.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (
@@ -58,13 +71,17 @@ export default function PublicTrackingPage() {
               <Search size={16} /> Track
             </Button>
           </form>
-          <p className="text-xs text-gray-400 mt-3 dark:text-gray-500">
-            Demo: try <button onClick={() => setQuery("YT2024123456CN")} className="underline">YT2024123456CN</button>
-          </p>
         </div>
       </section>
 
       <div className="container-section py-12 max-w-2xl">
+        {error && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center dark:bg-amber-950/30 dark:border-amber-900">
+            <p className="font-semibold text-amber-800 dark:text-amber-300">Tracking is temporarily unavailable</p>
+            <p className="text-sm text-amber-700 mt-1 dark:text-amber-400">{error}</p>
+          </div>
+        )}
+
         {/* Not found */}
         {notFound && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center dark:bg-red-950/30 dark:border-red-900">
@@ -138,7 +155,7 @@ export default function PublicTrackingPage() {
           </div>
         )}
 
-        {!result && !notFound && !loading && (
+        {!result && !notFound && !loading && !error && (
           <div className="text-center py-10 text-gray-400 dark:text-gray-500">
             <Package size={36} className="mx-auto mb-3 opacity-30" />
             <p className="text-sm">Enter a tracking number above to see your shipment status.</p>

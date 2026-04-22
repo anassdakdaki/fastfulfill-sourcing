@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
-import { getAllCategories, getAllPosts } from "@/lib/blog";
+import { getAllCategories, getAllPosts, getAllTags } from "@/lib/blog";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fastfulfill.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [posts, categories] = await Promise.all([
+  const [posts, categories, tags] = await Promise.all([
     getAllPosts(),
     getAllCategories(),
+    getAllTags(),
   ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -32,5 +33,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...postRoutes, ...categoryRoutes];
+  const tagRoutes: MetadataRoute.Sitemap = tags.map((tag) => ({
+    url: `${SITE_URL}/blog/tag/${tag.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.5,
+  }));
+
+  return [...staticRoutes, ...postRoutes, ...categoryRoutes, ...tagRoutes];
 }
