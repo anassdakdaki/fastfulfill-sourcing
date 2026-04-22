@@ -47,6 +47,139 @@
   }
 }
 
+@layer utilities {
+  .dark .portal-theme .bg-white {
+    @apply bg-gray-900;
+  }
+
+  .dark .portal-theme .bg-gray-50,
+  .dark .portal-theme .bg-gray-100 {
+    @apply bg-gray-800;
+  }
+
+  .dark .portal-theme .bg-brand-50,
+  .dark .portal-theme .bg-brand-100 {
+    @apply bg-brand-900/30;
+  }
+
+  .dark .portal-theme .bg-green-50,
+  .dark .portal-theme .bg-green-100 {
+    @apply bg-green-950/30;
+  }
+
+  .dark .portal-theme .bg-amber-50,
+  .dark .portal-theme .bg-amber-100,
+  .dark .portal-theme .bg-yellow-50,
+  .dark .portal-theme .bg-yellow-100 {
+    @apply bg-amber-950/30;
+  }
+
+  .dark .portal-theme .bg-red-50,
+  .dark .portal-theme .bg-red-100 {
+    @apply bg-red-950/30;
+  }
+
+  .dark .portal-theme .bg-blue-50,
+  .dark .portal-theme .bg-blue-100,
+  .dark .portal-theme .bg-purple-50,
+  .dark .portal-theme .bg-purple-100 {
+    @apply bg-gray-800;
+  }
+
+  .dark .portal-theme .border-gray-100,
+  .dark .portal-theme .border-gray-200,
+  .dark .portal-theme .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+    @apply border-gray-800;
+  }
+
+  .dark .portal-theme .border-brand-100,
+  .dark .portal-theme .border-brand-200 {
+    @apply border-brand-800;
+  }
+
+  .dark .portal-theme .border-green-100,
+  .dark .portal-theme .border-green-200 {
+    @apply border-green-900;
+  }
+
+  .dark .portal-theme .border-amber-200,
+  .dark .portal-theme .border-yellow-200 {
+    @apply border-amber-900;
+  }
+
+  .dark .portal-theme .border-red-200 {
+    @apply border-red-900;
+  }
+
+  .dark .portal-theme .border-blue-200,
+  .dark .portal-theme .border-purple-200 {
+    @apply border-gray-700;
+  }
+
+  .dark .portal-theme .text-gray-900,
+  .dark .portal-theme .text-gray-800 {
+    @apply text-white;
+  }
+
+  .dark .portal-theme .text-gray-700 {
+    @apply text-gray-300;
+  }
+
+  .dark .portal-theme .text-gray-600 {
+    @apply text-gray-400;
+  }
+
+  .dark .portal-theme .text-gray-500 {
+    @apply text-gray-400;
+  }
+
+  .dark .portal-theme .text-brand-800,
+  .dark .portal-theme .text-brand-700,
+  .dark .portal-theme .text-brand-600,
+  .dark .portal-theme .text-blue-700,
+  .dark .portal-theme .text-purple-700 {
+    @apply text-brand-300;
+  }
+
+  .dark .portal-theme .text-green-800,
+  .dark .portal-theme .text-green-700,
+  .dark .portal-theme .text-green-600 {
+    @apply text-green-300;
+  }
+
+  .dark .portal-theme .text-amber-800,
+  .dark .portal-theme .text-amber-700,
+  .dark .portal-theme .text-yellow-700 {
+    @apply text-amber-300;
+  }
+
+  .dark .portal-theme .text-red-700,
+  .dark .portal-theme .text-red-600,
+  .dark .portal-theme .text-red-500 {
+    @apply text-red-300;
+  }
+
+  .dark .portal-theme input,
+  .dark .portal-theme select,
+  .dark .portal-theme textarea {
+    @apply border-gray-700 bg-gray-900 text-gray-100;
+  }
+
+  .dark .portal-theme input::placeholder,
+  .dark .portal-theme textarea::placeholder {
+    color: rgb(107 114 128);
+  }
+
+  .dark .portal-theme table {
+    @apply text-gray-300;
+  }
+
+  .dark .portal-theme thead,
+  .dark .portal-theme tbody tr:hover {
+    @apply bg-gray-800;
+  }
+}
+
 /* Smooth scroll */
 html {
   scroll-behavior: smooth;

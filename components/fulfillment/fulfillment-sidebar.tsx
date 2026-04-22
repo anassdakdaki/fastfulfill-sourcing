@@ -12,16 +12,13 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AccountMenu } from "@/components/layout/account-menu";
 
 interface FulfillmentSidebarProps {
-  userEmail?: string;
   pendingInbound?: number;
   pendingOrders?: number;
 }
 
 export default function FulfillmentSidebar({
-  userEmail,
   pendingInbound = 0,
   pendingOrders = 0,
 }: FulfillmentSidebarProps) {
@@ -45,18 +42,18 @@ export default function FulfillmentSidebar({
   ];
 
   return (
-    <aside className="w-64 shrink-0 bg-slate-900 flex flex-col h-screen sticky top-0">
+    <aside className="w-64 shrink-0 bg-white dark:bg-slate-900 border-r border-gray-100 dark:border-slate-800 flex flex-col h-screen sticky top-0">
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-slate-700/60">
+      <div className="px-5 py-5 border-b border-gray-100 dark:border-slate-700/60">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-slate-700 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-brand-600 dark:bg-slate-700 rounded-lg flex items-center justify-center">
             <Warehouse size={17} className="text-white" />
           </div>
           <div>
-            <p className="font-bold text-white text-sm leading-tight">
+            <p className="font-bold text-gray-900 dark:text-white text-sm leading-tight">
               Fulfillment Portal
             </p>
-            <p className="text-[10px] text-slate-400 leading-tight mt-0.5">
+            <p className="text-[10px] text-gray-400 dark:text-slate-400 leading-tight mt-0.5">
               Powered by FastFulfill
             </p>
           </div>
@@ -67,7 +64,7 @@ export default function FulfillmentSidebar({
       <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
         {NAV_SECTIONS.map((section) => (
           <div key={section.label}>
-            <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+            <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
               {section.label}
             </p>
             <div className="space-y-0.5">
@@ -83,8 +80,8 @@ export default function FulfillmentSidebar({
                     className={cn(
                       "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                       isActive
-                        ? "bg-slate-700 text-white"
-                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                        ? "bg-brand-50 text-brand-700 dark:bg-slate-700 dark:text-white"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
                     )}
                   >
                     <Icon size={17} />
@@ -100,7 +97,7 @@ export default function FulfillmentSidebar({
                       </span>
                     )}
                     {isActive && (
-                      <ChevronRight size={14} className="text-slate-400" />
+                      <ChevronRight size={14} className="text-brand-400 dark:text-slate-400" />
                     )}
                   </Link>
                 );
@@ -110,20 +107,7 @@ export default function FulfillmentSidebar({
         ))}
       </nav>
 
-      {/* Bottom */}
-      <div className="px-3 py-4 border-t border-slate-700/60">
-        <AccountMenu
-          userEmail={userEmail}
-          accountName="Warehouse team"
-          roleLabel="Fulfillment partner"
-          signOutRedirect="/auth/login"
-          profileHref="/fulfillment/settings"
-          billingHref="/fulfillment/settings"
-          notificationsHref="/fulfillment/settings"
-          trackingHref="/fulfillment/orders"
-          apiHref="/fulfillment/settings"
-        />
-      </div>
+      <div className="h-4 shrink-0 border-t border-gray-100 dark:border-slate-700/60" />
     </aside>
   );
 }

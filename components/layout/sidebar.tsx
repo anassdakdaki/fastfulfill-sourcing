@@ -17,15 +17,13 @@ import {
   Plug,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AccountMenu } from "@/components/layout/account-menu";
 
 interface SidebarProps {
-  userEmail?: string;
   pendingQuotes?: number;
   hasConnectedStore?: boolean;
 }
 
-export function Sidebar({ userEmail, pendingQuotes = 0, hasConnectedStore = true }: SidebarProps) {
+export function Sidebar({ pendingQuotes = 0, hasConnectedStore = true }: SidebarProps) {
   const pathname = usePathname();
 
   type NavItem = {
@@ -129,19 +127,7 @@ export function Sidebar({ userEmail, pendingQuotes = 0, hasConnectedStore = true
         ))}
       </nav>
 
-      {/* Bottom */}
-      <div className="px-3 py-4 border-t border-gray-100 dark:border-gray-800">
-        <AccountMenu
-          userEmail={userEmail}
-          roleLabel="Seller account"
-          signOutRedirect="/"
-          profileHref="/dashboard/settings"
-          billingHref="/dashboard/invoices"
-          notificationsHref="/dashboard/settings"
-          trackingHref="/dashboard/tracking"
-          apiHref="/dashboard/integrations"
-        />
-      </div>
+      <div className="h-4 shrink-0 border-t border-gray-100 dark:border-gray-800" />
     </aside>
   );
 }
