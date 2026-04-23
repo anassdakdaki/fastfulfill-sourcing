@@ -6,19 +6,19 @@ const CTA_CONTENT = {
   quote: {
     headline: "Get a product price in 24 hours",
     sub: "Send a product link and our China team will check options, shipping, and next steps.",
-    cta: "Request free quote",
+    cta: "Request Product Pricing",
     href: "/auth/signup",
   },
   pricing: {
     headline: "Start sourcing without a monthly fee",
     sub: "Ask for prices, order samples when ready, then pay only when you approve work.",
-    cta: "See pricing",
+    cta: "See Fulfillment Pricing",
     href: "/pricing",
   },
   sourcing: {
     headline: "Need help finding a supplier?",
     sub: "FastFulfill can help source products, check quality, pack orders, and send tracking.",
-    cta: "Start sourcing",
+    cta: "Request Product Pricing",
     href: "/auth/signup",
   },
 } as const;

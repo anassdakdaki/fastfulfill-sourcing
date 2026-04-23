@@ -12,16 +12,43 @@ import { Testimonials } from "@/components/home/testimonials";
 import { FAQ } from "@/components/home/faq";
 import { CtaBanner } from "@/components/home/cta-banner";
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/seo/json-ld";
+import {
+  buildBreadcrumbJsonLd,
+  buildMetadata,
+  buildOrganizationJsonLd,
+  buildWebPageJsonLd,
+  buildWebsiteJsonLd,
+} from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "FastFulfill Product Sourcing and Shipping from China | Prices in 24h",
-  description:
-    "Find products from China, check them in our Shenzhen warehouse, and ship direct to your customers in 7 to 12 days. No monthly fee. Connect Shopify, TikTok Shop, Amazon, WooCommerce, or another store.",
-};
+const title = "Product Sourcing and Shipping from China | Prices in 24h";
+const description =
+  "Find products from China, check them in our Shenzhen warehouse, and ship direct to your customers in 7 to 12 days. No monthly fee. Connect Shopify, TikTok Shop, Amazon, WooCommerce, or another store.";
+
+export const metadata: Metadata = buildMetadata({
+  title,
+  description,
+  path: "/",
+  keywords: [
+    "shopify fulfillment from china",
+    "china sourcing agent",
+    "dropshipping fulfillment",
+    "shenzhen warehouse",
+    "ecommerce shipping from china",
+  ],
+});
 
 export default function HomePage() {
   return (
     <PublicLayout>
+      <JsonLd
+        data={[
+          buildOrganizationJsonLd(),
+          buildWebsiteJsonLd(),
+          buildWebPageJsonLd({ title, description, path: "/", type: "WebPage" }),
+          buildBreadcrumbJsonLd([{ name: "Home", path: "/" }]),
+        ]}
+      />
       {/* 1. Hero with headline, single CTA, dashboard mockup */}
       <Hero />
 

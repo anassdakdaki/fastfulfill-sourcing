@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CategoryFilter } from "@/components/blog/category-filter";
 import { PostCard } from "@/components/blog/post-card";
+import { JsonLd } from "@/components/seo/json-ld";
 import {
   formatBlogCategory,
   getAllCategories,
   getPostsByCategory,
 } from "@/lib/blog";
+import { buildBreadcrumbJsonLd, buildMetadata, buildWebPageJsonLd } from "@/lib/seo";
 
 type PageProps = {
   params: Promise<{ category: string }>;
@@ -21,11 +23,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { category } = await params;
   const label = formatBlogCategory(category);
 
-  return {
+  return buildMetadata({
     title: `${label} Articles`,
     description: `FastFulfill articles about ${label.toLowerCase()}.`,
-    alternates: { canonical: `/blog/category/${category}` },
-  };
+    path: `/blog/category/${category}`,
+  });
 }
 
 export default async function BlogCategoryPage({ params }: PageProps) {
@@ -39,6 +41,21 @@ export default async function BlogCategoryPage({ params }: PageProps) {
 
   return (
     <div className="bg-white dark:bg-gray-950">
+      <JsonLd
+        data={[
+          buildWebPageJsonLd({
+            title: `${formatBlogCategory(category)} Articles`,
+            description: `FastFulfill articles about ${formatBlogCategory(category).toLowerCase()}.`,
+            path: `/blog/category/${category}`,
+            type: "CollectionPage",
+          }),
+          buildBreadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Blog", path: "/blog" },
+            { name: formatBlogCategory(category), path: `/blog/category/${category}` },
+          ]),
+        ]}
+      />
       <section className="container-section py-12">
         <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
           Blog Category

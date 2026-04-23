@@ -1,16 +1,32 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Mail, MessageSquare, PackageSearch } from "lucide-react";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
+import { buildBreadcrumbJsonLd, buildMetadata, buildWebPageJsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Contact FastFulfill",
-  description: "Contact FastFulfill for product sourcing, Shopify fulfillment, warehousing, packaging, and shipping questions.",
-};
+const title = "Contact FastFulfill";
+const description = "Contact FastFulfill for product sourcing, Shopify fulfillment, warehousing, packaging, and shipping questions.";
+
+export const metadata: Metadata = buildMetadata({
+  title,
+  description,
+  path: "/contact",
+  keywords: ["contact fastfulfill", "fulfillment support", "china sourcing contact"],
+});
 
 export default function ContactPage() {
   return (
     <main className="bg-white dark:bg-gray-950">
+      <JsonLd
+        data={[
+          buildWebPageJsonLd({ title, description, path: "/contact", type: "ContactPage" }),
+          buildBreadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Contact", path: "/contact" },
+          ]),
+        ]}
+      />
       <section className="container-section max-w-4xl py-16">
         <p className="text-xs font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-400">Contact</p>
         <h1 className="mt-3 text-3xl font-extrabold text-gray-900 dark:text-white">Talk to FastFulfill</h1>
@@ -34,10 +50,10 @@ export default function ContactPage() {
 
         <div className="mt-10 flex flex-wrap gap-3">
           <Link href="/auth/signup">
-            <Button>Start sourcing</Button>
+            <Button>Request Product Pricing</Button>
           </Link>
           <Link href="/pricing">
-            <Button variant="outline">See pricing</Button>
+            <Button variant="outline">See Fulfillment Pricing</Button>
           </Link>
         </div>
       </section>

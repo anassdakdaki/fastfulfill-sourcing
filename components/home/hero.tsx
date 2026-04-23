@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Clock, Package2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,15 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 px-0 pb-20 pt-16 sm:pb-28 sm:pt-20">
       <div className="absolute inset-0 -z-10 overflow-hidden">
+        <Image
+          src="/site-assets/home/hero-sourcing-desk.png"
+          alt="FastFulfill sourcing workspace inside a warehouse environment"
+          fill
+          priority
+          className="object-cover opacity-18"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-slate-950/78" />
         <div className="absolute -top-24 right-0 h-80 w-80 rounded-full bg-brand-600/10 blur-3xl sm:-right-32 sm:-top-40 sm:h-[700px] sm:w-[700px]" />
         <div className="absolute -bottom-24 left-0 h-72 w-72 rounded-full bg-indigo-600/10 blur-3xl sm:-bottom-40 sm:-left-32 sm:h-[600px] sm:w-[600px]" />
         <div className="absolute left-1/2 top-1/2 h-64 w-[90vw] max-w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/5 blur-3xl sm:h-[400px]" />
@@ -43,17 +53,17 @@ export function Hero() {
         </p>
 
         <div className="mt-10 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
-          <Link href="/auth/signup" className="w-full sm:w-auto">
-            <Button size="lg" className="h-12 w-full px-6 text-base shadow-xl shadow-brand-500/20 sm:w-auto sm:px-8">
-              Get a Free Product Price
-              <ArrowRight size={18} />
-            </Button>
-          </Link>
-          <Link href="/pricing">
-            <button className="text-sm font-semibold text-slate-300 underline underline-offset-4 transition-colors hover:text-white">
-              See simple pricing
-            </button>
-          </Link>
+            <Link href="/auth/signup" className="w-full sm:w-auto">
+              <Button size="lg" className="h-12 w-full px-6 text-base shadow-xl shadow-brand-500/20 sm:w-auto sm:px-8">
+                Request Product Pricing
+                <ArrowRight size={18} />
+              </Button>
+            </Link>
+            <Link href="/pricing">
+              <button className="text-sm font-semibold text-slate-300 underline underline-offset-4 transition-colors hover:text-white">
+                See Fulfillment Pricing
+              </button>
+            </Link>
         </div>
 
         <div className="mt-12 flex flex-wrap items-center justify-center gap-3">

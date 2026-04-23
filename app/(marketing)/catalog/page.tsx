@@ -4,8 +4,10 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, ArrowRight } from "lucide-react";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { CATALOG_PRODUCTS } from "@/lib/catalog";
+import { buildBreadcrumbJsonLd, buildWebPageJsonLd } from "@/lib/seo";
 
 const CATEGORIES = ["All", "Gadgets", "Beauty", "Kitchen", "Fitness", "Pets", "Photography"];
 
@@ -21,6 +23,20 @@ export default function CatalogPage() {
 
   return (
     <div className="bg-white dark:bg-gray-950">
+      <JsonLd
+        data={[
+          buildWebPageJsonLd({
+            title: "Product Catalog",
+            description: "Browse product ideas FastFulfill can source from China, then request a clear supplier price within 24 hours.",
+            path: "/catalog",
+            type: "CollectionPage",
+          }),
+          buildBreadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Catalog", path: "/catalog" },
+          ]),
+        ]}
+      />
       {/* Header */}
       <section className="bg-gradient-to-br from-gray-50 to-brand-50 py-16 border-b border-gray-100 dark:from-gray-950 dark:to-gray-900 dark:border-gray-800">
         <div className="container-section text-center">

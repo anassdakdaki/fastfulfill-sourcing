@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { Search, MapPin, CheckCircle2, Package, Clock } from "lucide-react";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS, formatDate } from "@/lib/utils";
 import type { Order, TrackingEvent } from "@/types/database";
+import { buildBreadcrumbJsonLd, buildWebPageJsonLd } from "@/lib/seo";
 
 type TrackingOrder = Pick<Order, "id" | "product_name" | "quantity" | "status" | "tracking_number" | "destination_country">;
 type TrackingResult = { order: TrackingOrder; events: TrackingEvent[] };
@@ -50,6 +52,20 @@ export default function PublicTrackingPage() {
 
   return (
     <div className="bg-white dark:bg-gray-950">
+      <JsonLd
+        data={[
+          buildWebPageJsonLd({
+            title: "Track Your Shipment",
+            description: "Track FastFulfill shipments with a real tracking number and see package updates from warehouse to delivery.",
+            path: "/tracking",
+            type: "WebPage",
+          }),
+          buildBreadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Tracking", path: "/tracking" },
+          ]),
+        ]}
+      />
       {/* Header */}
       <section className="bg-gradient-to-br from-gray-50 to-brand-50 py-20 border-b border-gray-100 dark:from-gray-950 dark:to-gray-900 dark:border-gray-800">
         <div className="container-section text-center max-w-2xl">

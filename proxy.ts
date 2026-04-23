@@ -31,6 +31,7 @@ export async function proxy(request: NextRequest) {
     if (
       pathname.startsWith("/auth/login") ||
       pathname.startsWith("/auth/signup") ||
+      pathname.startsWith("/auth/private-access") ||
       pathname.startsWith("/auth/supplier-signup")
     ) {
       const url = request.nextUrl.clone();
@@ -85,13 +86,16 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    if (
-      pathname.startsWith("/dashboard") ||
-      pathname.startsWith("/supplier") ||
-      pathname.startsWith("/fulfillment")
-    ) {
+    if (pathname.startsWith("/dashboard")) {
       const url = request.nextUrl.clone();
       url.pathname = "/auth/login";
+      url.searchParams.set("redirectTo", pathname);
+      return NextResponse.redirect(url);
+    }
+
+    if (pathname.startsWith("/supplier") || pathname.startsWith("/fulfillment")) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth/private-access";
       url.searchParams.set("redirectTo", pathname);
       return NextResponse.redirect(url);
     }
@@ -110,6 +114,7 @@ export async function proxy(request: NextRequest) {
   if (
     pathname.startsWith("/auth/login") ||
     pathname.startsWith("/auth/signup") ||
+    pathname.startsWith("/auth/private-access") ||
     pathname.startsWith("/auth/supplier-signup")
   ) {
     const url = request.nextUrl.clone();

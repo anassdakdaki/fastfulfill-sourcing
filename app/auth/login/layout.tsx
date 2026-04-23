@@ -3,12 +3,12 @@ import { AuthHeaderLayout } from "@/components/layout/auth-header-layout";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Create Seller Account",
-  description: "Create a FastFulfill seller account to request product sourcing, quotes, samples, warehousing, and fulfillment.",
-  path: "/auth/signup",
+  title: "Sign In",
+  description: "Sign in to your FastFulfill seller account.",
+  path: "/auth/login",
   noIndex: true,
 });
 
-export default function BuyerSignupLayout({ children }: { children: React.ReactNode }) {
+export default function LoginLayout({ children }: { children: React.ReactNode }) {
   return <AuthHeaderLayout>{children}</AuthHeaderLayout>;
 }

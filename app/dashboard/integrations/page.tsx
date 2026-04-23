@@ -71,7 +71,7 @@ const SHOPIFY_CONNECT_REASON_COPY: Record<string, string> = {
   missing_params: "Shopify returned without the required OAuth parameters. Start the connection again from FastFulfill.",
   invalid_hmac: "Shopify returned an invalid OAuth signature. This usually means the Shopify app secret is wrong in your environment.",
   state_mismatch: "The Shopify OAuth state expired or changed during the redirect. Start the connection again and finish it in the same browser tab.",
-  unauthenticated: "You must be signed in with your real FastFulfill buyer account before connecting Shopify.",
+  unauthenticated: "You must be signed in with your real FastFulfill seller account before connecting Shopify.",
   shopify_setup_invalid: "The Shopify app environment is incomplete or invalid. Check SHOPIFY_API_KEY, SHOPIFY_API_SECRET, and NEXT_PUBLIC_APP_URL.",
   token_exchange_failed: "Shopify rejected the token exchange. This usually means the app credentials are wrong or the callback URL in Shopify does not match this app.",
   integration_save_failed: "Shopify authorized the app, but FastFulfill could not save the store connection in Supabase.",
@@ -358,7 +358,7 @@ export default function IntegrationsPage() {
             )}
             {oauthReason === "unauthenticated" && (
               <p className="text-xs text-red-700 mt-2">
-                Please <a href="/auth/login" className="underline font-semibold">sign in</a> with your buyer account and then start the Shopify connection again.
+                Please <a href="/auth/login" className="underline font-semibold">sign in</a> with your seller account and then start the Shopify connection again.
               </p>
             )}
           </div>

@@ -57,7 +57,7 @@ export function Navbar() {
               <Button variant="ghost" size="sm">Log in</Button>
             </Link>
             <Link href="/auth/signup">
-              <Button size="sm">Start Sourcing</Button>
+              <Button size="sm">Request Pricing</Button>
             </Link>
           </div>
 
@@ -98,7 +98,7 @@ export function Navbar() {
               <Button variant="outline" className="w-full">Log in</Button>
             </Link>
             <Link href="/auth/signup" onClick={() => setMobileOpen(false)}>
-              <Button className="w-full">Start Sourcing</Button>
+              <Button className="w-full">Request Pricing</Button>
             </Link>
           </div>
         </div>

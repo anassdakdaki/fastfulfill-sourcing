@@ -1,7 +1,11 @@
 const baseUrl = process.env.SMOKE_BASE_URL ?? "http://localhost:3000";
 
 const publicRoutes = ["/", "/pricing", "/services", "/catalog", "/tracking", "/blog"];
-const protectedRoutes = ["/dashboard", "/supplier", "/fulfillment"];
+const protectedRoutes = [
+  { path: "/dashboard", redirectTo: "/auth/login" },
+  { path: "/supplier", redirectTo: "/auth/private-access" },
+  { path: "/fulfillment", redirectTo: "/auth/private-access" },
+];
 
 async function checkPublicRoute(path) {
   const response = await fetch(`${baseUrl}${path}`, { redirect: "manual" });
@@ -11,14 +15,14 @@ async function checkPublicRoute(path) {
   console.log(`ok public ${path}`);
 }
 
-async function checkProtectedRoute(path) {
+async function checkProtectedRoute({ path, redirectTo }) {
   const response = await fetch(`${baseUrl}${path}`, { redirect: "manual" });
   const location = response.headers.get("location") ?? "";
   if (response.status !== 307 && response.status !== 308) {
     throw new Error(`${path} expected redirect, received ${response.status}`);
   }
-  if (!location.includes("/auth/login")) {
-    throw new Error(`${path} expected login redirect, received ${location}`);
+  if (!location.includes(redirectTo)) {
+    throw new Error(`${path} expected redirect to ${redirectTo}, received ${location}`);
   }
   console.log(`ok protected ${path}`);
 }

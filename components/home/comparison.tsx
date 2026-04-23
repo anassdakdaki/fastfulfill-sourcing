@@ -240,7 +240,7 @@ export function Comparison() {
 
         <div className="mt-8 text-center">
           <Link href="/auth/signup">
-            <Button size="lg">Get a Free Product Price in 24h</Button>
+            <Button size="lg">Request Product Pricing</Button>
           </Link>
           <p className="mt-3 text-xs text-gray-400 dark:text-gray-500">No credit card. No monthly fee. Just a clear price.</p>
         </div>

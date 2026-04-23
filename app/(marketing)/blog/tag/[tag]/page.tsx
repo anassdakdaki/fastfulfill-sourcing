@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PostCard } from "@/components/blog/post-card";
+import { JsonLd } from "@/components/seo/json-ld";
 import { getAllTags, getPostsByTagSlug } from "@/lib/blog";
+import { buildBreadcrumbJsonLd, buildMetadata, buildWebPageJsonLd } from "@/lib/seo";
 
 type PageProps = {
   params: Promise<{ tag: string }>;
@@ -17,11 +19,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const tags = await getAllTags();
   const currentTag = tags.find((item) => item.slug === tag);
 
-  return {
+  return buildMetadata({
     title: `${currentTag?.name ?? tag} Articles`,
     description: `FastFulfill articles tagged ${currentTag?.name ?? tag}.`,
-    alternates: { canonical: `/blog/tag/${tag}` },
-  };
+    path: `/blog/tag/${tag}`,
+  });
 }
 
 export default async function BlogTagPage({ params }: PageProps) {
@@ -33,6 +35,21 @@ export default async function BlogTagPage({ params }: PageProps) {
 
   return (
     <div className="bg-white dark:bg-gray-950">
+      <JsonLd
+        data={[
+          buildWebPageJsonLd({
+            title: `${currentTag?.name ?? tag} Articles`,
+            description: `FastFulfill articles tagged ${currentTag?.name ?? tag}.`,
+            path: `/blog/tag/${tag}`,
+            type: "CollectionPage",
+          }),
+          buildBreadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Blog", path: "/blog" },
+            { name: currentTag?.name ?? tag, path: `/blog/tag/${tag}` },
+          ]),
+        ]}
+      />
       <section className="container-section py-12">
         <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
           Blog Tag

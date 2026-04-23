@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Package2, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
@@ -79,7 +79,7 @@ function SignupContent() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
+      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md text-center">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 size={32} className="text-green-600 dark:text-green-400" />
@@ -98,17 +98,11 @@ function SignupContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
+    <div className="min-h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
 
         {/* Left value prop for desktop only */}
         <div className="hidden md:block pt-2">
-          <Link href="/" className="inline-flex items-center gap-2.5 font-bold text-gray-900 dark:text-white text-lg mb-8">
-            <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center">
-              <Package2 size={19} className="text-white" />
-            </div>
-            FastFulfill
-          </Link>
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white leading-tight">
               Source, store &<br />fulfill on autopilot.
           </h2>
@@ -132,14 +126,7 @@ function SignupContent() {
 
         {/* Right form */}
         <div>
-          {/* Mobile logo */}
           <div className="md:hidden text-center mb-8">
-            <Link href="/" className="inline-flex items-center gap-2.5 font-bold text-gray-900 dark:text-white text-lg">
-              <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center">
-                <Package2 size={19} className="text-white" />
-              </div>
-              FastFulfill
-            </Link>
             <div className="flex justify-center gap-4 mt-4 flex-wrap">
               {PERKS.slice(0, 2).map((p) => (
                 <span key={p} className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
@@ -150,7 +137,7 @@ function SignupContent() {
           </div>
 
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-8">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Create your buyer account</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Create your seller account</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Free to join. No credit card required.</p>
 
             <form onSubmit={handleSignup} className="space-y-4">
@@ -208,7 +195,7 @@ function SignupContent() {
               )}
 
               <Button type="submit" loading={loading} className="w-full" size="lg">
-                Create Free Account
+                Create Seller Account
               </Button>
 
               <p className="text-xs text-center text-gray-400 dark:text-gray-500">

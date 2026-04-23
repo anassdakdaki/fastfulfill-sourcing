@@ -15,7 +15,7 @@ export function BlogSidebar({ relatedPosts }: { relatedPosts: BlogPost[] }) {
         </p>
         <Link href="/auth/signup" className="mt-4 block">
           <Button className="w-full" size="sm">
-            Start for free
+            Request Product Pricing
             <ArrowRight size={15} />
           </Button>
         </Link>

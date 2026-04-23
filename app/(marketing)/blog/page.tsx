@@ -3,15 +3,21 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { CategoryFilter } from "@/components/blog/category-filter";
 import { PostCard } from "@/components/blog/post-card";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { getAllCategories, getAllPosts } from "@/lib/blog";
+import { buildBreadcrumbJsonLd, buildMetadata, buildWebPageJsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Blog",
-  description:
-    "Guides for sourcing products from China, Shopify fulfillment, shipping times, and ecommerce operations.",
-  alternates: { canonical: "/blog" },
-};
+const title = "Blog";
+const description =
+  "Guides for sourcing products from China, Shopify fulfillment, shipping times, and ecommerce operations.";
+
+export const metadata: Metadata = buildMetadata({
+  title,
+  description,
+  path: "/blog",
+  keywords: ["china sourcing blog", "shopify fulfillment blog", "dropshipping from china guides"],
+});
 
 export default async function BlogPage() {
   const [posts, categories] = await Promise.all([
@@ -25,6 +31,15 @@ export default async function BlogPage() {
 
   return (
     <div className="bg-white dark:bg-gray-950">
+      <JsonLd
+        data={[
+          buildWebPageJsonLd({ title, description, path: "/blog", type: "CollectionPage" }),
+          buildBreadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Blog", path: "/blog" },
+          ]),
+        ]}
+      />
       <section className="border-b border-gray-100 bg-gradient-to-br from-gray-50 to-brand-50 py-16 dark:border-gray-800 dark:from-gray-950 dark:to-gray-900">
         <div className="container-section">
           <div className="mx-auto max-w-3xl text-center">
@@ -40,13 +55,13 @@ export default async function BlogPage() {
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link href="/auth/signup">
                 <Button className="w-full sm:w-auto">
-                  Request a product price
+                  Request Product Pricing
                   <ArrowRight size={16} />
                 </Button>
               </Link>
               <Link href="/pricing">
                 <Button variant="outline" className="w-full sm:w-auto">
-                  See pricing
+                  See Fulfillment Pricing
                 </Button>
               </Link>
             </div>

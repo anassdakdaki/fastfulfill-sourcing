@@ -11,12 +11,19 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/seo/json-ld";
+import { buildBreadcrumbJsonLd, buildMetadata, buildWebPageJsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Pricing",
-  description:
-    "No monthly fee. Ask for product prices for free, order samples from $30, and pay only when products ship.",
-};
+const title = "Pricing";
+const description =
+  "No monthly fee. Ask for product prices for free, order samples from $30, and pay only when products ship.";
+
+export const metadata: Metadata = buildMetadata({
+  title,
+  description,
+  path: "/pricing",
+  keywords: ["fulfillment pricing", "china sourcing pricing", "sample order pricing"],
+});
 
 const PRICING_STEPS = [
   {
@@ -26,7 +33,7 @@ const PRICING_STEPS = [
     period: "monthly fee",
     description:
       "Send a product link or photo. We find factory options, estimate shipping, and reply within 24 hours.",
-    cta: "Ask for Free Price",
+    cta: "Request Product Pricing",
     features: [
       "Free product price request",
       "Factory price estimate",
@@ -42,7 +49,7 @@ const PRICING_STEPS = [
     period: "sample orders",
     description:
       "Test quality before you commit. We arrange the supplier sample and help you verify the product.",
-    cta: "Order Sample",
+    cta: "Order a Sample",
     features: [
       "Supplier sample coordination",
       "Product quality review",
@@ -59,7 +66,7 @@ const PRICING_STEPS = [
     period: "after approval",
     description:
       "Once you approve a product, we can check it, pack it, ship it, and send tracking.",
-    cta: "Start Shipping",
+    cta: "Request Product Pricing",
     features: [
       "Factory cost billed per product",
       "Shipping billed by weight and country",
@@ -162,6 +169,15 @@ const FAQ = [
 export default function PricingPage() {
   return (
     <div>
+      <JsonLd
+        data={[
+          buildWebPageJsonLd({ title, description, path: "/pricing" }),
+          buildBreadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Pricing", path: "/pricing" },
+          ]),
+        ]}
+      />
       <section className="bg-gradient-to-br from-gray-50 to-brand-50 py-20 border-b border-gray-100 text-center dark:from-gray-950 dark:to-gray-900 dark:border-gray-800">
         <div className="container-section max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-widest text-brand-600 mb-3">Pricing</p>

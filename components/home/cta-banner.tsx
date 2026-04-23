@@ -31,7 +31,7 @@ export function CtaBanner() {
           <div className="mb-10 flex flex-col justify-center gap-4 sm:flex-row">
             <Link href="/auth/signup">
               <Button size="lg" className="h-12 w-full px-8 text-base shadow-xl shadow-brand-500/20 sm:w-auto">
-                Get a Free Product Price
+                Request Product Pricing
                 <ArrowRight size={18} />
               </Button>
             </Link>
@@ -42,7 +42,7 @@ export function CtaBanner() {
                 className="h-12 w-full border-white/20 bg-transparent px-8 text-base text-white hover:border-white/30 hover:bg-white/10 sm:w-auto"
               >
                 <Package2 size={18} />
-                Order a Sample from $30
+                Order a Sample
               </Button>
             </Link>
           </div>
