@@ -9,13 +9,13 @@ export function PostCard({ post, featured = false }: { post: BlogPost; featured?
   return (
     <article className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900">
       <Link href={`/blog/${post.slug}`} className="block">
-        <div className={featured ? "relative aspect-[16/9]" : "relative aspect-[4/3]"}>
+        <div className="relative aspect-[16/9] overflow-hidden bg-gray-950">
           <Image
             src={post.featuredImage}
             alt={post.featuredImageAlt}
             fill
             unoptimized
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-contain transition-transform duration-300 group-hover:scale-[1.02]"
             sizes={featured ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 33vw, 100vw"}
           />
           <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-brand-700 shadow-sm backdrop-blur dark:bg-gray-950/80 dark:text-brand-300">

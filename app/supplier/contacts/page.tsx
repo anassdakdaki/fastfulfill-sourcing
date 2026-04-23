@@ -149,7 +149,7 @@ export default function ContactsPage() {
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-gray-200 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-          placeholder="Search suppliers…"
+          placeholder="Search suppliers..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -194,7 +194,7 @@ export default function ContactsPage() {
       {/* List */}
       {loading ? (
         <div className="flex items-center justify-center py-16 gap-2 text-gray-400">
-          <Loader2 size={18} className="animate-spin" /> Loading…
+          <Loader2 size={18} className="animate-spin" /> Loading...
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-16 flex flex-col items-center gap-3 text-center">

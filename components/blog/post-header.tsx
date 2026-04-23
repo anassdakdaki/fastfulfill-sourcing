@@ -31,14 +31,14 @@ export function PostHeader({ post }: { post: BlogPost }) {
             </span>
           </div>
         </div>
-        <div className="relative mx-auto mt-10 aspect-[16/9] max-w-5xl overflow-hidden rounded-3xl border border-gray-100 bg-gray-100 shadow-2xl shadow-gray-900/10 dark:border-gray-800 dark:bg-gray-900 dark:shadow-black/30">
+        <div className="relative mx-auto mt-10 aspect-[16/9] max-w-5xl overflow-hidden rounded-3xl border border-gray-100 bg-gray-950 shadow-2xl shadow-gray-900/10 dark:border-gray-800 dark:shadow-black/30">
           <Image
             src={post.featuredImage}
             alt={post.featuredImageAlt}
             fill
             priority
             unoptimized
-            className="object-cover"
+            className="object-contain"
             sizes="(min-width: 1024px) 960px, 100vw"
           />
         </div>

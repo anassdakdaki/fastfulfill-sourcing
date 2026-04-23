@@ -29,7 +29,7 @@ export async function sendQuoteEmail(to: string, productName: string, quoteRef: 
         </p>
         <a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://app.fastfulfill.com"}/dashboard/quotes"
            style="display:inline-block;margin-top:20px;padding:12px 24px;background:#6366f1;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">
-          View Quote →
+          View Quote
         </a>
         <p style="margin-top:32px;font-size:12px;color:#94a3b8">
           FastFulfill · You received this because you submitted a sourcing request.
@@ -61,7 +61,7 @@ export async function sendShipmentEmail(to: string, productName: string, trackin
         </div>
         <a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://app.fastfulfill.com"}/dashboard/tracking"
            style="display:inline-block;padding:12px 24px;background:#6366f1;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">
-          Track Shipment →
+          Track Shipment
         </a>
       </div>
     `,
@@ -86,7 +86,7 @@ export async function sendInvoiceEmail(to: string, invoiceNumber: string, total:
         </p>
         <a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://app.fastfulfill.com"}/dashboard/invoices"
            style="display:inline-block;margin-top:16px;padding:12px 24px;background:#6366f1;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">
-          View & Pay Invoice →
+          View & Pay Invoice
         </a>
       </div>
     `,

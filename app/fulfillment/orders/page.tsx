@@ -179,8 +179,7 @@ export default function OrdersQueuePage() {
       <div className="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700">
         <Info size={15} className="text-slate-400 shrink-0 mt-0.5" />
         <span>
-          <strong>Workflow:</strong> Export orders as CSV → Fill in tracking numbers in Excel →
-          Import back to update order statuses automatically.
+          <strong>Workflow:</strong> Export orders as CSV, fill in tracking numbers in Excel, then import back to update order statuses automatically.
         </span>
       </div>
 
@@ -226,7 +225,7 @@ export default function OrdersQueuePage() {
         {loading ? (
           <div className="py-16 flex flex-col items-center gap-3">
             <Loader2 size={24} className="animate-spin text-gray-400" />
-            <p className="text-sm text-gray-400">Loading orders…</p>
+            <p className="text-sm text-gray-400">Loading orders...</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-16 flex flex-col items-center gap-3">

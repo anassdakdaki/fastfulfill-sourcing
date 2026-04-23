@@ -108,5 +108,5 @@ export const SHIPPING_METHOD_LABELS: Record<string, string> = {
 export const DESTINATION_TYPE_LABELS: Record<string, string> = {
   amazon_fba: "Amazon FBA",
   customer:   "Direct to Customer",
-  "3pl":      "3PL Warehouse",
+  "3pl":      "External warehouse",
 };

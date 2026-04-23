@@ -122,7 +122,7 @@ export default function ShopifyIntegrationPage() {
         >
           shopify
         </span>
-        <span className="text-gray-300 text-2xl font-light">×</span>
+        <span className="text-sm font-semibold uppercase tracking-wide text-gray-300">with</span>
         <span className="text-xl font-bold text-gray-900">FastFulfill</span>
       </div>
 

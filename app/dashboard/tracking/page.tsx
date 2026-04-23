@@ -57,7 +57,7 @@ export default function TrackingPage() {
       {/* Search */}
       <form onSubmit={handleSearch} className="flex gap-3">
         <Input
-          placeholder="Enter tracking number or order ID…"
+          placeholder="Enter tracking number or order ID..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           required
@@ -149,7 +149,7 @@ export default function TrackingPage() {
           </div>
           {loadingList ? (
             <div className="py-12 flex items-center justify-center gap-2 text-gray-400">
-              <Loader2 size={18} className="animate-spin" /> Loading shipments…
+              <Loader2 size={18} className="animate-spin" /> Loading shipments...
             </div>
           ) : shipments.length === 0 ? (
             <div className="py-12 flex flex-col items-center gap-3 text-center">

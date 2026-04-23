@@ -26,35 +26,35 @@ const PLATFORM_META: Record<IntegrationPlatform, {
   urlPlaceholder: string;
 }> = {
   shopify: {
-    name: "Shopify", logo: "🛍️",
+    name: "Shopify", logo: "S",
     description: "Sync orders, auto-fulfill Shopify sales, update inventory in real-time.",
     color: "bg-green-50 border-green-200",
     urlPlaceholder: "mystore.myshopify.com",
     features: ["Auto-import orders", "Real-time inventory sync", "Auto-fulfill on sale", "Tracking push-back"],
   },
   woocommerce: {
-    name: "WooCommerce", logo: "🛒",
+    name: "WooCommerce", logo: "W",
     description: "Connect your WordPress store and automate order fulfillment.",
     color: "bg-purple-50 border-purple-200",
     urlPlaceholder: "mystore.com",
     features: ["Order import via REST API", "Product sync", "Fulfillment automation", "Status webhooks"],
   },
   amazon: {
-    name: "Amazon Seller", logo: "📦",
+    name: "Amazon Seller", logo: "A",
     description: "Link your Amazon Seller account for FBA prep and direct fulfillment.",
     color: "bg-yellow-50 border-yellow-200",
     urlPlaceholder: "amazon.com/seller/XXXXX",
     features: ["FBA shipment creation", "Multi-marketplace", "Inventory alerts", "Order routing"],
   },
   tiktok: {
-    name: "TikTok Shop", logo: "🎵",
+    name: "TikTok Shop", logo: "T",
     description: "Fulfill TikTok Shop orders directly through FastFulfill.",
     color: "bg-pink-50 border-pink-200",
     urlPlaceholder: "shop.tiktok.com/@mystore",
     features: ["Order auto-import", "Fast fulfillment SLA", "Returns management", "Tracking sync"],
   },
   etsy: {
-    name: "Etsy", logo: "🎨",
+    name: "Etsy", logo: "E",
     description: "Source and fulfill your Etsy listings with custom packaging.",
     color: "bg-orange-50 border-orange-200",
     urlPlaceholder: "etsy.com/shop/mystore",
@@ -426,7 +426,7 @@ export default function IntegrationsPage() {
         {/* Connected stores */}
         {loading ? (
           <div className="flex items-center justify-center py-10 gap-2 text-gray-400">
-            <Loader2 size={18} className="animate-spin" /> Loading integrations…
+            <Loader2 size={18} className="animate-spin" /> Loading integrations...
           </div>
         ) : (
           <div className="space-y-3">
@@ -439,14 +439,16 @@ export default function IntegrationsPage() {
                 <div key={integration.id} className={`rounded-2xl border p-5 ${meta.color}`}>
                   <div className="flex items-start justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-3">
-                      <span className="text-3xl">{meta.logo}</span>
+                      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-base font-bold text-brand-700">
+                        {meta.logo}
+                      </span>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="text-base font-bold text-gray-900">{meta.name}</h3>
                           <StatusBadge status={isSyncing ? "syncing" : integration.status} />
                         </div>
                         <p className="text-sm text-gray-600 mt-0.5">
-                          {integration.store_name} · {integration.store_url}
+                          {integration.store_name} / {integration.store_url}
                         </p>
                         {integration.error_message && (
                           <p className="text-xs text-red-600 mt-1">{integration.error_message}</p>
@@ -520,7 +522,9 @@ export default function IntegrationsPage() {
                 return (
                   <div key={platform} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-shadow">
                     <div className="flex items-start gap-3 mb-3">
-                      <span className="text-3xl">{meta.logo}</span>
+                      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-base font-bold text-brand-700">
+                        {meta.logo}
+                      </span>
                       <h3 className="text-base font-bold text-gray-900 mt-1">{meta.name}</h3>
                     </div>
                     <p className="text-sm text-gray-500 mb-4">{meta.description}</p>
@@ -561,7 +565,7 @@ export default function IntegrationsPage() {
                         <div className="flex gap-2">
                           <Button type="submit" size="sm" disabled={connectSaving} className="flex-1">
                             {connectSaving ? <Loader2 size={13} className="animate-spin" /> : <Plug size={13} />}
-                            {connectSaving ? "Connecting…" : "Connect"}
+                          {connectSaving ? "Connecting..." : "Connect"}
                           </Button>
                           <Button type="button" size="sm" variant="ghost" onClick={() => setConnectingPlatform(null)}>
                             <X size={13} />
@@ -604,9 +608,7 @@ export default function IntegrationsPage() {
         )}
       </section>
 
-      {/* ══════════════════════════════════
-      SECTION 2 FULL FLOW EXPLAINER
-         ══════════════════════════════════ */}
+      {/* Full flow explainer */}
       <section className="bg-gray-50 rounded-2xl border border-gray-100 p-6">
         <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <Zap size={15} className="text-brand-600" /> Full Automated Flow
@@ -614,11 +616,11 @@ export default function IntegrationsPage() {
         <div className="flex flex-wrap items-start gap-2">
           {[
             { n: "1", title: "Store order comes in",       sub: "Shopify" },
-            { n: "→" },
+            { n: ">" },
             { n: "2", title: "FastFulfill receives it",    sub: "Auto-imported via store integration" },
-            { n: "→" },
+            { n: ">" },
             { n: "3", title: "Warehouse team fulfills",    sub: "From your stored warehouse stock" },
-            { n: "→" },
+            { n: ">" },
             { n: "4", title: "Tracking synced back",       sub: "To FastFulfill and your store" },
           ].map((s, i) =>
             s.title ? (

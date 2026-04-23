@@ -191,7 +191,7 @@ function InvoicesContent() {
         {loading ? (
           <div className="py-16 flex flex-col items-center gap-3">
             <Loader2 size={24} className="animate-spin text-gray-400" />
-            <p className="text-sm text-gray-400">Loading invoices…</p>
+            <p className="text-sm text-gray-400">Loading invoices...</p>
           </div>
         ) : filtered.length === 0 ? (
           <EmptyState

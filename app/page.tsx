@@ -4,6 +4,7 @@ import { HowItWorks } from "@/components/home/how-it-works";
 import { Comparison } from "@/components/home/comparison";
 import { WhatWeSource } from "@/components/home/what-we-source";
 import { Benefits } from "@/components/home/benefits";
+import { OperationsProof } from "@/components/home/operations-proof";
 import { FulfillmentFlow } from "@/components/home/fulfillment-flow";
 import { FirstRequest } from "@/components/home/first-request";
 import { Stats } from "@/components/home/stats";
@@ -35,6 +36,9 @@ export default function HomePage() {
 
       {/* 5. Benefits / features */}
       <Benefits />
+
+      {/* 5b. Operational proof */}
+      <OperationsProof />
 
       {/* 6. Order flow */}
       <FulfillmentFlow />

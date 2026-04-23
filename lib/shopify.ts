@@ -436,7 +436,7 @@ function tokenExpiresSoon(expiresAt: string | null) {
   return new Date(expiresAt).getTime() <= Date.now() + ACCESS_TOKEN_EXPIRY_BUFFER_MS;
 }
 
-/** @internal Used only within syncShopifyOrders – loaded via the caller's client. */
+/** @internal Used only within syncShopifyOrders. Loaded via the caller's client. */
 /** @deprecated Use fn_shopify_lookup_integration RPC in the webhook route. */
 export async function loadShopifyIntegrationByDomain(_shopDomain: string) {
   void _shopDomain;
@@ -733,7 +733,7 @@ function buildShippingAddress(address?: ShopifyRestAddress | null) {
 // ── Pure mapping helper (no DB) ───────────────────────────────────────────────
 
 /** Maps a raw Shopify REST order to the fields needed for our DB.
- *  No database calls — safe to call anywhere, including the webhook route. */
+ *  No database calls. Safe to call anywhere, including the webhook route. */
 export function mapShopifyOrderForWebhook(shopifyOrder: ShopifyRestOrder) {
   const summary = mapShopifyOrderSummary(shopifyOrder.line_items ?? []);
   const shippingAddress = buildShippingAddress(shopifyOrder.shipping_address);
@@ -857,7 +857,7 @@ export async function upsertShopifyOrder(
 }
 
 /** Register webhooks for a Shopify store directly using the access token.
- *  No DB reads required — tokens are passed in from the OAuth callback. */
+ *  No DB reads required. Tokens are passed in from the OAuth callback. */
 export async function registerShopifyWebhooks(
   shop: string,
   accessToken: string,
@@ -876,7 +876,7 @@ export async function registerShopifyWebhooks(
     }
   `;
 
-  // topic → which URI to register it on
+  // Topic to webhook URI registration map.
   const topics: Array<{ topic: string; webhookUri: string }> = [
     { topic: "ORDERS_CREATE",           webhookUri: uri },
     { topic: "APP_UNINSTALLED",         webhookUri: uri },
@@ -908,7 +908,7 @@ export async function registerShopifyWebhooks(
 
     const firstError = payload.data?.webhookSubscriptionCreate?.userErrors?.[0];
     if (firstError) {
-      // "already registered" is not a fatal error — skip it
+      // "already registered" is not a fatal error. Skip it.
       if (firstError.message?.toLowerCase().includes("already")) continue;
       const message = firstError.field?.length
         ? `${firstError.field.join(".")}: ${firstError.message}`
@@ -1113,7 +1113,7 @@ export async function markShopifyIntegrationConnected(
 }
 
 /** Sync historical orders from Shopify REST API into the DB.
- *  Uses SECURITY DEFINER RPC for writes — no admin client needed. */
+ *  Uses SECURITY DEFINER RPC for writes. No admin client needed. */
 export async function syncShopifyOrders(supabase: SupabaseClient, integrationId: string) {
   // Load integration with the caller's supabase client (RLS: buyer can read own rows)
   const { data: integrationRow, error: loadErr } = await supabase

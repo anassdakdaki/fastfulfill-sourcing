@@ -123,7 +123,7 @@ export default function SourcingSettingsPage() {
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
             </div>
             <p className="text-xs text-gray-400 mt-1">
-              e.g. 20% → $4.00 cost becomes $4.80 seller price
+              e.g. 20 percent markup means $4.00 cost becomes $4.80 seller price
             </p>
           </div>
           <div>

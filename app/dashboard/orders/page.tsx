@@ -51,7 +51,7 @@ export default function OrdersPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {loading ? "Loading…" : `${orders.length} total order${orders.length !== 1 ? "s" : ""}`}
+            {loading ? "Loading..." : `${orders.length} total order${orders.length !== 1 ? "s" : ""}`}
           </p>
         </div>
       </div>
@@ -102,7 +102,7 @@ export default function OrdersPage() {
         {loading ? (
           <div className="py-16 flex flex-col items-center gap-3">
             <Loader2 size={24} className="animate-spin text-gray-400" />
-            <p className="text-sm text-gray-400">Loading your orders…</p>
+            <p className="text-sm text-gray-400">Loading your orders...</p>
           </div>
         ) : orders.length === 0 ? (
           <div className="py-16 flex flex-col items-center gap-3 text-center px-4">

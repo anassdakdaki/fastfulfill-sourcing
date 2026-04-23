@@ -110,7 +110,7 @@ export default function QuotesManagerPage() {
         {loading ? (
           <div className="py-16 flex flex-col items-center gap-3">
             <Loader2 size={24} className="animate-spin text-gray-400" />
-            <p className="text-sm text-gray-400">Loading quotes…</p>
+            <p className="text-sm text-gray-400">Loading quotes...</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-16 flex flex-col items-center gap-3">

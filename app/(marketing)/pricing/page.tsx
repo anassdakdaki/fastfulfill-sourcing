@@ -3,8 +3,10 @@ import {
   ArrowRight,
   CheckCircle2,
   ClipboardCheck,
+  Globe2,
   PackageCheck,
   Sparkles,
+  Truck,
   Warehouse,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -87,6 +89,57 @@ const COST_LINES = [
   },
 ];
 
+const QUOTE_FACTORS = [
+  {
+    icon: ClipboardCheck,
+    title: "Product details",
+    text: "Material, size, color options, packaging style, and order quantity all affect the factory cost.",
+  },
+  {
+    icon: Truck,
+    title: "Shipping method",
+    text: "Destination country, parcel weight, speed, and final package size determine the delivery cost.",
+  },
+  {
+    icon: Globe2,
+    title: "Service work",
+    text: "QC, storage handling, packing steps, tracking sync, and custom packaging are priced clearly instead of hidden inside one number.",
+  },
+];
+
+const QUOTE_EXAMPLES = [
+  {
+    title: "Sample check before launch",
+    note: "Useful when you want to verify quality before ordering stock",
+    lines: [
+      { label: "Sample product", value: "$18.00" },
+      { label: "Sample shipping", value: "$12.00" },
+      { label: "Handling and review", value: "$6.00" },
+    ],
+    total: "$36.00",
+  },
+  {
+    title: "First stocked order",
+    note: "Useful when you want inventory ready for faster fulfillment",
+    lines: [
+      { label: "100 units at $4.80", value: "$480.00" },
+      { label: "Inbound shipping", value: "$92.00" },
+      { label: "QC and warehouse intake", value: "$38.00" },
+    ],
+    total: "$610.00",
+  },
+  {
+    title: "One customer shipment",
+    note: "Useful once stock is already in FastFulfill warehouse",
+    lines: [
+      { label: "Product cost", value: "$4.80" },
+      { label: "Shipping to customer", value: "$6.40" },
+      { label: "Pick, pack, tracking", value: "$1.80" },
+    ],
+    total: "$13.00",
+  },
+];
+
 const FAQ = [
   {
     q: "Is there a monthly fee?",
@@ -118,6 +171,20 @@ export default function PricingPage() {
           <p className="text-gray-500 dark:text-gray-400 text-lg">
             Ask for prices for free, order samples when you are ready, then pay per order when products ship.
           </p>
+          <div className="mt-8 grid gap-3 text-left sm:grid-cols-3">
+            {[
+              "Free product pricing requests",
+              "Samples from $30 depending on product",
+              "Per-order costs shown before approval",
+            ].map((item) => (
+              <div
+                key={item}
+                className="rounded-2xl border border-gray-200 bg-white/90 px-4 py-3 text-sm font-medium text-gray-700 shadow-sm dark:border-gray-800 dark:bg-gray-900/80 dark:text-gray-300"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -214,6 +281,78 @@ export default function PricingPage() {
                 <div key={line.label} className="rounded-xl bg-white border border-gray-100 p-5 dark:bg-gray-950 dark:border-gray-800">
                   <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">{line.label}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{line.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 md:p-8 dark:border-gray-800 dark:bg-gray-900">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-widest text-brand-600 mb-3">
+                How a quote is built
+              </p>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">
+                The final number depends on product, shipping, and service work
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-gray-500 dark:text-gray-400">
+                FastFulfill does not use one vague fee. Every quote is built from the actual product cost, the delivery route, and the operational work needed to check, pack, and ship the order.
+              </p>
+            </div>
+
+            <div className="mt-8 grid gap-4 md:grid-cols-3">
+              {QUOTE_FACTORS.map(({ icon: Icon, title, text }) => (
+                <div key={title} className="rounded-2xl border border-gray-100 bg-gray-50 p-5 dark:border-gray-800 dark:bg-gray-950">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-950/40 dark:text-brand-300">
+                    <Icon size={20} />
+                  </div>
+                  <p className="mt-4 text-lg font-bold text-gray-900 dark:text-white">{title}</p>
+                  <p className="mt-2 text-sm leading-7 text-gray-600 dark:text-gray-400">{text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 md:p-8 dark:border-gray-800 dark:bg-gray-900">
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div className="max-w-2xl">
+                <p className="text-xs font-semibold uppercase tracking-widest text-brand-600 mb-3">
+                  Example Costs
+                </p>
+                <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">
+                  Three common quote examples
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-gray-500 dark:text-gray-400">
+                  These examples are illustrative, not fixed public rates. They show how FastFulfill pricing is structured so buyers understand what changes the final cost.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-600 dark:text-gray-300">
+                <Sparkles size={16} className="text-brand-600" />
+                Final quote always depends on product and destination.
+              </div>
+            </div>
+
+            <div className="mt-8 grid gap-4 lg:grid-cols-3">
+              {QUOTE_EXAMPLES.map((example) => (
+                <div
+                  key={example.title}
+                  className="rounded-2xl border border-gray-100 bg-gray-50 p-5 dark:border-gray-800 dark:bg-gray-950"
+                >
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">{example.title}</p>
+                  <p className="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">{example.note}</p>
+
+                  <div className="mt-5 space-y-3">
+                    {example.lines.map((line) => (
+                      <div key={line.label} className="flex items-start justify-between gap-4 border-b border-gray-200 pb-3 text-sm dark:border-gray-800">
+                        <span className="text-gray-600 dark:text-gray-400">{line.label}</span>
+                        <span className="font-semibold text-gray-900 dark:text-white">{line.value}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between rounded-xl bg-white px-4 py-3 dark:bg-gray-900">
+                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Example total</span>
+                    <span className="text-2xl font-black text-gray-900 dark:text-white">{example.total}</span>
+                  </div>
                 </div>
               ))}
             </div>

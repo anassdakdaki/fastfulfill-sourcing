@@ -107,7 +107,7 @@ export default function InboundStockPage() {
         {loading ? (
           <div className="py-16 flex flex-col items-center gap-3">
             <Loader2 size={24} className="animate-spin text-gray-400" />
-            <p className="text-sm text-gray-400">Loading inbound shipments…</p>
+            <p className="text-sm text-gray-400">Loading inbound shipments...</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-16 flex flex-col items-center gap-3">
@@ -174,7 +174,7 @@ export default function InboundStockPage() {
                             }`}
                           >
                             {isConfirming && <Loader2 size={11} className="animate-spin" />}
-                            {isConfirming ? "Confirming…" : "Confirm Receipt"}
+                            {isConfirming ? "Confirming..." : "Confirm Receipt"}
                           </button>
                         )}
                         {s.status === "logged" && <CheckCircle2 size={18} className="text-green-500" />}

@@ -120,7 +120,7 @@ export default function ProcurementPage() {
         {loading ? (
           <div className="card py-16 flex flex-col items-center gap-3">
             <Loader2 size={24} className="animate-spin text-gray-400" />
-            <p className="text-sm text-gray-400">Loading procurement…</p>
+            <p className="text-sm text-gray-400">Loading procurement...</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="card py-16 flex flex-col items-center gap-3">
@@ -139,7 +139,7 @@ export default function ProcurementPage() {
             <div key={item.id} className={`card overflow-hidden ${item.status === "at_warehouse" ? "border-green-200" : ""}`}>
               {item.status === "at_warehouse" && (
                 <div className="bg-green-600 text-white text-xs font-semibold px-5 py-1.5 flex items-center justify-between">
-                <span>✅ Received at warehouse and ready to log into fulfillment inventory</span>
+                <span>Received at warehouse and ready to log into fulfillment inventory</span>
                   <Link href="/fulfillment/inbound" className="flex items-center gap-1 underline underline-offset-2 hover:no-underline">
                     Open Fulfillment Portal <ExternalLink size={10} />
                   </Link>

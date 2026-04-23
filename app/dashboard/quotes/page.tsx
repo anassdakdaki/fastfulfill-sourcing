@@ -125,7 +125,7 @@ export default function QuotesPage() {
       {/* Quote cards */}
       {loading ? (
         <div className="flex items-center justify-center py-16 gap-2 text-gray-400">
-          <Loader2 size={18} className="animate-spin" /> Loading your quotes…
+          <Loader2 size={18} className="animate-spin" /> Loading your quotes...
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">

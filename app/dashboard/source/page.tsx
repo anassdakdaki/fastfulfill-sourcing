@@ -252,7 +252,7 @@ export default function SourceRequestPage() {
               <p className="font-semibold text-gray-700">After you submit:</p>
               <p>✓ Our team reviews and finds the best source</p>
               <p>✓ We send you a quote within 24h</p>
-              <p>✓ You confirm → we order in bulk and store in our warehouse</p>
+              <p>You confirm, then we order in bulk and store in our warehouse</p>
               <p>✓ Your orders are fulfilled automatically, one-by-one</p>
             </div>
 
@@ -278,7 +278,7 @@ export default function SourceRequestPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-16 gap-2 text-gray-400">
-            <Loader2 size={18} className="animate-spin" /> Loading your requests…
+            <Loader2 size={18} className="animate-spin" /> Loading your requests...
           </div>
         ) : requests.length === 0 ? (
           <div className="flex flex-col items-center py-16 text-center px-4">

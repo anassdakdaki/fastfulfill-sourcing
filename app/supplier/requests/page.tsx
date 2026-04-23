@@ -176,7 +176,7 @@ export default function SourcingRequestsPage() {
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
-          placeholder="Search by product, seller, country…"
+          placeholder="Search by product, seller, country..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-300 bg-white"
@@ -206,7 +206,7 @@ export default function SourcingRequestsPage() {
         {loading ? (
           <div className="card py-16 flex flex-col items-center gap-3">
             <Loader2 size={24} className="animate-spin text-gray-400" />
-            <p className="text-sm text-gray-400">Loading requests…</p>
+            <p className="text-sm text-gray-400">Loading requests...</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="card py-16 flex flex-col items-center gap-3">
@@ -229,7 +229,7 @@ export default function SourcingRequestsPage() {
             <div key={req.id} className={`card overflow-hidden transition-all ${req.urgency === "rush" ? "border-red-200" : ""}`}>
               {req.urgency === "rush" && req.status === "new" && (
                 <div className="bg-red-600 text-white text-xs font-semibold px-5 py-1.5 flex items-center gap-2">
-                  ⚡ Rush request. Seller expects fast response
+                  Rush request. Seller expects fast response
                 </div>
               )}
 
@@ -318,7 +318,7 @@ export default function SourcingRequestsPage() {
                             <div>
                               <label className="block text-xs font-medium text-gray-700 mb-1.5">Message to Seller</label>
                               <textarea
-                                rows={2} placeholder="e.g. Available in 3 colours. OEM logo printing included…"
+                                rows={2} placeholder="e.g. Available in 3 colors. OEM logo printing included..."
                                 value={form.notes}
                                 onChange={(e) => updateForm(req.id, "notes", e.target.value)}
                                 className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 resize-none"
@@ -336,12 +336,12 @@ export default function SourcingRequestsPage() {
                                   <p className="text-xs text-gray-400 mb-0.5">Your cost / unit</p>
                                   <p className="font-bold text-gray-900">${calc.cost.toFixed(2)}</p>
                                 </div>
-                                <span className="text-gray-400 text-base font-bold">→ +{DEFAULT_MARGIN}% →</span>
+                                <span className="text-gray-400 text-base font-bold">+{DEFAULT_MARGIN}%</span>
                                 <div className="bg-white rounded-xl px-4 py-2.5 border border-brand-200 text-center min-w-[100px]">
                                   <p className="text-xs text-brand-600 mb-0.5">Seller sees / unit</p>
                                   <p className="font-bold text-brand-700">${calc.sellerUnit.toFixed(2)}</p>
                                 </div>
-                                <span className="text-gray-400 text-base">×{req.qty_requested}</span>
+                                <span className="text-gray-400 text-base">Qty {req.qty_requested}</span>
                                 <span className="text-gray-400">=</span>
                                 <div className="bg-green-600 rounded-xl px-4 py-2.5 text-center min-w-[90px]">
                                   <p className="text-xs text-green-200 mb-0.5">Your margin</p>

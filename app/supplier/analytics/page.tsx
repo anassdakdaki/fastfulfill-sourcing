@@ -72,7 +72,7 @@ export default function SupplierAnalyticsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32 gap-2 text-gray-400">
-        <Loader2 size={20} className="animate-spin" /> Loading analytics…
+        <Loader2 size={20} className="animate-spin" /> Loading analytics...
       </div>
     );
   }

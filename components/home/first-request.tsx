@@ -34,7 +34,7 @@ const COSTS = [
 export function FirstRequest() {
   return (
     <section className="bg-white py-20 dark:bg-gray-950">
-      <div className="container-section">
+      <div className="container-section min-w-0">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-brand-600 dark:text-brand-400">
             First request
@@ -42,52 +42,54 @@ export function FirstRequest() {
           <h2 className="mt-3 text-3xl font-extrabold text-gray-900 dark:text-white md:text-4xl">
             How your first product request works
           </h2>
-          <p className="mt-4 text-gray-500 dark:text-gray-400">
+          <p className="mt-4 text-gray-600 dark:text-gray-400">
             You do not need supplier contacts, freight accounts, or warehouse staff. Send the product and we handle the sourcing path.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-4 md:grid-cols-3">
+        <div className="mt-12 grid min-w-0 gap-4 md:grid-cols-3">
           {STEPS.map((step, index) => (
-            <div key={step.title} className="rounded-2xl border border-gray-100 bg-gray-50 p-6 dark:border-gray-800 dark:bg-gray-900">
+            <div key={step.title} className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-600 text-white">
                 <step.icon size={20} />
               </div>
               <p className="mt-5 text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
                 Step {index + 1}
               </p>
-              <h3 className="mt-2 text-lg font-bold text-gray-900 dark:text-white">{step.title}</h3>
-              <p className="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">{step.text}</p>
+              <h3 className="mt-2 text-lg font-bold text-gray-950 dark:text-white">{step.title}</h3>
+              <p className="mt-3 break-words text-sm leading-6 text-gray-700 dark:text-gray-400">{step.text}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-8 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-2xl border border-gray-100 bg-gray-50 p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="mt-8 grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+          <div className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <div className="flex items-center gap-2">
               <Truck size={18} className="text-brand-600 dark:text-brand-400" />
-              <h3 className="font-bold text-gray-900 dark:text-white">Proof you should expect</h3>
+              <h3 className="font-bold text-gray-950 dark:text-white">Proof you should expect</h3>
             </div>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="mt-5 grid min-w-0 gap-3 sm:grid-cols-2">
               {PROOF.map((item) => (
-                <div key={item.title} className="rounded-xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-950">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{item.title}</p>
-                  <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">{item.text}</p>
+                <div key={item.title} className="min-w-0 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+                  <p className="text-sm font-semibold text-gray-950 dark:text-white">{item.title}</p>
+                  <p className="mt-1 break-words text-xs leading-5 text-gray-700 dark:text-gray-400">{item.text}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-brand-100 bg-brand-50 p-6 dark:border-brand-900 dark:bg-brand-950/30">
+          <div className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <div className="flex items-center gap-2">
-              <WalletCards size={18} className="text-brand-600 dark:text-brand-400" />
-              <h3 className="font-bold text-gray-900 dark:text-white">What you pay for</h3>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white">
+                <WalletCards size={18} />
+              </div>
+              <h3 className="font-bold text-gray-950 dark:text-white">What you pay for</h3>
             </div>
-            <div className="mt-5 space-y-4">
+            <div className="mt-5 space-y-3">
               {COSTS.map((item) => (
-                <div key={item.label}>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{item.label}</p>
-                  <p className="mt-1 text-xs leading-5 text-gray-600 dark:text-gray-300">{item.value}</p>
+                <div key={item.label} className="min-w-0 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+                  <p className="text-sm font-semibold text-gray-950 dark:text-white">{item.label}</p>
+                  <p className="mt-1 break-words text-xs leading-5 text-gray-700 dark:text-gray-400">{item.value}</p>
                 </div>
               ))}
             </div>

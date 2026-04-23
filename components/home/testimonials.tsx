@@ -1,21 +1,23 @@
 const TESTIMONIALS = [
   {
     name: "Sarah K.",
-    role: "Beauty store owner",
+    role: "Beauty seller",
     country: "United States",
     avatar: "SK",
     text: "FastFulfill helped me find suppliers faster. They checked the products before shipping, so fewer bad items reached my customers.",
     stars: 5,
-    metric: "Faster supplier search",
+    metric: "Supplier search",
+    detail: "Beauty, US market",
   },
   {
     name: "James M.",
-    role: "Online seller",
+    role: "Home goods seller",
     country: "United Kingdom",
     avatar: "JM",
     text: "The prices were easier to understand than doing everything myself. My UK orders arrived faster than before.",
     stars: 5,
-    metric: "9-day UK shipping",
+    metric: "9-day UK delivery",
+    detail: "Home goods, UK market",
   },
   {
     name: "Amir T.",
@@ -25,6 +27,7 @@ const TESTIMONIALS = [
     text: "The dashboard makes it easy to see all my orders in one place. Tracking is clear and my customers like the faster delivery.",
     stars: 5,
     metric: "Clear tracking",
+    detail: "Pet products, Germany",
   },
   {
     name: "Lena P.",
@@ -34,6 +37,7 @@ const TESTIMONIALS = [
     text: "The team answers quickly and explains things in simple words. I do not need to chase suppliers every day.",
     stars: 5,
     metric: "Fast replies",
+    detail: "Fitness, Australia",
   },
   {
     name: "Carlos R.",
@@ -43,6 +47,7 @@ const TESTIMONIALS = [
     text: "They helped with packaging and labels. My products look more professional without me managing the factory myself.",
     stars: 5,
     metric: "Custom packaging",
+    detail: "General store, Canada",
   },
   {
     name: "Nadia B.",
@@ -52,6 +57,7 @@ const TESTIMONIALS = [
     text: "I get product prices quickly, shipping is clear, and I know what is happening with every order.",
     stars: 5,
     metric: "Simple order view",
+    detail: "Gadgets, France",
   },
 ];
 
@@ -67,6 +73,37 @@ export function Testimonials() {
           <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
             Simple stories from sellers who wanted easier product sourcing and shipping.
           </p>
+        </div>
+
+        <div className="mb-8 rounded-[28px] border border-gray-200 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 p-6 text-white shadow-xl shadow-slate-900/10 dark:border-gray-800 md:p-8">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-end">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brand-300">
+                Featured store outcome
+              </p>
+              <h3 className="mt-3 text-2xl font-extrabold md:text-3xl">
+                A UK beauty seller used FastFulfill to simplify sourcing, packaging, and delivery
+              </h3>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
+                Product pricing was easier to compare, sample checks reduced uncertainty, and customer orders started moving with clearer delivery expectations instead of supplier guesswork.
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              {[
+                { label: "Market", value: "United Kingdom" },
+                { label: "Observed result", value: "9-day delivery" },
+                { label: "Why it mattered", value: "Clearer tracking" },
+              ].map((item) => (
+                <div key={item.label} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    {item.label}
+                  </p>
+                  <p className="mt-2 text-lg font-bold text-white">{item.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -89,7 +126,8 @@ export function Testimonials() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-900 dark:text-white">{t.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{t.role} - {t.country}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{t.role}, {t.country}</p>
+                    <p className="mt-0.5 text-[11px] text-gray-400 dark:text-gray-500">{t.detail}</p>
                   </div>
                 </div>
                 <span className="text-xs font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/30 border border-brand-100 dark:border-brand-800 px-2.5 py-1 rounded-full shrink-0">
